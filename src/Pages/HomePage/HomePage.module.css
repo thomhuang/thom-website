@@ -1,0 +1,37 @@
+.container {
+    min-height: calc(100vh - 76px);
+    display: grid;
+    grid-template-columns: repeat(3, 33%);
+    align-items: center;
+}
+
+.centerContainer {
+    max-height: 600px;
+    display: grid;
+    place-items: center;
+    vertical-align: middle;
+}
+
+.centerContainer > img {
+    border: 4px solid var(--charcoal);
+    margin: 16px auto 10px auto;
+    max-height: 300px;
+    width: auto;
+    border-radius: 100%;
+}
+
+.centerContainer > p, a {
+    text-align: center;
+    margin-right: auto;
+    margin-left: auto;
+    font-family: var(--light-font);
+}
+
+.click {
+    color: inherit;
+    text-decoration: none;
+}
+
+.click:hover {
+    cursor: pointer;
+}

@@ -1,0 +1,28 @@
+.button {
+    font-family: 'NotoSans-Light', sans-serif;
+}
+
+.small {
+    width: 100px;
+    height: 25px;
+    border-color: red;
+    background-color: red;
+}
+
+.medium {
+    width: 200px;
+    height: 30px;
+    border-color: blue;
+    background-color: blue;
+}
+
+.large {
+    width: 300px;
+    height: 45px;
+    border-color: green;
+    background-color: green;
+}
+
+.pill {
+    border-radius: 16px;
+}

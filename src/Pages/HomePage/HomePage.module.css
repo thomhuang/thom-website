@@ -1,19 +1,17 @@
 .container {
-    min-height: calc(100vh - 76px);
+    min-height: calc(100vh - 80px);
+    overflow-y: hidden;
     display: grid;
     grid-template-columns: repeat(3, 33%);
     align-items: center;
 }
 
 .centerContainer {
-    max-height: 600px;
     display: grid;
-    place-items: center;
     vertical-align: middle;
 }
 
-.centerContainer > img {
-    border: 4px solid var(--charcoal);
+.headshot {
     margin: 16px auto 10px auto;
     max-height: 300px;
     width: auto;
@@ -32,6 +30,14 @@
     text-decoration: none;
 }
 
-.click:hover {
+.click:hover, p {
     cursor: pointer;
+}
+
+.dark {
+    border: 2px solid var(--minorwhite);
+}
+
+.light {
+    border: 2px solid var(--charcoal);
 }

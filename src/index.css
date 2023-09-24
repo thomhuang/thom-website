@@ -5,7 +5,8 @@
   --semibold-font: 'NotoSans-SemiBold';
   --black: #1a1a1d;
   --charcoal: #222225;
-  --white: #fff;
+  --minorwhite: #f6f6f6c1;
+  --mainwhite : #fefefe;
 }
 
 body,
@@ -13,12 +14,11 @@ html,
 #app {
   width: 100%;
   height: 100%;
-  background-color: var(--black);
+  overflow-x: hidden;
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: var(--regular-font);
-  color: var(--white);
   font-size: 16px;
 }
 

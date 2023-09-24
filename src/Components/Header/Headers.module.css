@@ -2,47 +2,77 @@
     width: 100%;
     height: 72px;
     display: grid;
-    grid-template-columns: 30% 40% 30%;
-    background-color: var(--black);
-    border-bottom: 4px solid var(--charcoal);
-}
-
-a {
-    color: inherit;
-}
-
-a:hover {
-    cursor: pointer;
-}
-
-.sticky {
+    grid-template-columns: min(450px, 20%) max(50%, calc(100% - 900px)) min(450px, 30%);
     top: 0;
     position: sticky;
 }
 
+p {
+    color: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+.figure {
+    width: auto;
+    height: 48px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.name {
+    text-align: left;
+}
+
 .leftContainer {
     display: flex;
-    padding-left: 30%;
+    padding-left: 10%;
     font-family: var(--semibold-font);
     font-size: 23px;
 }
 
-.leftContainer > a {
+.leftContainer > p {
     margin-top: auto;
     margin-bottom: auto;
     text-decoration: none;
 }
 
-
-.rightContainer {
-    padding-right: 30%;
+.directory {
     display: flex;
+    padding-right: 10%;
     align-items: center;
     justify-content: space-between;
     font-family: var(--semibold-font);
     font-size: 16px;
 }
 
-.rightContainer > a {
+.icon {
+    width: auto;
+    height: 24px;
+}
+
+.directory > a {
     text-decoration: underline;
+}
+
+.darkNav {
+    background-color: var(--black);
+    color: var(--minorwhite);
+    border-bottom: 4px solid var(--charcoal);
+}
+
+.lightNav {
+    background-color: var(--mainwhite);
+    color: var(--black);
+    border-bottom: 4px solid var(--minorwhite);
+}
+
+.lightIcon {
+    -webkit-filter: grayscale(1) invert(1);
+    filter: grayscale(1) invert(1);
+}
+
+
+.icon:hover, a:hover {
+    cursor: pointer;
 }

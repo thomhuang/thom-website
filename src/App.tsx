@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import styles from './App.module.css';
+import { useAppSelector } from './hooks';
 import {
   BrowserRouter,
   Route,
   Routes,
 } from 'react-router-dom';
+import styles from './App.module.css';
 import Header from './Components/Header/Header';
 import HomePage from './Pages/HomePage/HomePage';
 import ErrorPage from './Pages/ErrorPage/ErrorPage';
-import { useAppSelector } from './hooks';
+import ContactPage from './Pages/ContactPage/ContactPage';
 
 const App = () => {
   const darkMode = useAppSelector((state) => state.theme.darkMode);
@@ -33,6 +34,7 @@ const App = () => {
         <Header/>
         <Routes>
           <Route path='/' Component={HomePage} />
+          <Route path ='/contact' Component={ContactPage} />
           <Route path='/*' Component={ErrorPage} />
         </Routes>
       </div>

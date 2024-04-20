@@ -3,44 +3,25 @@ import { useAppDispatch, useAppSelector } from '../../hooks';
 import { useNavigate } from 'react-router-dom';
 import styles from './Headers.module.css';
 import phrases from '../../Assets/en.json'
-import { toggleTheme } from '../../Reducers/themeSlice';
+import { toggleTheme } from '../../Reducers/ThemeSlice';
 import { PAGES } from '../../Assets/constants';
 import { ReactComponent as Sun } from "./Assets/sun.svg";
 import { ReactComponent as Moon } from "./Assets/moon.svg";
 import HandsUp from './Assets/stick_figure_up.png'
 import HandsDown from './Assets/stick_figure_down.png'
+import Navigate from '../../Assets/Common';
 
 
-export default function Header({switchTheme} : any) {
+export default function Header() {
     const dispatch = useAppDispatch();
     const darkMode = useAppSelector((state) => state.theme.darkMode);
-    const navigate = useNavigate();
+    const nav = useNavigate();
     const [navClass, SetNavClass] = useState('');
     const [iconClass, setIconClass] = useState('');
     const [figureClass, setFigureClass] = useState('');
 
     function setTheme() {
         dispatch(toggleTheme());
-    }
-
-    function Navigate(page : PAGES) {
-        switch (page) {
-            case PAGES.Home:
-                navigate(PAGES.Home);
-                break;
-            case PAGES.BlogPosts:
-                navigate(PAGES.BlogPosts);
-                break;
-            case PAGES.Hobbies:
-                navigate(PAGES.Hobbies);
-                break;
-            case PAGES.Contact:
-                navigate(PAGES.Contact);
-                break;
-            default:
-                navigate(PAGES.Error);
-                break;
-        }
     }
 
     useEffect(() => {
@@ -79,8 +60,8 @@ export default function Header({switchTheme} : any) {
             <img
                 className={figureClass}
                 src={figure}
-                alt='figure'
-                onClick={() => Navigate(PAGES.Home)}
+                alt='figure man'
+                onClick={() => Navigate(nav, PAGES.Home)}
             >
             </img>
         );
@@ -90,15 +71,35 @@ export default function Header({switchTheme} : any) {
         <div className={navClass}>
             <div className={styles.leftContainer}>
                 {brandIcon()}
-                <p className={styles.name} onClick={() => Navigate(PAGES.Home)}>{phrases.Name}</p>
+                <p className={styles.name} onClick={() => Navigate(nav, PAGES.Home)}>{phrases.Name}</p>
             </div>
             <div className={`${styles.middleContainer}`}>
             </div>
             <div className={styles.directory}>
-                <p onClick={() => Navigate(PAGES.Projects)}>{phrases.Projects}</p>
-                <p onClick={() => Navigate(PAGES.BlogPosts)}>{phrases.BlogPosts}</p>
-                <p onClick={() => Navigate(PAGES.Hobbies)}>{phrases.Hobbies}</p>
-                <p onClick={() => Navigate(PAGES.Contact)}>{phrases.Contact}</p>
+                {/* <p 
+                    className={styles.redirect}
+                    onClick={() => Navigate(nav, PAGES.Home)}
+                >
+                    {phrases.Projects}
+                </p> */}
+                <p 
+                    className={styles.redirect}
+                     onClick={() => Navigate(nav, PAGES.BlogPosts)}
+                >
+                    {phrases.BlogPosts}
+                </p>
+                {/* <p
+                    className={styles.redirect} 
+                    onClick={() => Navigate(nav, PAGES.Home)}
+                >
+                    {phrases.Hobbies}
+                </p> */}
+                <p
+                    className={styles.redirect}
+                    onClick={() => Navigate(nav, PAGES.Contact)}
+                >
+                    {phrases.Contact}
+                </p>
                 {themeIcon()}
             </div>
         </div>

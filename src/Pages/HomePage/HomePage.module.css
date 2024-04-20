@@ -6,6 +6,13 @@
     align-items: center;
 }
 
+.text {
+    text-align: center;
+    margin-right: auto;
+    margin-left: auto;
+    font-family: var(--light-font);
+}
+
 .centerContainer {
     display: grid;
     vertical-align: middle;
@@ -18,19 +25,13 @@
     border-radius: 100%;
 }
 
-.centerContainer > p, a {
-    text-align: center;
-    margin-right: auto;
-    margin-left: auto;
-    font-family: var(--light-font);
-}
 
 .click {
     color: inherit;
     text-decoration: none;
 }
 
-.click:hover, p {
+.click:hover {
     cursor: pointer;
 }
 

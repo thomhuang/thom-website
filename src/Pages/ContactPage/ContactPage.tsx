@@ -2,7 +2,6 @@ import React from "react";
 import styles from './ContactPage.module.css';
 import phrases from '../../Assets/en.json';
 
-
 export default function ContactPage() {
 
     return (

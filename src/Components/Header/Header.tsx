@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '../../hooks';
 import { useNavigate } from 'react-router-dom';
 import styles from './Headers.module.css';
 import phrases from '../../Assets/en.json'
-import { toggleTheme } from '../../Reducers/themeSlice';
+import { toggleTheme } from '../../Reducers/ThemeSlice';
 import { PAGES } from '../../Assets/constants';
 import { ReactComponent as Sun } from "./Assets/sun.svg";
 import { ReactComponent as Moon } from "./Assets/moon.svg";
@@ -76,24 +76,24 @@ export default function Header() {
             <div className={`${styles.middleContainer}`}>
             </div>
             <div className={styles.directory}>
-                <p 
+                {/* <p 
                     className={styles.redirect}
                     onClick={() => Navigate(nav, PAGES.Home)}
                 >
                     {phrases.Projects}
-                </p>
+                </p> */}
                 <p 
                     className={styles.redirect}
-                     onClick={() => Navigate(nav, PAGES.Home)}
+                     onClick={() => Navigate(nav, PAGES.BlogPosts)}
                 >
                     {phrases.BlogPosts}
                 </p>
-                <p
+                {/* <p
                     className={styles.redirect} 
                     onClick={() => Navigate(nav, PAGES.Home)}
                 >
                     {phrases.Hobbies}
-                </p>
+                </p> */}
                 <p
                     className={styles.redirect}
                     onClick={() => Navigate(nav, PAGES.Contact)}

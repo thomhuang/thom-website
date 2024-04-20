@@ -1,8 +1,11 @@
 .container {
-    margin-top: 64px;
     display: flex; /* Using flexbox layout */
     flex-direction: column; /* Stack components vertically */
+    justify-content: center; /* Horizontally center content */
     align-items: center; /* Vertically center content */
-    height: 100vh;
   }
   
+
+.section {
+    
+}

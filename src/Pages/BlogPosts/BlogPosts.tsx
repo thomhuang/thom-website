@@ -1,7 +1,13 @@
 import React from "react";
 import styles from './BlogPosts.module.css'
-import ReactMarkdown from 'react-markdown'
+import CollapsibleSection from "../../Components/CollapsibleSection/CollapsibleSection";
 
-export function BlogPosts() {
-
+export default function BlogPosts() {
+    return (
+        <div className={styles.container}>
+            <CollapsibleSection title="Projects"/>
+            <CollapsibleSection title="Personal Posts"/>
+            <CollapsibleSection title = "Test"/>
+        </div>
+      );
 }

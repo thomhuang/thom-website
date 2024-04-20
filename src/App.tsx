@@ -10,6 +10,8 @@ import Header from './Components/Header/Header';
 import HomePage from './Pages/HomePage/HomePage';
 import ErrorPage from './Pages/ErrorPage/ErrorPage';
 import ContactPage from './Pages/ContactPage/ContactPage';
+import BlogPosts from './Pages/BlogPosts/BlogPosts';
+
 
 const App = () => {
   const darkMode = useAppSelector((state) => state.theme.darkMode);
@@ -17,7 +19,7 @@ const App = () => {
 
   useEffect(() => {
     var appClassList = [styles.container]
-
+    
     var currTheme = darkMode
       ? styles.dark 
       : styles.light; 
@@ -26,8 +28,6 @@ const App = () => {
       setThemeClass(appClassList.join(' '));
   }, [darkMode, themeClass])
 
-
-
   return(
       <BrowserRouter>
       <div className={themeClass}>
@@ -35,6 +35,7 @@ const App = () => {
         <Routes>
           <Route path='/' Component={HomePage} />
           <Route path ='/contact' Component={ContactPage} />
+          <Route path ='/blog-posts' Component={BlogPosts} />
           <Route path='/*' Component={ErrorPage} />
         </Routes>
       </div>

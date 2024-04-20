@@ -16,6 +16,7 @@ interface IButton {
     fill?: boolean,
     size?: Size;
 }
+
 export default function Button(props : IButton) {
     useEffect(() => {
         var classList = [styles.button];

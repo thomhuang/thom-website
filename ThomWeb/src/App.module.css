@@ -1,0 +1,22 @@
+.container {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    min-height: 100vh;
+    min-width: 100vw;
+    margin: 0;
+    padding: 0;
+    
+}
+
+.dark {
+    background-color: var(--black);
+    color: var(--minorwhite);
+    border-bottom: 4px solid var(--charcoal);
+}
+
+.light {
+    background-color: var(--mainwhite);
+    color: var(--black);
+    border-bottom: 4px solid var(--minorwhite);
+}

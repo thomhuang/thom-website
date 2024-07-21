@@ -13,7 +13,7 @@ body,
 html,
 #app {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   overflow-x: hidden;
   padding: 0;
@@ -30,6 +30,7 @@ html,
   #app {
     font-size: 15px;
     font-family: var(--medium-font);
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -38,6 +39,7 @@ html,
   html,
   #app {
     font-size: 17px;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

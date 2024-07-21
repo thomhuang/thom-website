@@ -1,5 +1,4 @@
 .container {
-    flex: 1;
     display: grid;
     align-items: center;
 }
@@ -43,6 +42,7 @@
 @media (min-width:320px)  {
     .container {
         grid-template-columns: 15% 70% 15%;
+        margin-top: 8em;
     }
 
     .headshot {
@@ -57,6 +57,7 @@
 @media (min-width:960px)  {
     .container {
         grid-template-columns: 30% 40% 30%;
+        margin-top: 10em;
     }
 
     .headshot {
@@ -71,6 +72,8 @@
 @media (min-width:1281px) {
     .container {
         grid-template-columns: repeat(3, 33.33%);
+        margin-top: auto;
+        margin-bottom: auto;
     }
 
     .headshot {

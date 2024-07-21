@@ -44,6 +44,23 @@
             ],
             "id": "maze-solver",
             "github": "https://github.com/thomhuang/Maze-Solver"
+        },
+        {
+            "title": "Recipe App",
+            "description": [
+                "Recipe-App is an application developed in Python geared towards the home cook. Often times, home cooks have trouble finding recipes, not to mention those that work with what they have in their pantry and this hopefully solves this issue. Thus, our app works to retrieve data from www.SeriousEats.com and utilize the information to query recipes containing specific ingredients/authors/cuisines/etc. directly to the user.",
+                "It is created using scrapy, pandas, SQLite3, and PyQt5.",
+                "Once you've queried for your desired recipe, you can view the recipe steps, list of ingredients, the link to the recipe itself, and similar recipes based on the recipe's tags!",
+                "Below displays an example flow of how to query for a pizza recipe:"
+            ],
+            "summary": "This is an application developed in Python geared towards the home cook to find recipes that suit their needs :)",
+            "imagePaths": [
+                "recipe_app_prompt.jpg",
+                "recipe_app_search.jpg",
+                "recipe_app_info.jpg"
+            ],
+            "id": "recipe-app",
+            "github": "https://github.com/thomhuang/recipe-app"
         }
     ]
 }

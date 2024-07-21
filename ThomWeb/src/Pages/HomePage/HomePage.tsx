@@ -1,15 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-import Navigate from '../../Assets/Common';
-import { PAGES } from '../../Assets/constants';
 import phrases from '../../Assets/en.json';
 import { useAppSelector } from '../../hooks';
 import me from './Assets/me.png';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
-    const nav = useNavigate();
     const darkMode = useAppSelector((state) => state.theme.darkMode);
     const [photoClass, setPhotoClass] = useState('');
 
@@ -34,8 +30,9 @@ export default function HomePage() {
                     {phrases.IntroCareer1}
                     <a 
                         className={styles.click} 
-                        onClick={() => Navigate(nav, PAGES.Home)}
-                        href='/'
+                        href={process.env.PUBLIC_URL + 'curr_resume.pdf'}
+                        target="_blank"
+                        rel="noreferrer"
                     >
                         {phrases.IntroResume}
                     </a>

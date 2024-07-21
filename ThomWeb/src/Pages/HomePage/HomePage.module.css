@@ -13,6 +13,7 @@
 .centerContainer {
     display: grid;
     vertical-align: middle;
+    padding-bottom: 4em;
 }
 
 .headshot {
@@ -42,7 +43,7 @@
 @media (min-width:320px)  {
     .container {
         grid-template-columns: 15% 70% 15%;
-        margin-top: 8em;
+        margin-top: 6em;
     }
 
     .headshot {

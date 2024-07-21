@@ -3,6 +3,7 @@
     flex-direction: column;
     align-items: center;
     width: 75vw;
+    text-align: center;
 }
 
 .title {
@@ -10,11 +11,5 @@
   }
 
   .body {
-    text-align: left;
+    text-align: center;
   }
-
-  .code {
-    margin: auto;
-    text-align: left;
-  }
-  

@@ -20,9 +20,9 @@ interface IButton {
 
 export default function Button(props : IButton) {
     useEffect(() => {
-        var classList = [styles.button];
+        let classList = [styles.button];
         
-        var sizeClass;
+        let sizeClass;
         switch (props.size) {
             case Size.small:
                 sizeClass = styles.small;

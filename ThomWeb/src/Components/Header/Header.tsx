@@ -25,36 +25,36 @@ export default function Header() {
     }
 
     useEffect(() => {
-        var navTheme = darkMode
+        let navTheme = darkMode
         ? styles.darkNav 
         : styles.lightNav;
 
-        var navClassList = [styles.header, navTheme];
+        let navClassList = [styles.header, navTheme];
         SetNavClass(navClassList.join(' '));
 
-        var IconTheme = !darkMode
+        let IconTheme = !darkMode
             ? ''
             : styles.lightIcon;
 
-        var themeIconClass = [styles.icon, IconTheme];
+        let themeIconClass = [styles.icon, IconTheme];
         setIconClass(themeIconClass.join(' '));
         
-        var figureIconClass = [styles.figure, IconTheme];
+        let figureIconClass = [styles.figure, IconTheme];
         setFigureClass(figureIconClass.join(' '));
 
     }, [darkMode]);
 
     function themeIcon() {
-        var svg = darkMode
+        let svg = darkMode
             ? <Sun className={iconClass} onClick={setTheme}/>
             : <Moon className={iconClass} onClick={setTheme}/>
 
-        return <button className={styles.themeButton}>{svg}</button>
+        return svg
     }
 
 
     function brandIcon() {
-        var figure = darkMode
+        let figure = darkMode
             ? HandsUp
             : HandsDown;
 
@@ -71,11 +71,9 @@ export default function Header() {
     
     return (
         <div className={navClass}>
-            <div className={styles.leftContainer}>
+            <div className={styles.leftContainer} onClick={() => Navigate(nav, PAGES.Home)}>
                 {brandIcon()}
-                <button className={styles.homeButton}>
-                    <p className={styles.name} onClick={() => Navigate(nav, PAGES.Home)}>{phrases.Name}</p>
-                </button>
+                <p className={styles.name}>{phrases.Name}</p>
             </div>
             <div className={`${styles.middleContainer}`}>
             </div>

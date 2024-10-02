@@ -14,8 +14,8 @@ export default function HomePage() {
     const [photoClass, setPhotoClass] = useState('');
 
     useEffect(() => {
-        var photoClassList = [styles.homeButton];
-        var currTheme = darkMode
+        let photoClassList = [styles.homeButton];
+        let currTheme = darkMode
             ? styles.dark
             : styles.light;
             photoClassList.push(currTheme, styles.headshot);

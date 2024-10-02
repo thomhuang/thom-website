@@ -1,7 +1,94 @@
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-    width: 80vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  width: 60%;
+}
+
+@media (min-width: 320px) and (max-width: 480px) {
+  /* Mobile (Portrait) */
+  .container {
+    width: 80%;
   }
+}
+
+@media (min-width: 481px) and (max-width: 1024px) {
+  /* Mobile (Landscape) & Tablets */
+  /* Tablets & Small Desktops */
+  .container {
+    width: 80%;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1200px) {
+  /* Large Desktops */
+  .container {
+    width: 75%;
+  }
+}
+
+@media(min-width: 1201px) {
+  .container {
+    max-width: min(900px, 80%);
+  }
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0;
+  padding-bottom: 16px;
+  margin: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none; 
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; 
+  user-select: none;
+}
+
+.title:hover {
+  cursor: pointer;
+}
+
+h1 {
+  font-size: var(--large-font-size);
+  padding-top: 0;
+  margin: 0;
+}
+
+.icon {
+  width: auto;
+  height: 32px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none; 
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; 
+  user-select: none;
+}
+
+.flipIcon {
+  transform: rotate(180deg);
+}
+
+.arrowButton {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: inherit;
+}
+
+.darkArrow {
+  fill: var(--minorwhite);
+}
+
+.lightArrow {
+  fill: var(--black);
+}
+  
   

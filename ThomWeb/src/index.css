@@ -63,7 +63,6 @@
   }
 }
 
-
 body,
 html,
 #app {
@@ -77,37 +76,7 @@ html,
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: var(--regular-font);
-<<<<<<< HEAD
   font-size: var(--regular-font-size);
-=======
-}
-
-@media (min-width:320px)  {
-  body,
-  html,
-  #app {
-    font-size: 15px;
-    font-family: var(--medium-font);
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-@media (min-width:960px)  {
-  body,
-  html,
-  #app {
-    font-size: 17px;
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-@media (min-width:1281px) {
-  body,
-  html,
-  #app {
-    font-size: 18px;
-  }
->>>>>>> main
 }
 
 @font-face {

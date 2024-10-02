@@ -1,9 +1,6 @@
 .container {
     display: grid;
-<<<<<<< HEAD
     margin: 0 30% 0 30%;
-=======
->>>>>>> main
     align-items: center;
 }
 
@@ -94,16 +91,6 @@ img {
     padding-bottom: 4em;
 }
 
-<<<<<<< HEAD
-=======
-.headshot {
-    margin: 1em auto 1em auto;
-    width: auto;
-    border-radius: 100%;
-}
-
-
->>>>>>> main
 .click {
     color: inherit;
     text-decoration: none;

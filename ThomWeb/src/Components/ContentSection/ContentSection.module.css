@@ -1,7 +1,15 @@
 .container {
+<<<<<<< HEAD
   display: flex;
   flex-direction: column;
   width: 100%;
+=======
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 75vw;
+    text-align: center;
+>>>>>>> main
 }
 
 .title {
@@ -13,6 +21,7 @@
   margin: 0;
 }
 
+<<<<<<< HEAD
 .body {
   font-size: var(--small-font-size);
   text-align: left;
@@ -25,3 +34,8 @@
   text-align: left;
 }
 
+=======
+  .body {
+    text-align: center;
+  }
+>>>>>>> main

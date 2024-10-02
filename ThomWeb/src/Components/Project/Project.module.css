@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .container {
     margin: 0 25% 0 25%;
 }
@@ -24,6 +25,8 @@
     }
   }
 
+=======
+>>>>>>> main
 .header {
     padding-top: 32px;
     text-align: center;
@@ -32,7 +35,39 @@
 
 .image {
     display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 80%;
+}
+
+@media (min-width:320px)  {
+    .container {
+        margin: 0 10% 0 10%;
+    }
+
+    .image {
+        margin: 1em auto 1em auto;
+        max-width: 100%;
+    }
+}
+
+@media (min-width:961px) {
+    .container {
+        margin: 0 20% 0 20%;
+    }
+
+    .image {
+        margin: 1.5em auto 1.5em auto;
+        max-width: 90%;
+    }
+}
+
+  
+@media (min-width:1281px) {
+    .container {
+        margin: 0 30% 0 30%;
+    }
+
+    .image {
+        display: block;
+        margin: 32px auto 32px auto;
+        max-width: 80%;
+    }
 }

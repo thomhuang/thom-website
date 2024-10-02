@@ -45,12 +45,14 @@
     padding: 0;
 }
 
-.figure {
-    width: auto;
-    height: 48px;
+.figure, .name {
     margin-top: auto;
     margin-bottom: auto;
     cursor: pointer;
+}
+
+.figure {
+    width: 2.5em;
 }
 
 .name {
@@ -68,7 +70,10 @@
 .leftContainer {
     display: flex;
     font-family: var(--semibold-font);
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
 }
 
 .leftContainer > p {
@@ -79,10 +84,12 @@
 
 .directory {
     display: flex;
+    margin-left: auto;
     align-items: center;
     margin-left: auto;
     column-gap: 32px;
     font-family: var(--semibold-font);
+<<<<<<< HEAD
     font-size: var(--regular-font-size);
     -webkit-touch-callout: none;
     -webkit-user-select: none; 
@@ -90,6 +97,8 @@
     -moz-user-select: none;
     -ms-user-select: none; 
     user-select: none;
+=======
+>>>>>>> main
 }
 
 .icon {
@@ -97,6 +106,23 @@
     height: 24px;
 }
 
+<<<<<<< HEAD
+=======
+.themeButton, .homeButton {
+    background: none;
+    color: inherit;
+    border: none;
+    padding-right: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+}
+
+.themeButton {
+    margin-left: auto;
+}
+
+>>>>>>> main
 .directory > a {
     text-decoration: underline;
 }
@@ -121,4 +147,62 @@
 
 .icon:hover, .redirect:hover {
     cursor: pointer;
+}
+
+@media (min-width:320px)  {
+    .header {
+        grid-template-columns: 50% 0% 50%
+    }
+
+    .leftContainer, .directory {
+        font-size: 1em;
+    }
+
+    .leftContainer {
+        padding-left: 1em;
+    }
+
+    .redirect {
+        padding-right: 1em;
+    }
+
+    .themeButton {
+        padding-right: 2em;
+    }
+}
+
+@media (min-width:960px)  {
+    .header {
+        grid-template-columns: 50% 0% 50%
+    }
+
+    .leftContainer {
+        padding-left: 1em;
+    }
+
+    .redirect {
+        padding-right: 1em;
+    }
+
+    .themeButton {
+        padding-right: 2em;
+    }
+}
+  
+@media (min-width:1281px) {
+    .header {
+        grid-template-columns: 50% 0 50%;
+    }
+
+    .leftContainer {
+        padding-left: 2em;
+    }
+
+    .redirect {
+        padding-right: 3em;
+    }
+
+    .themeButton {
+        padding-right: 4em;
+    }
 }

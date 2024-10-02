@@ -7,3 +7,6 @@
     align-items: center; /* Vertically center content */
   }
   
+  .container > * {
+    border-bottom: 1px;
+  }

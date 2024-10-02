@@ -14,9 +14,9 @@ const App = () => {
   const [themeClass, setThemeClass] = useState('');
 
   useEffect(() => {
-    var appClassList = [styles.container]
+    let appClassList = [styles.container]
     
-    var currTheme = darkMode
+    let currTheme = darkMode
       ? styles.dark 
       : styles.light; 
     appClassList.push(currTheme);
@@ -25,13 +25,13 @@ const App = () => {
   }, [darkMode, themeClass])
 
   return(
-      <BrowserRouter>
+      <BrowserRouter> 
       <div className={themeClass}>
         <Header/>
         <Routes>
           <Route path='/' Component={HomePage} />
           <Route path ='/posts' Component={Posts}/>
-          <Route path ='/posts/:id' Component={Project} />
+          <Route path ='/posts/:pathName' Component={Project} />
           <Route path='/error' Component={ErrorPage} />
         </Routes>
       </div>

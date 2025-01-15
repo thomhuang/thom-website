@@ -5,6 +5,7 @@
 }
 
 .headshot {
+    object-fit: cover;
     margin: 16px auto 10px auto;
     width: 100%;
     max-width: 40%;
@@ -20,15 +21,27 @@
     }
 
     .headshot {
-        max-width: 70%;
+        max-width: 60%;
     }
 }
-  
-@media (min-width: 481px) and (max-width: 1024px) {
+
+@media (min-width: 481px) and (max-width: 720px) {
     /* Mobile (Landscape) & Tablets */
     /* Tablets & Small Desktops */
     .container {
-        margin: 0 15% 0 15%;
+        margin: 0 5% 0 5%;
+    }
+
+    .headshot {
+        max-width: 50%;
+    }
+}
+  
+@media (min-width: 721px) and (max-width: 1024px) {
+    /* Mobile (Landscape) & Tablets */
+    /* Tablets & Small Desktops */
+    .container {
+        margin: 0 5% 0 5%;
     }
 
     .headshot {
@@ -39,22 +52,33 @@
 @media (min-width: 1025px) and (max-width: 1200px) {
     /* Large Desktops */
     .container {
-        margin: 0 20% 0 20%;
+        margin: 0 10% 0 10%;
     }
 
     .headshot {
-        max-width: 45%;
+        max-width: 60%;
     }
 }
 
-@media (min-width: 1201px) and (max-width: 1920px){
+@media (min-width: 1201px) and (max-width: 1600px){
     /* Large Desktops */
     .container {
-        margin: 0 20% 0 20%;
+        margin: 0 15% 0 15%;
     }
 
     .headshot {
-        max-width: 25%;
+        max-width: 60%;
+    }
+}
+
+@media (min-width: 1601px) and (max-width: 1920px){
+    /* Large Desktops */
+    .container {
+        margin: 0 10% 0 10%;
+    }
+
+    .headshot {
+        max-width: 40%;
     }
 }
 
@@ -65,7 +89,7 @@
     }
 
     .headshot {
-        max-width: 15%;
+        max-width: 35%;
     }
 }
 
@@ -111,11 +135,7 @@ img {
 @media (min-width:320px)  {
     .container {
         grid-template-columns: 15% 70% 15%;
-        margin-top: 6em;
-    }
-
-    .headshot {
-        max-height: 250px;
+        margin-top: 10%;
     }
 
     .text {
@@ -123,34 +143,35 @@ img {
     }
 }
 
-@media (min-width:960px)  {
+@media (min-width:720px)  {
     .container {
-        grid-template-columns: 30% 40% 30%;
-        margin-top: 10em;
-    }
-
-    .headshot {
-        max-height: 250px;
+        grid-template-columns: 20% 60% 20%;
+        margin-top: 10%;
     }
 
     .text {
-        font-size: 17px;
+        font-size: 15px;
+    }
+}
+
+@media (min-width:1025px)  {
+    .container {
+        grid-template-columns: 30% 40% 30%;
+        margin-top: 8.5%;
+    }
+
+    .text {
+        font-size: 16px;
     }
 }
 
 @media (min-width:1281px) {
     .container {
-        grid-template-columns: repeat(3, 33.33%);
-        margin-top: auto;
-        margin-bottom: auto;
+        grid-template-columns: 30% 40% 30%;
+        margin-top: 6%;
     }
-
-    .headshot {
-        max-height: 300px;
-    }
-
 
     .text {
-        font-size: 18px;
+        font-size: 17px;
     }
 }

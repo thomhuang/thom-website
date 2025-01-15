@@ -58,7 +58,7 @@
   :root {
     --large-font-size: clamp(32px, 2.5vw, 34px);
     --medium-font-size: clamp(20px, 2vw, 22px);
-    --regular-font-size: clamp(16px, 1.5vw, 18px);
+    --regular-font-size: clamp(14px, 1.5vw, 16px);
     --small-font-size: clamp(14px, 1.25vw, 16px);
   }
 }

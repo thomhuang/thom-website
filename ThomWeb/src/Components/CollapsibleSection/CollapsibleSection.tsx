@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 
 import {ReactComponent as ArrowDown} from './Assets/arrow-down.svg'
 import ContentSection from '../ContentSection/ContentSection';
 import styles from './CollapsibleSection.module.css';
-import { Post } from '../../api/Posts/PostsRouter';
-import { useAppSelector } from '../../hooks';
+import {Post} from '../../api/Posts/PostsRouter';
+import {useAppSelector} from '../../hooks';
 
 interface ICollapsibleSection {
     title?: string,
@@ -21,13 +21,9 @@ export default function CollapsibleSection(props: ICollapsibleSection) {
     }
 
     useEffect(() => {
-        const navTheme = darkMode
-            ? styles.darkArrow 
-            : styles.lightArrow;
+        const navTheme = darkMode ? styles.darkArrow : styles.lightArrow;
 
-        let iconFlip = isOpen
-            ? styles.flipIcon
-            : ''
+        let iconFlip = isOpen ? styles.flipIcon : ''
 
         const arrowClassList = [styles.icon, navTheme, iconFlip]
         setArrowClass(arrowClassList.join(' '))
@@ -40,25 +36,21 @@ export default function CollapsibleSection(props: ICollapsibleSection) {
 
     function displayContent() {
         if (isOpen) {
-            return props?.content?.map((item) => (
-                <ContentSection 
+            return props?.content?.map((item) => (<ContentSection
                     title={item.Title}
                     id={item.ID}
-                    summary={item.Summary} 
+                    summary={item.Summary}
                     pathName={item.PathName}
                     key={item.PathName}
-                />
-            ))
+                />))
         }
     }
 
-    return(
-        <div className={styles.container}>
+    return (<div className={styles.container}>
             <div className={styles.title} onClick={toggleCollapsible}>
                 {themeIcon()}
                 <h1>{props.title}</h1>
             </div>
             {displayContent()}
-      </div>
-    )
+        </div>)
 }

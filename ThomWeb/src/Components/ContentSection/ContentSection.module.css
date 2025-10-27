@@ -1,27 +1,25 @@
 .container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 .title {
-  font-size: var(--medium-font-size);
-  text-decoration: underline;
-  cursor: pointer;
-  text-align: left;
-  padding: 0;
-  margin: 0;
+    text-decoration: underline;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    margin: 0;
 }
 
 .body {
-  font-size: var(--small-font-size);
-  text-align: left;
-  padding-bottom: 16px;
-  text-wrap: pretty;
+    text-align: left;
+    padding-bottom: 1rem;
+    text-wrap: pretty;
 }
 
 .code {
-  margin: auto;
-  text-align: left;
+    margin: auto;
+    text-align: left;
 }
 

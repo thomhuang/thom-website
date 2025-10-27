@@ -2,11 +2,11 @@
     min-height: 100%;
     margin-top: 4em;
     margin-bottom: 6em;
-    display: flex; /* Using flexbox layout */
-    flex-direction: column; /* Stack components vertically */
-    align-items: center; /* Vertically center content */
-  }
-  
-  .container > * {
-    border-bottom: 1px;
-  }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container > * {
+    border-bottom: 0.0625rem;
+}

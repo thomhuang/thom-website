@@ -1,12 +1,13 @@
 {
     "Name" : "Thomas Huang",
-    "IntroMe" : "Hi! Welcome to my website. I'm Thomas.",
-    "IntroCareer1" : "I'm a backend software engineer at Costar Group working on Homes. Here's my ",
-    "IntroCareer2" : " if you'd like to check it out. Also, feel free to roam around the website and check out what I've added so far :)",
+    "IntroMe" : "Hi! My name's Thomas.",
+    "IntroCareer1" : "I'm currently backend software engineer working on Homes.com. If you'd like, here's my ",
+    "IntroCareer2" : ".",
+    "IntroCareer3" : "Feel free to roam around the website or contact me via any methods of communication I have :)",
     "IntroResume"  : "resume",
-    "IntroContact" : "Feel free to contact me via any of the communication methods that I have.",
     "Contact" : "Contact",
     "Projects" : "Projects",
     "BlogPosts" : "Posts",
-    "Hobbies" : "Hobbies"
+    "Hobbies" : "Hobbies",
+    "MobileHomepage" : "I'm sorry, I don't support mobile views at the moment, or maybe ever!"
 }

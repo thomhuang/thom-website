@@ -1,7 +1,7 @@
-import { useNavigate } from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 
-import { PAGES } from '../../Assets/constants'
 import styles from './ContentSection.module.css'
+import {PAGES} from "../../Assets/Common";
 
 export interface IContentSection {
     title?: string,
@@ -21,10 +21,8 @@ export default function ContentSection(props: IContentSection) {
         })
     }
 
-    return (
-        <div className={styles.container} key={props.title}>
+    return (<div className={styles.container} key={props.title}>
             <h1 className={styles.title} onClick={navigateToPost}>{props.title}</h1>
             <p className={styles.body}>{props.summary}</p>
-        </div>
-    );
+        </div>);
 }

@@ -1,8 +1,13 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Navigate from '../../Assets/Common';
-import { PAGES } from '../../Assets/constants';
+import {
+    NavigatePage,
+    PAGES,
+    setDarkTheme,
+    setLightTheme,
+
+} from '../../Assets/Common';
 import phrases from '../../Assets/en.json';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { toggleTheme } from '../../Reducers/ThemeSlice';
@@ -10,95 +15,74 @@ import { ReactComponent as Moon } from './Assets/moon.svg';
 import HandsDown from './Assets/stick_figure_down.png';
 import HandsUp from './Assets/stick_figure_up.png';
 import { ReactComponent as Sun } from './Assets/sun.svg';
-import styles from './Headers.module.css';
+import styles from './Header.module.css';
+import {ResizeListener} from "../../Hooks/resizeListener";
 
 export default function Header() {
     const dispatch = useAppDispatch();
-    const darkMode = useAppSelector((state) => state.theme.darkMode);
     const nav = useNavigate();
-    const [navClass, SetNavClass] = useState('');
-    const [iconClass, setIconClass] = useState('');
-    const [figureClass, setFigureClass] = useState('');
+    const darkMode = useAppSelector((state) => state.theme.darkMode);
+    ResizeListener();
 
-    function setTheme() {
+    const handleThemeToggle = () => {
         dispatch(toggleTheme());
+    };
+
+    const figureStyling = [styles.figure];
+    const iconStyling = [styles.icon];
+    const navStyling = [styles.container];
+
+    if (darkMode) {
+        setDarkTheme()
+        figureStyling.push(styles.figureDark)
+        iconStyling.push(styles.iconDark)
+        navStyling.push(styles.darkNav)
+    } else {
+        setLightTheme()
+        navStyling.push(styles.lightNav)
     }
 
-    useEffect(() => {
-        let navTheme = darkMode
-        ? styles.darkNav 
-        : styles.lightNav;
+    const renderThemeIcon = () => {
+        const iconClass = iconStyling.join(' ');
+        return darkMode ? (
+            <Sun className={iconClass} onClick={handleThemeToggle} />
+        ) : (
+            <Moon className={iconClass} onClick={handleThemeToggle} />
+        );
+    };
 
-        let navClassList = [styles.header, navTheme];
-        SetNavClass(navClassList.join(' '));
-
-        let IconTheme = !darkMode
-            ? ''
-            : styles.lightIcon;
-
-        let themeIconClass = [styles.icon, IconTheme];
-        setIconClass(themeIconClass.join(' '));
-        
-        let figureIconClass = [styles.figure, IconTheme];
-        setFigureClass(figureIconClass.join(' '));
-
-    }, [darkMode]);
-
-    function themeIcon() {
-        let svg = darkMode
-            ? <Sun className={iconClass} onClick={setTheme}/>
-            : <Moon className={iconClass} onClick={setTheme}/>
-
-        return svg
-    }
-
-
-    function brandIcon() {
-        let figure = darkMode
-            ? HandsUp
-            : HandsDown;
-
+    const renderBrandIcon = () => {
+        const figure = darkMode ? HandsUp : HandsDown;
+        const figureClass = figureStyling.join(' ');
         return (
             <img
                 className={figureClass}
                 src={figure}
-                alt='figure man'
-                onClick={() => Navigate(nav, PAGES.Home)}
-            >
-            </img>
+                alt="Brand figure"
+            />
         );
-    }
-    
-    return (
-        <div className={navClass}>
-            <div className={styles.leftContainer} onClick={() => Navigate(nav, PAGES.Home)}>
-                {brandIcon()}
-                <p className={styles.name}>{phrases.Name}</p>
-            </div>
-            <div className={`${styles.middleContainer}`}>
-            </div>
-            <div className={styles.directory}>
-                {/* <p 
-                    className={styles.redirect}
-                    onClick={() => Navigate(nav, PAGES.Home)}
-                >
-                    {phrases.Projects}
-                </p> */}
-                <p 
-                    className={styles.redirect}
-                     onClick={() => Navigate(nav, PAGES.Posts)}
-                >
-                    {phrases.BlogPosts}
-                </p>
-                {/* <p
-                    className={styles.redirect} 
-                    onClick={() => Navigate(nav, PAGES.Home)}
-                >
-                    {phrases.Hobbies}
-                </p> */}
-                {themeIcon()}
-            </div>
-        </div>
+    };
 
+    const navClass = navStyling.join(' ');
+    return (
+        <header className={styles.header}>
+            <div className={navClass}>
+                <a href={PAGES.Home} className={styles.logo}>
+                {renderBrandIcon()}
+                <p className={styles.name}>{phrases.Name}</p>
+                </a>
+
+                <div className={styles.navSection}>
+                    <nav className={styles.nav}>
+                        <ul className={styles.navList}>
+                            <li className={styles.navItem}>
+                                <a className={styles.navLink} href={PAGES.Posts}>Posts</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    {renderThemeIcon()}
+                </div>
+            </div>
+        </header>
     );
 }

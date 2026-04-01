@@ -1,29 +1,28 @@
 .button {
-    font-family: 'NotoSans-Light', sans-serif;
+  font-family: "NotoSans-Light", sans-serif;
 }
 
 .small {
-    width: 6.25rem;
-    height: 1.5625rem;
-    border-color: red;
-    background-color: red;
+  width: 6.25rem;
+  height: 1.5625rem;
+  border-color: red;
+  background-color: red;
 }
 
 .medium {
-    width: 12.5rem;
-    height: 1.875rem;
-    border-color: blue;
-    background-color: blue;
+  width: 12.5rem;
+  height: 1.875rem;
+  border-color: blue;
+  background-color: blue;
 }
 
 .large {
-    width: 18.75rem;
-    height: 2.8125rem;
-    border-color: green;
-    background-color: green;
+  width: 18.75rem;
+  height: 2.8125rem;
+  border-color: green;
+  background-color: green;
 }
 
 .pill {
-    border-radius: 1rem;
-/
+  border-radius: 1rem;
 }

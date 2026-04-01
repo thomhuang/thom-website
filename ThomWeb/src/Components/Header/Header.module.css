@@ -1,113 +1,111 @@
 .header {
-    background-color: var(--bg-color);
-    width: 100%;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+  background-color: var(--bg-color);
+  width: 100%;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 a {
-    text-decoration: none;
-    color: inherit;
+  text-decoration: none;
+  color: inherit;
 }
 
 ul {
-    list-style: none;
+  list-style: none;
 }
 
-
 .container {
-    max-width: 768px;
-    min-height: 72px;
-    margin: 0 auto 2rem auto;
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 0.25rem solid var(--border-color);
-    padding: 0 2rem;
+  max-width: 768px;
+  min-height: 72px;
+  margin: 0 auto 2rem auto;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 0.25rem solid var(--border-color);
+  padding: 0 2rem;
 }
 
 .logo {
-    display: flex;
-    font-size: var(--small-font-size);
+  display: flex;
+  font-size: var(--small-font-size);
 }
 
-.figure, .name {
-    margin-top: auto;
-    margin-bottom: auto;
-    cursor: pointer;
+.figure,
+.name {
+  margin-top: auto;
+  margin-bottom: auto;
+  cursor: pointer;
 }
 
 .figure {
-    width: 2.5rem;
+  width: 2.5rem;
 }
 
 .figureDark {
-    -webkit-filter: grayscale(1) invert(1);
-    filter: grayscale(1) invert(1);
+  -webkit-filter: grayscale(1) invert(1);
+  filter: grayscale(1) invert(1);
 }
 
 .name {
-    font-size: var(--medium-font);
-    text-align: left;
+  font-size: var(--medium-font);
+  text-align: left;
 }
 
 .navSection {
-    display: flex;
-    align-items: center;
-    column-gap: 20px;
+  display: flex;
+  align-items: center;
+  column-gap: 20px;
 }
 
 .nav {
-    font-size: var(--small-font-size);
+  font-size: var(--small-font-size);
 }
-
 
 .navList {
-    display: flex;
-    column-gap: 40px;
-}
-
-.navItem {
+  display: flex;
+  column-gap: 40px;
 }
 
 .navLink {
-    color: var(--color);
-    transition: all 0.4s;
-    position: relative;
+  color: var(--color);
+  transition: all 0.4s;
+  position: relative;
 }
 
 .navLink:hover,
 .navLink:focus {
-    color: var(--color);}
+  color: var(--color);
+}
 
 .navLink::after {
-    content: '';
-    height: 2px;
-    width: 100%;
-    background-color: var(--color);
-    position: absolute;
-    left: 0;
-    bottom: -8px;
-    transition: all 0.2s;
-    opacity: 0;
-    pointer-events: none;
+  content: "";
+  height: 2px;
+  width: 100%;
+  background-color: var(--color);
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  transition: all 0.2s;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .navLink:hover::after {
-    opacity: 1;
+  opacity: 1;
 }
 
 .icon {
-    width: auto;
-    height: 1.25rem;
+  width: auto;
+  height: 1.25rem;
 }
 
 .iconDark {
-    -webkit-filter: grayscale(1) invert(1);
-    filter: grayscale(1) invert(1);
+  -webkit-filter: grayscale(1) invert(1);
+  filter: grayscale(1) invert(1);
 }
 
-.icon:hover, .redirect:hover {
-    cursor: pointer;
+.icon:hover,
+.redirect:hover {
+  cursor: pointer;
 }

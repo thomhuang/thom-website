@@ -1,16 +1,16 @@
 .container {
-    margin: 0 25% 0 25%;
+  margin: 0 25% 0 25%;
 }
 
 .header {
-    font-size: var(--large-font-size);
-    padding-top: 2rem;
-    text-align: center;
-    cursor: pointer;
+  font-size: var(--large-font-size);
+  padding-top: 2rem;
+  text-align: center;
+  cursor: pointer;
 }
 
 .image {
-    display: block;
-    margin: 2rem auto 2rem auto;
-    max-width: 80%;
+  display: block;
+  margin: 2rem auto 2rem auto;
+  max-width: 80%;
 }

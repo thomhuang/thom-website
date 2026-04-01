@@ -1,13 +1,14 @@
 .container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    transition: background-color 0.5s ease, color 0.5s ease, border-bottom-color 0.5s ease;
-    border-bottom: 4px var(--border-color);
-    background-color: var(--bg-color);
-    color: var(--color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.5s ease, color 0.5s ease,
+    border-bottom-color 0.5s ease;
+  border-bottom: 4px var(--border-color);
+  background-color: var(--bg-color);
+  color: var(--color);
 }
 
 .container > main {
-    flex: 1;
+  flex: 1;
 }

@@ -1,27 +1,27 @@
 .container {
-    display: inline-block;
-    text-align: center;
+  display: inline-block;
+  text-align: center;
 }
 
 .header {
-    padding-bottom: 1rem;
-    font-family: var(--medium-font), serif;
-    font-size: var(--regular-font-size);
+  padding-bottom: 1rem;
+  font-family: var(--medium-font), serif;
+  font-size: var(--regular-font-size);
 }
 
 .text {
-    display: inline-block;
-    text-align: left;
-    font-family: var(--light-font), serif;
-    font-size: var(--small-font-size);
-    line-height: 2rem;
+  display: inline-block;
+  text-align: left;
+  font-family: var(--light-font), serif;
+  font-size: var(--small-font-size);
+  line-height: 2rem;
 }
 
 .click {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
 
 .click:hover {
-    cursor: pointer;
+  cursor: pointer;
 }

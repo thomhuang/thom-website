@@ -1,7 +1,7 @@
 .footer {
-    display: grid;
-    grid-template-columns: 30% 1fr 30%;
-    height: 4.5rem;
-    position: sticky;
-    padding: 0 4rem;
+  display: grid;
+  grid-template-columns: 30% 1fr 30%;
+  height: 4.5rem;
+  position: sticky;
+  padding: 0 4rem;
 }

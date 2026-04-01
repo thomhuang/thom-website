@@ -1,25 +1,25 @@
 .container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .title {
-    text-decoration: underline;
-    cursor: pointer;
-    text-align: left;
-    padding: 0;
-    margin: 0;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  margin: 0;
 }
 
 .body {
-    text-align: left;
-    padding-bottom: 1rem;
-    text-wrap: pretty;
+  text-align: left;
+  padding-bottom: 1rem;
+  text-wrap: pretty;
 }
 
 .code {
-    margin: auto;
-    text-align: left;
+  margin: auto;
+  text-align: left;
 }
 

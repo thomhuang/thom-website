@@ -1,0 +1,13 @@
+[
+  {
+    "ID": "downtown-print",
+    "Title": "Downtown Print",
+    "Description": "A framed photo listing with a short product-style description.",
+    "ImageUrl": "https://drive.google.com/file/d/GOOGLE_DRIVE_FILE_ID/view?usp=sharing",
+    "Provider": "Google Drive",
+    "Price": "$45",
+    "Tags": ["print", "city", "available"],
+    "UpdatedAt": "2026-04-06",
+    "Link": "https://drive.google.com/file/d/GOOGLE_DRIVE_FILE_ID/view?usp=sharing"
+  }
+]

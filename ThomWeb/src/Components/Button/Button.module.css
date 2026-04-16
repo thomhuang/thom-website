@@ -1,28 +1,44 @@
 .button {
-  font-family: "NotoSans-Light", sans-serif;
+  padding: 0 var(--space-md);
+  border: var(--border-thin);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-color);
+  color: var(--color);
+  font-family: var(--regular-font), sans-serif;
+  font-size: var(--regular-font-size);
+  cursor: pointer;
+  transition: opacity var(--transition-regular), transform var(--transition-fast);
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+.button:active {
+  transform: translateY(0.0625rem);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .small {
-  width: 6.25rem;
-  height: 1.5625rem;
-  border-color: red;
-  background-color: red;
+  min-height: 2rem;
 }
 
 .medium {
-  width: 12.5rem;
-  height: 1.875rem;
-  border-color: blue;
-  background-color: blue;
+  min-height: 2.5rem;
 }
 
 .large {
-  width: 18.75rem;
-  height: 2.8125rem;
-  border-color: green;
-  background-color: green;
+  min-height: 3rem;
 }
 
 .pill {
-  border-radius: 1rem;
+  border-radius: var(--radius-pill);
+}
+
+.fill {
+  width: 100%;
 }

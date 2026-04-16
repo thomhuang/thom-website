@@ -1,7 +1,7 @@
 import phrases from "../../Assets/en.json";
 import styles from "./MobileHomePage.module.css";
 
-export default function HomePage() {
+export default function MobileHomePage() {
   return (
     <div className={styles.container}>
       <div className={styles.text}>

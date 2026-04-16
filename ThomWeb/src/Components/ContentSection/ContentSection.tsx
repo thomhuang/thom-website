@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { PAGES } from "../../Assets/Common";
 import styles from "./ContentSection.module.css";
@@ -11,21 +11,17 @@ export interface IContentSection {
 }
 
 export default function ContentSection(props: IContentSection) {
-  const navigate = useNavigate();
-
-  function navigateToPost() {
-    navigate(`${PAGES.Posts}/${props.pathName}`, {
-      state: {
-        id: props.id,
-      },
-    });
-  }
-
   return (
-    <div className={styles.container} key={props.title}>
-      <h1 className={styles.title} onClick={navigateToPost}>
-        {props.title}
-      </h1>
+    <div className={styles.container}>
+      <h2 className={styles.title}>
+        <Link
+          to={`${PAGES.Posts}/${props.pathName ?? ""}`}
+          state={{ id: props.id }}
+          className={styles.postLink}
+        >
+          {props.title}
+        </Link>
+      </h2>
       <p className={styles.body}>{props.summary}</p>
     </div>
   );

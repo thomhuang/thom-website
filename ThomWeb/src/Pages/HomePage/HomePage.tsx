@@ -2,6 +2,8 @@ import phrases from "../../Assets/en.json";
 import styles from "./HomePage.module.css";
 
 export default function HomePage() {
+  const resumeHref = `${process.env.PUBLIC_URL}/curr_resume.pdf`;
+
   return (
     <div className={styles.container}>
       <div className={styles.text}>
@@ -10,7 +12,7 @@ export default function HomePage() {
           {phrases.IntroCareer1}
           <a
             className={styles.click}
-            href={process.env.PUBLIC_URL + "curr_resume.pdf"}
+            href={resumeHref}
             target="_blank"
             rel="noreferrer"
           >

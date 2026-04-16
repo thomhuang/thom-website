@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+ThomWeb/node_modules/
+
+# Build output
+build/
+dist/
+ThomWeb/build/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Cache / temp
+.cache/
+coverage/
+tmp/
+temp/
+
+# OS / editor files
+.DS_Store
+.idea/
+.vscode/

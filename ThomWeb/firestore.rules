@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid == "REPLACE_WITH_YOUR_FIREBASE_AUTH_UID";
+    }
+
+    function isOptionalString(field) {
+      return !(field in request.resource.data)
+        || request.resource.data[field] is string;
+    }
+
+    function isOptionalStringList(field) {
+      return !(field in request.resource.data)
+        || request.resource.data[field] is list;
+    }
+
+    function isValidPhotoListing() {
+      return request.resource.data.keys().hasOnly([
+        "Title",
+        "Description",
+        "ImageUrl",
+        "Provider",
+        "Price",
+        "Tags",
+        "UpdatedAt",
+        "Link",
+        "CreatedAt"
+      ])
+      && request.resource.data.Title is string
+      && request.resource.data.Description is string
+      && request.resource.data.ImageUrl is string
+      && request.resource.data.CreatedAt is timestamp
+      && isOptionalString("Provider")
+      && isOptionalString("Price")
+      && isOptionalStringList("Tags")
+      && isOptionalString("UpdatedAt")
+      && isOptionalString("Link");
+    }
+
+    match /photoListings/{listingId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidPhotoListing();
+      allow delete: if isAdmin();
+    }
+  }
+}

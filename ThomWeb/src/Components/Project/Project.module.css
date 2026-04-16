@@ -1,16 +1,33 @@
 .container {
-  margin: 0 25% 0 25%;
+  width: min(100%, var(--project-page-width));
+  margin: 0 auto;
+  padding: var(--space-md);
 }
 
 .header {
+  margin: 0;
+  padding-top: var(--space-md);
   font-size: var(--large-font-size);
-  padding-top: 2rem;
+  line-height: 1.3;
   text-align: center;
+}
+
+.headerButton {
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
 }
 
 .image {
   display: block;
-  margin: 2rem auto 2rem auto;
-  max-width: 80%;
+  max-width: 100%;
+  height: auto;
+  margin: var(--space-xl) auto;
+}
+
+.body {
+  line-height: 1.7;
 }

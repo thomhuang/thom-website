@@ -8,19 +8,24 @@ import {
   updateLastLocation,
 } from "../Reducers/UserContextSlice";
 
-export function ResizeListener() {
+export function useResizeListener() {
   const dispatch = useAppDispatch();
   const nav = useNavigate();
   const location = useLocation();
-  const userContext = useAppSelector((context) => context.userContext);
+  const { isMobile, lastLocation } = useAppSelector(
+    (context) => context.userContext
+  );
 
   useEffect(() => {
     const handleResize = () => {
       const isCurrentlyMobile = window.innerWidth < 768;
 
-      if (userContext.isMobile !== isCurrentlyMobile) {
-        dispatch(updateDevicePlatform()); // updates isMobile
-        dispatch(updateLastLocation({ payload: location.pathname }));
+      if (isMobile !== isCurrentlyMobile) {
+        dispatch(updateDevicePlatform(isCurrentlyMobile));
+      }
+
+      if (!isCurrentlyMobile && location.pathname !== ToPage(PAGES.MobileHome)) {
+        dispatch(updateLastLocation(location.pathname));
       }
 
       // If resized to desktop and currently on MobileHome, redirect to lastLocation
@@ -28,7 +33,7 @@ export function ResizeListener() {
         !isCurrentlyMobile &&
         location.pathname === ToPage(PAGES.MobileHome)
       ) {
-        NavigatePage(nav, userContext.lastLocation ?? PAGES.Home);
+        NavigatePage(nav, lastLocation || PAGES.Home);
       }
 
       // If resized to mobile and not on MobileHome, redirect to MobileHome
@@ -48,11 +53,5 @@ export function ResizeListener() {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [
-    dispatch,
-    location.pathname,
-    nav,
-    userContext.isMobile,
-    userContext.lastLocation,
-  ]);
+  }, [dispatch, isMobile, lastLocation, location.pathname, nav]);
 }

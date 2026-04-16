@@ -1,7 +1,15 @@
 .footer {
-  display: grid;
-  grid-template-columns: 30% 1fr 30%;
-  height: 4.5rem;
-  position: sticky;
-  padding: 0 4rem;
+  min-height: 4rem;
+  margin-top: auto;
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: var(--border-regular);
+  background-color: var(--bg-color);
+  color: var(--color);
+  font-size: var(--small-font-size);
+  text-align: center;
+  transition: background-color var(--transition-theme),
+    border-color var(--transition-theme), color var(--transition-theme);
 }

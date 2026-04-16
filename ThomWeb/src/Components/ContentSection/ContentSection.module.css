@@ -1,20 +1,35 @@
 .container {
+  width: 100%;
+  padding: var(--space-2xs) 0 var(--space-xs);
   display: flex;
   flex-direction: column;
-  width: 100%;
+  gap: var(--space-xs);
 }
 
 .title {
-  text-decoration: underline;
-  cursor: pointer;
-  text-align: left;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.postLink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.125rem;
+  cursor: pointer;
+  transition: opacity var(--transition-regular);
+}
+
+.postLink:hover,
+.postLink:focus-visible {
+  opacity: 0.85;
 }
 
 .body {
+  margin: 0;
+  padding-bottom: var(--space-sm);
+  line-height: 1.6;
   text-align: left;
-  padding-bottom: 1rem;
   text-wrap: pretty;
 }
 
@@ -22,4 +37,3 @@
   margin: auto;
   text-align: left;
 }
-

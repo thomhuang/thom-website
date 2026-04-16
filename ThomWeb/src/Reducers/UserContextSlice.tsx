@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { PAGES, ToPage } from "../Assets/Common";
 
 interface UserContextState {
@@ -15,11 +15,11 @@ const userContextSlice = createSlice({
   name: "userContext",
   initialState,
   reducers: {
-    updateDevicePlatform: (state) => {
-      state.isMobile = !state.isMobile;
+    updateDevicePlatform: (state, action: PayloadAction<boolean>) => {
+      state.isMobile = action.payload;
     },
-    updateLastLocation: (state, payload) => {
-      const currLocation = payload.payload as string;
+    updateLastLocation: (state, action: PayloadAction<string>) => {
+      const currLocation = action.payload;
       currLocation !== PAGES.MobileHome
         ? (state.lastLocation = currLocation)
         : (state.lastLocation = PAGES.Home);

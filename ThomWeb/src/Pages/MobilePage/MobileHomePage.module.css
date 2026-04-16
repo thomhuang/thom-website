@@ -1,18 +1,24 @@
 .container {
-  display: inline-block;
-  text-align: center;
+  width: 100%;
+  min-height: 100%;
+  padding: var(--space-2xl) var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header {
-  padding-bottom: 1rem;
+  margin: 0;
+  padding-bottom: var(--space-md);
   font-family: var(--medium-font), serif;
-  font-size: var(--regular-font-size);
+  font-size: var(--medium-font-size);
+  line-height: 1.4;
 }
 
 .text {
-  display: inline-block;
-  text-align: left;
+  width: min(100%, 50ch);
   font-family: var(--light-font), serif;
-  font-size: var(--small-font-size);
-  line-height: 2rem;
+  font-size: var(--regular-font-size);
+  line-height: 1.6;
+  text-align: left;
 }

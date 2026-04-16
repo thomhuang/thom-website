@@ -1,11 +1,14 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
+import { PAGES } from "./Assets/Common";
 import Footer from "./Components/Footer/Footer";
 import Header from "./Components/Header/Header";
 import Project from "./Components/Project/Project";
 import ErrorPage from "./Pages/ErrorPage/ErrorPage";
 import HomePage from "./Pages/HomePage/HomePage";
 import MobileHomePage from "./Pages/MobilePage/MobileHomePage";
+import PhotoAdmin from "./Pages/PhotoAdmin/PhotoAdmin";
+import Photos from "./Pages/Photos/Photos";
 import Posts from "./Pages/Posts/Posts";
 import styles from "./App.module.css";
 
@@ -14,13 +17,18 @@ const App = () => {
     <BrowserRouter>
       <div className={styles.container}>
         <Header />
-        <Routes>
-          <Route path="/" Component={HomePage} />
-          <Route path="/posts" Component={Posts} />
-          <Route path="/posts/:pathName" Component={Project} />
-          <Route path="/mobile" Component={MobileHomePage} />
-          <Route path="/error" Component={ErrorPage} />
-        </Routes>
+        <main>
+          <Routes>
+            <Route path={PAGES.Home} Component={HomePage} />
+            <Route path={PAGES.Posts} Component={Posts} />
+            <Route path={`${PAGES.Posts}/:pathName`} Component={Project} />
+            <Route path={PAGES.Photos} Component={Photos} />
+            <Route path={PAGES.PhotoAdmin} Component={PhotoAdmin} />
+            <Route path={PAGES.MobileHome} Component={MobileHomePage} />
+            <Route path={PAGES.Error} Component={ErrorPage} />
+            <Route path="*" Component={ErrorPage} />
+          </Routes>
+        </main>
         <Footer />
       </div>
     </BrowserRouter>

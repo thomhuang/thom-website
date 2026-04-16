@@ -1,8 +1,9 @@
-import React from "react";
-import { useAppSelector } from "../../hooks";
+import styles from "./Footer.module.css";
 
 export default function Footer() {
-  const darkMode = useAppSelector((state) => state.theme.darkMode);
-
-  return <div></div>;
+  return (
+    <footer className={styles.footer}>
+      <span>© {new Date().getFullYear()} Thomas Huang</span>
+    </footer>
+  );
 }

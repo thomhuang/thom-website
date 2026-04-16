@@ -1,15 +1,17 @@
-* {
-  margin: 0;
-  padding: 0;
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 :root {
-  color-scheme: light dark;
-  --black: #1a1a1d; /* dark-mode primary */
-  --charcoal: #222225; /* dark-mode secondary */
-  --minorwhite: #f6f6f6c1; /* light-mode primary */
-  --mainwhite: #fefefe; /* light-mode secondary */
+  color-scheme: light;
+  --black: #1a1a1d;
+  --charcoal: #222225;
+  --minorwhite: #f6f6f6c1;
+  --mainwhite: #fefefe;
+  --surface-dark: #2a2a2e;
+  --surface-light: #ffffff;
   --light-font: "NotoSans-Light", sans-serif;
   --regular-font: "NotoSans-Regular", sans-serif;
   --medium-font: "NotoSans-Medium", sans-serif;
@@ -19,6 +21,34 @@
   --medium-font-size: 1.25rem;
   --large-font-size: 1.5rem;
   --larger-font-size: 2rem;
+  --content-width: 72rem;
+  --reading-width: 60ch;
+  --narrow-page-width: 48rem;
+  --post-page-width: 56rem;
+  --project-page-width: 60rem;
+  --gallery-page-width: 64rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.25rem;
+  --space-xl: 1.5rem;
+  --space-2xl: 2rem;
+  --space-3xl: 3rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-pill: 999rem;
+  --border-thin: 0.0625rem solid var(--border-color);
+  --border-regular: 0.125rem solid var(--border-color);
+  --border-strong: 0.125rem solid var(--color);
+  --transition-fast: 0.15s ease;
+  --transition-regular: 0.2s ease;
+  --transition-theme: 0.35s ease;
+  --bg-color: var(--mainwhite);
+  --color: var(--charcoal);
+  --border-color: var(--minorwhite);
+  --surface-color: var(--surface-light);
 }
 
 @font-face {
@@ -56,25 +86,50 @@ body {
     "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: light-dark(var(--mainwhite), var(--black));
-  color: light-dark(var(--black), var(--minorwhite));
+  background-color: var(--bg-color);
+  color: var(--color);
+  line-height: 1.5;
+  transition: background-color var(--transition-theme),
+    color var(--transition-theme);
+}
+
+#root {
+  min-height: 100vh;
 }
 
 body[data-theme="light"] {
+  color-scheme: light;
   --bg-color: var(--mainwhite);
   --color: var(--charcoal);
   --border-color: var(--minorwhite);
+  --surface-color: var(--surface-light);
 }
 
 body[data-theme="dark"] {
+  color-scheme: dark;
   --bg-color: var(--black);
   --color: var(--minorwhite);
   --border-color: var(--charcoal);
+  --surface-color: var(--surface-dark);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  color: inherit;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -86,10 +141,10 @@ code {
 }
 
 *:focus {
-  outline: 2px solid light-dark(var(--black), var(--minorwhite));
-  outline-offset: 2px;
+  outline: none;
 }
 
-*:focus:not(:focus-visible) {
-  outline: none;
+*:focus-visible {
+  outline: 0.125rem solid var(--color);
+  outline-offset: 0.125rem;
 }

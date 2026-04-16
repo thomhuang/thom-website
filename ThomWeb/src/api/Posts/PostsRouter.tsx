@@ -1,5 +1,3 @@
-import axios from "axios";
-
 const BASE_ROUTE = process.env.REACT_APP_API_URL;
 
 export interface Category {
@@ -25,50 +23,59 @@ export interface Content {
   ImagePath: string;
 }
 
-export async function GetCategoriesAsync() {
-  const response = await axios({
+const toUrl = (path: string, params?: Record<string, string | number>) => {
+  if (!BASE_ROUTE) {
+    throw new Error("REACT_APP_API_URL is not configured");
+  }
+
+  const url = new URL(path, BASE_ROUTE);
+  if (params) {
+    Object.entries(params).forEach(([key, value]) =>
+      url.searchParams.append(key, String(value))
+    );
+  }
+
+  return url.toString();
+};
+
+async function getAsync<T>(
+  path: string,
+  params?: Record<string, string | number>,
+  signal?: AbortSignal
+): Promise<T> {
+  const response = await fetch(toUrl(path, params), {
     method: "GET",
-    url: `${BASE_ROUTE}/categories`,
+    signal,
+    headers: {
+      Accept: "application/json",
+    },
   });
 
-  return response.data;
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+  }
+
+  return (await response.json()) as T;
 }
 
-export async function GetPostsAsync(id: number) {
-  const response = await axios({
-    method: "GET",
-    params: {
-      category: id,
-    },
-    url: `${BASE_ROUTE}/post`,
-    paramsSerializer: {
-      indexes: null,
-    },
-  });
-
-  return response.data;
+export async function GetCategoriesAsync(signal?: AbortSignal) {
+  return getAsync<Category[]>("/categories", undefined, signal);
 }
 
-export async function GetPostContentByIdAsync(postId: number) {
-  const response = await axios({
-    method: "GET",
-    params: {
-      post: postId,
-    },
-    url: `${BASE_ROUTE}/post/content/id`,
-  });
-
-  return response.data;
+export async function GetPostsAsync(id: number, signal?: AbortSignal) {
+  return getAsync<Post[]>("/post", { category: id }, signal);
 }
 
-export async function GetPostContentByPathNameAsync(pathName: string) {
-  const response = await axios({
-    method: "GET",
-    params: {
-      pathName: pathName,
-    },
-    url: `${BASE_ROUTE}/post/content/path`,
-  });
+export async function GetPostContentByIdAsync(
+  postId: number,
+  signal?: AbortSignal
+) {
+  return getAsync<Post>("/post/content/id", { post: postId }, signal);
+}
 
-  return response.data;
+export async function GetPostContentByPathNameAsync(
+  pathName: string,
+  signal?: AbortSignal
+) {
+  return getAsync<Post>("/post/content/path", { pathName }, signal);
 }

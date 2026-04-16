@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "typeRoots": ["types.d.ts"],
-    "target": "es5",
+    "target": "es2017",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -23,6 +22,5 @@
   },
   "include": [
     "src"
-  ],
-  
+  ]
 }

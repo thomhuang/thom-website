@@ -20,17 +20,21 @@ export interface IProject {
 
 export default function Project() {
   const { pathName } = useParams();
-  const { id } = useLocation().state;
+  const location = useLocation();
+  const id = (location.state as { id?: number } | null)?.id;
   const [post, setPost] = useState<Post | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const GetPostContentById = async (
       postId: number
     ): Promise<Post | undefined> => {
       try {
-        return await GetPostContentByIdAsync(postId);
+        return await GetPostContentByIdAsync(postId, controller.signal);
       } catch (error) {
-        console.error(`Failed to fetch posts for postId: ${postId}, %d`, error);
+        console.error(`Failed to fetch posts for postId: ${postId}`, error);
       }
     };
 
@@ -40,39 +44,46 @@ export default function Project() {
       if (pathName === undefined) return;
 
       try {
-        return await GetPostContentByPathNameAsync(pathName);
+        return await GetPostContentByPathNameAsync(pathName, controller.signal);
       } catch (error) {
-        console.error(
-          `Failed to fetch posts for pathName: ${pathName}, %d`,
-          error
-        );
+        console.error(`Failed to fetch posts for pathName: ${pathName}`, error);
       }
     };
 
     const getPostContent = async () => {
-      if (id !== null) {
+      if (typeof id === "number") {
         const postContentById = await GetPostContentById(id);
-
-        setPost(postContentById);
+        if (!controller.signal.aborted) {
+          setPost(postContentById);
+        }
       } else {
         const postContentByPath = await GetPostContentByPathName(pathName);
-
-        setPost(postContentByPath);
+        if (!controller.signal.aborted) {
+          setPost(postContentByPath);
+        }
       }
     };
 
-    getPostContent();
+    getPostContent().finally(() => {
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      controller.abort();
+    };
   }, [pathName, id]);
 
-  function DisplayText(content: Content, idx: number) {
+  function DisplayText(content: Content) {
     if (content.Text.length <= 0) {
       return null;
     }
 
-    return <p key={idx}>{content.Text}</p>;
+    return <p>{content.Text}</p>;
   }
 
-  function DisplayImage(content: Content, idx: number) {
+  function DisplayImage(content: Content) {
     if (content.ImagePath.length <= 0) {
       return null;
     }
@@ -80,9 +91,9 @@ export default function Project() {
     return (
       <img
         className={styles.image}
-        key={idx}
         src={`${process.env.PUBLIC_URL}/${content.ImagePath}`}
-        alt={content.ImagePath}
+        alt={`${post?.Title ?? "Post"} visual`}
+        loading="lazy"
       />
     );
   }
@@ -90,23 +101,35 @@ export default function Project() {
   function GetContent() {
     return post?.Content?.map((currContent, idx) => {
       return (
-        <>
-          {DisplayText(currContent, idx)}
-          {DisplayImage(currContent, idx)}
-        </>
+        <div key={`${currContent.ID}-${idx}`}>
+          {DisplayText(currContent)}
+          {DisplayImage(currContent)}
+        </div>
       );
     });
   }
 
   function HandleRedirect() {
-    window.open(post?.Link, "_blank");
+    if (!post?.Link) {
+      return;
+    }
+
+    window.open(post.Link, "_blank", "noopener,noreferrer");
+  }
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <p>Loading post...</p>
+      </div>
+    );
   }
 
   return post ? (
     <div className={styles.container}>
-      <h1 className={styles.header} onClick={HandleRedirect}>
-        {post.Title}
-      </h1>
+      <button className={styles.headerButton} type="button" onClick={HandleRedirect}>
+        <h1 className={styles.header}>{post.Title}</h1>
+      </button>
       <div className={styles.body}>{GetContent()}</div>
     </div>
   ) : (

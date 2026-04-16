@@ -1,15 +1,10 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLayoutEffect } from "react";
+import { Link, NavLink } from "react-router-dom";
 
-import {
-  NavigatePage,
-  PAGES,
-  setDarkTheme,
-  setLightTheme,
-} from "../../Assets/Common";
+import { applyTheme, PAGES } from "../../Assets/Common";
 import phrases from "../../Assets/en.json";
 import { useAppDispatch, useAppSelector } from "../../hooks";
-import { ResizeListener } from "../../Hooks/resizeListener";
+import { useResizeListener } from "../../Hooks/resizeListener";
 import { toggleTheme } from "../../Reducers/ThemeSlice";
 import { ReactComponent as Moon } from "./Assets/moon.svg";
 import HandsDown from "./Assets/stick_figure_down.png";
@@ -19,63 +14,60 @@ import styles from "./Header.module.css";
 
 export default function Header() {
   const dispatch = useAppDispatch();
-  const nav = useNavigate();
   const darkMode = useAppSelector((state) => state.theme.darkMode);
-  ResizeListener();
+  useResizeListener();
 
   const handleThemeToggle = () => {
+    applyTheme(darkMode ? "light" : "dark");
     dispatch(toggleTheme());
   };
 
-  const figureStyling = [styles.figure];
-  const iconStyling = [styles.icon];
-  const navStyling = [styles.container];
+  useLayoutEffect(() => {
+    applyTheme(darkMode ? "dark" : "light");
+  }, [darkMode]);
 
-  if (darkMode) {
-    setDarkTheme();
-    figureStyling.push(styles.figureDark);
-    iconStyling.push(styles.iconDark);
-    navStyling.push(styles.darkNav);
-  } else {
-    setLightTheme();
-    navStyling.push(styles.lightNav);
-  }
+  const figureClass = [styles.figure, darkMode ? styles.figureDark : ""]
+    .filter(Boolean)
+    .join(" ");
+  const iconClass = [styles.icon, darkMode ? styles.iconDark : ""]
+    .filter(Boolean)
+    .join(" ");
+  const navClass = [styles.container, darkMode ? styles.darkNav : styles.lightNav]
+    .filter(Boolean)
+    .join(" ");
 
-  const renderThemeIcon = () => {
-    const iconClass = iconStyling.join(" ");
-    return darkMode ? (
-      <Sun className={iconClass} onClick={handleThemeToggle} />
-    ) : (
-      <Moon className={iconClass} onClick={handleThemeToggle} />
-    );
-  };
-
-  const renderBrandIcon = () => {
-    const figure = darkMode ? HandsUp : HandsDown;
-    const figureClass = figureStyling.join(" ");
-    return <img className={figureClass} src={figure} alt="Brand figure" />;
-  };
-
-  const navClass = navStyling.join(" ");
+  const figure = darkMode ? HandsUp : HandsDown;
   return (
     <header className={styles.header}>
       <div className={navClass}>
-        <a href={PAGES.Home} className={styles.logo}>
-          {renderBrandIcon()}
+        <Link to={PAGES.Home} className={styles.logo}>
+          <img className={figureClass} src={figure} alt="Brand figure" />
           <p className={styles.name}>{phrases.Name}</p>
-        </a>
+        </Link>
 
         <div className={styles.navSection}>
           <nav className={styles.nav}>
             <ul className={styles.navList}>
               <li className={styles.navItem}>
-                <a className={styles.navLink} href={PAGES.Posts}>
+                <NavLink className={styles.navLink} to={PAGES.Posts}>
                   Posts
-                </a>
+                </NavLink>
+              </li>
+              <li className={styles.navItem}>
+                <NavLink className={styles.navLink} to={PAGES.Photos}>
+                  Photos
+                </NavLink>
               </li>
             </ul>
           </nav>
-          {renderThemeIcon()}
+          <button
+            type="button"
+            className={styles.iconButton}
+            onClick={handleThemeToggle}
+            aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}
+          >
+            {darkMode ? <Sun className={iconClass} /> : <Moon className={iconClass} />}
+          </button>
         </div>
       </div>
     </header>

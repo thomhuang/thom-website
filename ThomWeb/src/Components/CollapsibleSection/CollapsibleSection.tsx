@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Post } from "../../api/Posts/PostsRouter";
 import { useAppSelector } from "../../hooks";
@@ -13,25 +13,19 @@ interface ICollapsibleSection {
 
 export default function CollapsibleSection(props: ICollapsibleSection) {
   const darkMode = useAppSelector((state) => state.theme.darkMode);
-  const [arrowClass, setArrowClass] = useState("");
   const [isOpen, setOpen] = useState(false);
 
-  function toggleCollapsible() {
-    setOpen(!isOpen);
-  }
+  const toggleCollapsible = () => {
+    setOpen((prev) => !prev);
+  };
 
-  useEffect(() => {
-    const navTheme = darkMode ? styles.darkArrow : styles.lightArrow;
-
-    let iconFlip = isOpen ? styles.flipIcon : "";
-
-    const arrowClassList = [styles.icon, navTheme, iconFlip];
-    setArrowClass(arrowClassList.join(" "));
-  }, [darkMode, isOpen]);
-
-  function themeIcon() {
-    return <ArrowDown className={arrowClass}></ArrowDown>;
-  }
+  const arrowClass = [
+    styles.icon,
+    darkMode ? styles.darkArrow : styles.lightArrow,
+    isOpen ? styles.flipIcon : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   function displayContent() {
     if (isOpen) {
@@ -49,10 +43,15 @@ export default function CollapsibleSection(props: ICollapsibleSection) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.title} onClick={toggleCollapsible}>
-        {themeIcon()}
+      <button
+        type="button"
+        className={`${styles.title} ${styles.arrowButton}`}
+        onClick={toggleCollapsible}
+        aria-expanded={isOpen}
+      >
+        <ArrowDown className={arrowClass} />
         <h1>{props.title}</h1>
-      </div>
+      </button>
       {displayContent()}
     </div>
   );

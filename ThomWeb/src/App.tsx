@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import styles from './App.module.css';
@@ -11,18 +11,14 @@ import Posts from './Pages/Posts/Posts';
 
 const App = () => {
   const darkMode = useAppSelector((state) => state.theme.darkMode);
-  const [themeClass, setThemeClass] = useState('');
+  const themeClass = [
+    styles.container,
+    darkMode ? styles.dark : styles.light,
+  ].join(' ');
 
   useEffect(() => {
-    let appClassList = [styles.container]
-    
-    let currTheme = darkMode
-      ? styles.dark 
-      : styles.light; 
-    appClassList.push(currTheme);
-    
-      setThemeClass(appClassList.join(' '));
-  }, [darkMode, themeClass])
+    document.body.dataset.theme = darkMode ? 'dark' : 'light';
+  }, [darkMode]);
 
   return(
       <BrowserRouter> 

@@ -23,7 +23,9 @@ export default function ContentSection(props: IContentSection) {
 
     return (
         <div className={styles.container} key={props.title}>
-            <h1 className={styles.title} onClick={navigateToPost}>{props.title}</h1>
+            <button className={styles.title} type="button" onClick={navigateToPost}>
+                {props.title}
+            </button>
             <p className={styles.body}>{props.summary}</p>
         </div>
     );

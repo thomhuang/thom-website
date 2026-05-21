@@ -1,110 +1,156 @@
-import { useLocation, useParams } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
 
-import ErrorPage from '../../Pages/ErrorPage/ErrorPage';
-import styles from './Project.module.css';
-import { useEffect, useState } from 'react';
-import { Content, Post, GetPostContentByIdAsync, GetPostContentByPathNameAsync } from '../../api/Posts/PostsRouter';
+import {
+  Content,
+  GetPostContentByIdAsync,
+  GetPostContentByPathNameAsync,
+  Post,
+} from "../../api/Posts/PostsRouter";
+import ErrorPage from "../../Pages/ErrorPage/ErrorPage";
+import styles from "./Project.module.css";
 
 export interface IProject {
-    title?: string,
-    description?: string[],
-    github?: string,
-    imagePaths?: string[],
-    pathName?: string
+  title?: string;
+  description?: string[];
+  github?: string;
+  imagePaths?: string[];
+  pathName?: string;
 }
 
+const ABSOLUTE_ASSET_PATTERN = /^https?:\/\//;
+const POSTS_ASSET_DIR = "posts";
+
+const toPostImageUrl = (imagePath: string) => {
+  const cleanImagePath = imagePath.trim();
+
+  if (ABSOLUTE_ASSET_PATTERN.test(cleanImagePath)) {
+    return cleanImagePath;
+  }
+
+  const normalizedPath = cleanImagePath.replace(/^\/+/, "");
+  const publicPath = normalizedPath.startsWith(`${POSTS_ASSET_DIR}/`)
+    ? normalizedPath
+    : `${POSTS_ASSET_DIR}/${normalizedPath}`;
+
+  return `${process.env.PUBLIC_URL}/${publicPath}`;
+};
+
 export default function Project() {
-    const { pathName } = useParams()
-    const { id }  = useLocation().state
-    const [post, setPost] = useState<Post | undefined>()
+  const { pathName } = useParams();
+  const location = useLocation();
+  const id = (location.state as { id?: number } | null)?.id;
+  const [post, setPost] = useState<Post | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const GetPostContentById = async (postId: number) : Promise<Post | undefined> => {
-            try {
-              return await GetPostContentByIdAsync(postId)
-            } catch (error) {
-              console.error(`Failed to fetch posts for postId: ${postId}, %d`, error)
-            }
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const GetPostContentById = async (
+      postId: number
+    ): Promise<Post | undefined> => {
+      try {
+        return await GetPostContentByIdAsync(postId, controller.signal);
+      } catch (error) {
+        console.error(`Failed to fetch posts for postId: ${postId}`, error);
+      }
+    };
+
+    const GetPostContentByPathName = async (
+      pathName: string | undefined
+    ): Promise<Post | undefined> => {
+      if (pathName === undefined) return;
+
+      try {
+        return await GetPostContentByPathNameAsync(pathName, controller.signal);
+      } catch (error) {
+        console.error(`Failed to fetch posts for pathName: ${pathName}`, error);
+      }
+    };
+
+    const getPostContent = async () => {
+      if (typeof id === "number") {
+        const postContentById = await GetPostContentById(id);
+        if (!controller.signal.aborted) {
+          setPost(postContentById);
         }
-
-        const GetPostContentByPathName = async (pathName: string | undefined) : Promise<Post | undefined> => {
-            if (pathName === undefined)
-                return 
-
-            try {
-              return await GetPostContentByPathNameAsync(pathName)
-            } catch (error) {
-              console.error(`Failed to fetch posts for pathName: ${pathName}, %d`, error)
-            }
+      } else {
+        const postContentByPath = await GetPostContentByPathName(pathName);
+        if (!controller.signal.aborted) {
+          setPost(postContentByPath);
         }
+      }
+    };
 
-        const getPostContent = async() => {
-            if (id !== null) {
-                const postContentById = await GetPostContentById(id)
+    getPostContent().finally(() => {
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
+    });
 
-                setPost(postContentById)
-            } else {
-                const postContentByPath = await GetPostContentByPathName(pathName)
+    return () => {
+      controller.abort();
+    };
+  }, [pathName, id]);
 
-                setPost(postContentByPath)
-            }
-        }
-
-        getPostContent()
-    }, [pathName, id])
-
-    function DisplayText(content : Content, idx: number) {
-        if (content.Text.length <= 0) {
-            return null
-        }
-
-        return (
-            <p key={idx}> 
-                { content.Text } 
-            </p>
-        )
+  function DisplayText(content: Content) {
+    if (content.Text.length <= 0) {
+      return null;
     }
 
-    function DisplayImage(content : Content, idx: number) {
-        if (content.ImagePath.length <= 0) {
-            return null
-        }
+    return <p>{content.Text}</p>;
+  }
 
-        return (
-            <img
-                className={styles.image}
-                key={idx}
-                src={`${process.env.PUBLIC_URL}/${content.ImagePath}`}
-                alt={content.ImagePath}
-            /> 
-        )
-    }
-    
-    function GetContent() {
-        return post?.Content?.map((currContent, idx) => {
-            return (
-                <>
-                    {DisplayText(currContent, idx)}
-                    {DisplayImage(currContent, idx)}
-                </>
-            )
-        }
-        )
-    }
-
-    function HandleRedirect() {
-        window.open(post?.Link, "_blank")
+  function DisplayImage(content: Content) {
+    if (content.ImagePath.length <= 0) {
+      return null;
     }
 
     return (
-        post ? (
-            <div className={styles.container}>
-                <h1 className={styles.header} onClick={HandleRedirect}>{post.Title}</h1>
-                <div className={styles.body}>
-                    {GetContent()}
-                </div>
-            </div>  
-        )
-        : <ErrorPage/>
+      <img
+        className={styles.image}
+        src={toPostImageUrl(content.ImagePath)}
+        alt={`${post?.Title ?? "Post"} visual`}
+        loading="lazy"
+      />
     );
+  }
+
+  function GetContent() {
+    return post?.Content?.map((currContent, idx) => {
+      return (
+        <div key={`${currContent.ID}-${idx}`}>
+          {DisplayText(currContent)}
+          {DisplayImage(currContent)}
+        </div>
+      );
+    });
+  }
+
+  function HandleRedirect() {
+    if (!post?.Link) {
+      return;
+    }
+
+    window.open(post.Link, "_blank", "noopener,noreferrer");
+  }
+
+  if (isLoading) {
+    return (
+      <div className={styles.container}>
+        <p>Loading post...</p>
+      </div>
+    );
+  }
+
+  return post ? (
+    <div className={styles.container}>
+      <button className={styles.headerButton} type="button" onClick={HandleRedirect}>
+        <h1 className={styles.header}>{post.Title}</h1>
+      </button>
+      <div className={styles.body}>{GetContent()}</div>
+    </div>
+  ) : (
+    <ErrorPage />
+  );
 }

@@ -5,7 +5,7 @@ const BASE_ROUTE = process.env.REACT_APP_API_URL
 export interface Category {
     ID: number,
     Category: string,
-    Posts?: Post[]
+    Posts?: Post[] | null
 }
 
 export interface Post {
@@ -25,7 +25,7 @@ export interface Content {
     ImagePath: string
 }
 
-export async function GetCategoriesAsync() {
+export async function GetCategoriesAsync(): Promise<Category[] | null> {
     const response = await axios({
         method: "GET",
         url: `${BASE_ROUTE}/categories`
@@ -34,7 +34,7 @@ export async function GetCategoriesAsync() {
     return response.data
 }
 
-export async function GetPostsAsync(id: number) {
+export async function GetPostsAsync(id: number): Promise<Post[] | null> {
     const response = await axios({
         method: "GET",
         params: {
@@ -49,24 +49,26 @@ export async function GetPostsAsync(id: number) {
     return response.data
 }
 
-export async function GetPostContentByIdAsync(postId: number) {
+export async function GetPostContentByIdAsync(postId: number, signal?: AbortSignal) {
     const response = await axios({
         method: "GET",
         params: {
             post: postId
         },
+        signal,
         url: `${BASE_ROUTE}/post/content/id`
     })
 
     return response.data
 }
 
-export async function GetPostContentByPathNameAsync(pathName: string) {
+export async function GetPostContentByPathNameAsync(pathName: string, signal?: AbortSignal) {
     const response = await axios({
         method: "GET",
         params: {
             pathName: pathName
         },
+        signal,
         url: `${BASE_ROUTE}/post/content/path`
     })
 

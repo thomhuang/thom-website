@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Navigate from '../../Assets/Common';
@@ -16,40 +15,45 @@ export default function Header() {
     const dispatch = useAppDispatch();
     const darkMode = useAppSelector((state) => state.theme.darkMode);
     const nav = useNavigate();
-    const [navClass, SetNavClass] = useState('');
-    const [iconClass, setIconClass] = useState('');
-    const [figureClass, setFigureClass] = useState('');
+    const iconThemeClass = darkMode ? styles.lightIcon : '';
+    const navClass = [
+        styles.header,
+        darkMode ? styles.darkNav : styles.lightNav,
+    ].join(' ');
+    const figureClass = [styles.figure, iconThemeClass].join(' ');
 
     function setTheme() {
         dispatch(toggleTheme());
     }
 
-    useEffect(() => {
-        let navTheme = darkMode
-        ? styles.darkNav 
-        : styles.lightNav;
-
-        let navClassList = [styles.header, navTheme];
-        SetNavClass(navClassList.join(' '));
-
-        let IconTheme = !darkMode
-            ? ''
-            : styles.lightIcon;
-
-        let themeIconClass = [styles.icon, IconTheme];
-        setIconClass(themeIconClass.join(' '));
-        
-        let figureIconClass = [styles.figure, IconTheme];
-        setFigureClass(figureIconClass.join(' '));
-
-    }, [darkMode]);
-
     function themeIcon() {
-        let svg = darkMode
-            ? <Sun className={iconClass} onClick={setTheme}/>
-            : <Moon className={iconClass} onClick={setTheme}/>
-
-        return svg
+        return (
+            <button
+                type="button"
+                className={styles.themeButton}
+                onClick={setTheme}
+                aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+                <Moon
+                    className={[
+                        styles.icon,
+                        styles.themeIcon,
+                        iconThemeClass,
+                        darkMode ? '' : styles.themeIconVisible,
+                    ].join(' ')}
+                    aria-hidden="true"
+                />
+                <Sun
+                    className={[
+                        styles.icon,
+                        styles.themeIcon,
+                        iconThemeClass,
+                        darkMode ? styles.themeIconVisible : '',
+                    ].join(' ')}
+                    aria-hidden="true"
+                />
+            </button>
+        );
     }
 
 

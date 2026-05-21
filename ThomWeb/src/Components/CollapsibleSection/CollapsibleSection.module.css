@@ -1,73 +1,54 @@
 .container {
+  width: 100%;
+  padding-bottom: var(--space-md);
   display: flex;
   flex-direction: column;
-  align-items: center; 
-  width: 60%;
-}
-
-@media (min-width: 320px) and (max-width: 480px) {
-  /* Mobile (Portrait) */
-  .container {
-    width: 80%;
-  }
-}
-
-@media (min-width: 481px) and (max-width: 1024px) {
-  /* Mobile (Landscape) & Tablets */
-  /* Tablets & Small Desktops */
-  .container {
-    width: 80%;
-  }
-}
-
-@media (min-width: 1025px) and (max-width: 1200px) {
-  /* Large Desktops */
-  .container {
-    width: 75%;
-  }
-}
-
-@media(min-width: 1201px) {
-  .container {
-    max-width: min(900px, 80%);
-  }
+  border-bottom: var(--border-thin);
+  transition: border-color var(--transition-theme);
 }
 
 .title {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  padding-top: 0;
-  padding-bottom: 16px;
+  width: 100%;
   margin: 0;
+  padding: var(--space-sm) 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-xs);
   -webkit-touch-callout: none;
-  -webkit-user-select: none; 
-  -khtml-user-select: none;
+  -webkit-user-select: none;
   -moz-user-select: none;
-  -ms-user-select: none; 
+  -ms-user-select: none;
   user-select: none;
 }
 
-.title:hover {
+.title:hover,
+.title:focus-visible {
   cursor: pointer;
+  color: var(--accent-color);
 }
 
-h1 {
-  font-size: var(--large-font-size);
-  padding-top: 0;
+.title h1 {
   margin: 0;
+  padding: 0;
+  font-size: clamp(1.1rem, 1rem + 0.75vw, var(--large-font-size));
+  line-height: var(--line-height-heading);
+  text-align: left;
+  transition: color var(--transition-theme);
 }
 
 .icon {
+  height: 2rem;
   width: auto;
-  height: 32px;
+  flex: 0 0 auto;
   -webkit-touch-callout: none;
-  -webkit-user-select: none; 
-  -khtml-user-select: none;
+  -webkit-user-select: none;
   -moz-user-select: none;
-  -ms-user-select: none; 
+  -ms-user-select: none;
   user-select: none;
+  transition:
+    fill var(--transition-theme),
+    transform var(--transition-regular);
 }
 
 .flipIcon {
@@ -75,20 +56,26 @@ h1 {
 }
 
 .arrowButton {
-  background: none;
-  color: inherit;
-  border: none;
   padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
-  outline: inherit;
+  appearance: none;
+  text-align: left;
 }
 
 .darkArrow {
-  fill: var(--minorwhite);
+  fill: var(--color);
 }
 
 .lightArrow {
-  fill: var(--black);
+  fill: var(--color);
 }
-  
-  
+
+.title:hover .darkArrow,
+.title:hover .lightArrow,
+.title:focus-visible .darkArrow,
+.title:focus-visible .lightArrow {
+  fill: var(--accent-color);
+}

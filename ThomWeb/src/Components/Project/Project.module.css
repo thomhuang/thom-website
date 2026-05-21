@@ -1,70 +1,59 @@
 .container {
-    margin: 0 25% 0 25%;
+  width: min(100%, var(--project-page-width));
+  margin: 0 auto;
+  padding: clamp(var(--space-xl), 5vw, var(--space-3xl)) var(--space-md)
+    var(--space-3xl);
 }
 
-@media (min-width: 320px) and (max-width: 480px) {
-    /* Mobile (Portrait) */
-    .container {
-        margin: 0 5% 0 5%;
-    }
-  }
-  
-  @media (min-width: 481px) and (max-width: 1024px) {
-    /* Mobile (Landscape) & Tablets */
-    /* Tablets & Small Desktops */
-    .container {
-        margin: 0 10% 0 10%;
-    }
-  }
-  
-  @media (min-width: 1025px) and (max-width: 1200px) {
-    /* Large Desktops */
-    .container {
-        margin: 0 15% 0 15%;
-    }
-  }
-
 .header {
-    padding-top: 32px;
-    text-align: center;
-    cursor: pointer;
+  margin: 0;
+  font-size: clamp(var(--large-font-size), 3vw, var(--larger-font-size));
+  line-height: var(--line-height-tight);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.headerButton {
+  width: 100%;
+  padding: 0 0 var(--space-xl);
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: color var(--transition-theme), opacity var(--transition-regular);
+}
+
+.headerButton:hover,
+.headerButton:focus-visible {
+  color: var(--accent-color);
+  opacity: var(--opacity-hover);
 }
 
 .image {
-    display: block;
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: var(--space-2xl) auto;
+  border: var(--border-thin);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-elevated-color);
+  box-shadow: var(--shadow-soft);
+  transition:
+    background-color var(--transition-theme),
+    border-color var(--transition-theme);
 }
 
-@media (min-width:320px)  {
-    .container {
-        margin: 0 10% 0 10%;
-    }
-
-    .image {
-        margin: 1em auto 1em auto;
-        max-width: 100%;
-    }
+.body {
+  color: var(--color);
+  line-height: var(--line-height-relaxed);
+  transition: color var(--transition-theme);
 }
 
-@media (min-width:961px) {
-    .container {
-        margin: 0 20% 0 20%;
-    }
-
-    .image {
-        margin: 1.5em auto 1.5em auto;
-        max-width: 90%;
-    }
+.body p {
+  margin: 0 0 var(--space-lg);
+  text-wrap: pretty;
 }
 
-  
-@media (min-width:1281px) {
-    .container {
-        margin: 0 30% 0 30%;
-    }
-
-    .image {
-        display: block;
-        margin: 32px auto 32px auto;
-        max-width: 80%;
-    }
+.body p:last-child {
+  margin-bottom: 0;
 }

@@ -3,20 +3,39 @@
     flex-grow: 1;
     flex-direction: column;
     min-height: 100vh;
-    min-width: 100vw;
+    width: 100%;
     margin: 0;
     padding: 0;
-    
+    overflow-x: clip;
+    transition:
+        background-color var(--transition-theme),
+        color var(--transition-theme);
 }
 
 .dark {
-    background-color: var(--black);
-    color: var(--minorwhite);
-    border-bottom: 4px solid var(--charcoal);
+    --bg-color: var(--black);
+    --color: var(--minorwhite);
+    --muted-color: var(--muted-light);
+    --accent-color: var(--accent-dark);
+    --accent-soft-color: var(--accent-soft-dark);
+    --border-color: var(--charcoal);
+    --surface-color: var(--surface-dark);
+    --surface-elevated-color: var(--surface-elevated-dark);
+
+    background-color: var(--bg-color);
+    color: var(--color);
 }
 
 .light {
-    background-color: var(--mainwhite);
-    color: var(--black);
-    border-bottom: 4px solid var(--minorwhite);
+    --bg-color: var(--mainwhite);
+    --color: var(--charcoal);
+    --muted-color: var(--muted-dark);
+    --accent-color: var(--accent-light);
+    --accent-soft-color: var(--accent-soft-light);
+    --border-color: var(--minorwhite);
+    --surface-color: var(--surface-light);
+    --surface-elevated-color: var(--surface-elevated-light);
+
+    background-color: var(--bg-color);
+    color: var(--color);
 }

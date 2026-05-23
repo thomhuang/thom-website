@@ -146,6 +146,123 @@
     text-decoration: underline;
 }
 
+.authMenu,
+.authStatus {
+    position: relative;
+    color: var(--color);
+    font-family: var(--regular-font), sans-serif;
+}
+
+.authSummary,
+.authButton {
+    min-height: 2.25rem;
+    padding: 0 var(--space-md);
+    border: var(--border-thin);
+    border-radius: var(--radius-pill);
+    background: var(--surface-elevated-color);
+    color: var(--color);
+    cursor: pointer;
+    font-family: var(--semibold-font), sans-serif;
+    font-size: var(--small-font-size);
+    line-height: var(--line-height-tight);
+    transition:
+        background-color var(--transition-theme),
+        border-color var(--transition-theme),
+        color var(--transition-theme),
+        transform var(--transition-regular);
+}
+
+.authSummary {
+    display: inline-flex;
+    align-items: center;
+    list-style: none;
+}
+
+.authSummary::-webkit-details-marker {
+    display: none;
+}
+
+.authForm {
+    position: absolute;
+    top: calc(100% + var(--space-sm));
+    right: 0;
+    width: min(18rem, calc(100vw - (2 * var(--space-md))));
+    padding: var(--space-md);
+    border: var(--border-thin);
+    border-radius: var(--radius-md);
+    background: var(--surface-elevated-color);
+    box-shadow: 0 1rem 2rem color-mix(in srgb, var(--color) 18%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    transition:
+        background-color var(--transition-theme),
+        border-color var(--transition-theme);
+}
+
+.authField {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    color: var(--muted-color);
+    font-family: var(--regular-font), sans-serif;
+    font-size: var(--small-font-size);
+    line-height: var(--line-height-tight);
+}
+
+.authField input {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: var(--space-sm) var(--space-md);
+    border: var(--border-thin);
+    border-radius: var(--radius-md);
+    background: var(--surface-color);
+    color: var(--color);
+    font-family: var(--regular-font), sans-serif;
+    font-size: var(--small-font-size);
+    transition:
+        background-color var(--transition-theme),
+        border-color var(--transition-theme),
+        color var(--transition-theme);
+}
+
+.authButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.authButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+}
+
+.authStatus {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.authUser {
+    max-width: 8rem;
+    overflow: hidden;
+    color: var(--muted-color);
+    font-size: var(--small-font-size);
+    line-height: var(--line-height-tight);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color var(--transition-theme);
+}
+
+.authError {
+    margin: 0;
+    color: var(--accent-color);
+    font-family: var(--regular-font), sans-serif;
+    font-size: var(--small-font-size);
+    line-height: var(--line-height-copy);
+}
+
 .darkNav,
 .lightNav {
     background-color: var(--bg-color);
@@ -160,6 +277,8 @@
 }
 
 .themeButton:hover,
+.authSummary:hover,
+.authButton:hover:not(:disabled),
 .themeButton:focus-visible {
     transform: translateY(-1px);
 }
@@ -174,8 +293,17 @@
 }
 
 .redirect:hover,
-.redirect:focus-visible {
+.redirect:focus-visible,
+.authSummary:hover,
+.authSummary:focus-visible {
     color: var(--color);
+}
+
+.authSummary:focus-visible,
+.authButton:focus-visible,
+.authField input:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-outline-offset);
 }
 
 .redirect:hover::after,
@@ -201,5 +329,31 @@
     .directory {
         column-gap: var(--space-md);
         font-size: var(--small-font-size);
+    }
+
+    .authUser {
+        display: none;
+    }
+}
+
+@media (max-width: 520px) {
+    .header {
+        grid-template-columns: 1fr;
+        align-items: start;
+        padding-top: var(--space-sm);
+        padding-bottom: var(--space-sm);
+    }
+
+    .directory {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin-left: 0;
+        row-gap: var(--space-sm);
+    }
+
+    .authForm {
+        left: 0;
+        right: auto;
     }
 }

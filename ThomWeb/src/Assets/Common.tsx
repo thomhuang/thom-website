@@ -10,6 +10,12 @@ export default function Navigate(navigate : NavigateFunction, page : string) {
         case PAGES.Posts:
             navigate(PAGES.Posts)
             break;
+        case PAGES.Coffee:
+            navigate(PAGES.Coffee)
+            break;
+        case PAGES.CoffeeEntry:
+            navigate(PAGES.CoffeeEntry)
+            break;
         case PAGES.Hobbies:
             navigate(PAGES.Hobbies)
             break

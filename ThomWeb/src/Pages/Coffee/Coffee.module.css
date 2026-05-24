@@ -218,7 +218,7 @@
 .entryStats {
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
   gap: var(--space-md);
 }
 
@@ -238,10 +238,28 @@
   font-family: var(--semibold-font), sans-serif;
   font-size: var(--regular-font-size);
   line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.entryText {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .entryNotes {
-  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.entryNoteLabel {
+  margin-bottom: var(--space-2xs);
+  color: var(--color);
+  display: block;
+  font-family: var(--semibold-font), sans-serif;
+  font-size: var(--small-font-size);
+  line-height: var(--line-height-tight);
+  transition: color var(--transition-theme);
 }
 
 .emptyJournal {

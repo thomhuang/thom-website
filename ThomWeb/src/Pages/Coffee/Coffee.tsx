@@ -7,13 +7,66 @@ import {
   CoffeeEntrySummary,
   DeleteCoffeeEntryAsync,
   GetCoffeeEntriesAsync,
+  GetCoffeeEntryByIdAsync,
 } from '../../api/Coffee/CoffeeRouter';
 import styles from './Coffee.module.css';
+
+type EntryStat = {
+  label: string;
+  value: string;
+};
 
 const formatCoffeeMetadata = (entry: CoffeeEntrySummary) =>
   [entry.origin, entry.coffeeVarietal, entry.processingMethod]
     .filter(Boolean)
     .join(' / ');
+
+const formatDaysSinceRoast = (daysSinceRoast?: string) => {
+  const days = daysSinceRoast?.trim();
+
+  if (!days) {
+    return '';
+  }
+
+  return `${days} day${days === '1' ? '' : 's'} off roast`;
+};
+
+const formatBloom = (entry: CoffeeEntrySummary) =>
+  [entry.bloomTime, entry.bloomWater].filter(Boolean).join(' / ');
+
+const getEntryStats = (entry: CoffeeEntrySummary): EntryStat[] =>
+  [
+    { label: 'Method', value: entry.brewMethod },
+    { label: 'Ratio', value: entry.ratio },
+    { label: 'Rating', value: `${entry.rating}/5` },
+    { label: 'Grinder', value: entry.grinder || '' },
+    { label: 'Grind', value: entry.grindSetting || '' },
+    { label: 'Dose', value: entry.dose || '' },
+    { label: 'Yield', value: entry.yieldAmount || '' },
+    { label: 'Water', value: entry.waterTemperature || '' },
+    { label: 'Time', value: entry.brewTime || '' },
+    { label: 'Bloom', value: formatBloom(entry) },
+    { label: 'Roast', value: entry.roastLevel || '' },
+    { label: 'Rest', value: formatDaysSinceRoast(entry.daysSinceRoast) },
+  ].filter((stat) => Boolean(stat.value));
+
+const getTastingNotes = (entry: CoffeeEntrySummary) =>
+  entry.tastingNotes || entry.notes || '';
+
+const loadCoffeeEntryDetails = async (
+  entry: CoffeeEntrySummary,
+  signal: AbortSignal
+) => {
+  try {
+    return await GetCoffeeEntryByIdAsync(entry.id, signal);
+  } catch (error) {
+    if (signal.aborted) {
+      throw error;
+    }
+
+    return entry;
+  }
+};
 
 export default function Coffee() {
   const { isAdmin, isAuthLoading } = useAuth();
@@ -31,9 +84,14 @@ export default function Coffee() {
 
       try {
         const entries = await GetCoffeeEntriesAsync(controller.signal);
+        const entriesWithDetails = await Promise.all(
+          entries.map((entry) =>
+            loadCoffeeEntryDetails(entry, controller.signal)
+          )
+        );
 
         if (isMounted) {
-          setBrewLogs(entries);
+          setBrewLogs(entriesWithDetails);
         }
       } catch {
         if (!controller.signal.aborted && isMounted) {
@@ -109,6 +167,8 @@ export default function Coffee() {
         ) : brewLogs.length > 0 ? (
           brewLogs.map((entry) => {
             const coffeeMetadata = formatCoffeeMetadata(entry);
+            const entryStats = getEntryStats(entry);
+            const tastingNotes = getTastingNotes(entry);
 
             return (
               <article className={styles.entryCard} key={entry.id}>
@@ -144,20 +204,28 @@ export default function Coffee() {
                   )}
                 </div>
                 <dl className={styles.entryStats}>
-                  <div>
-                    <dt>Method</dt>
-                    <dd>{entry.brewMethod}</dd>
-                  </div>
-                  <div>
-                    <dt>Ratio</dt>
-                    <dd>{entry.ratio}</dd>
-                  </div>
-                  <div>
-                    <dt>Rating</dt>
-                    <dd>{entry.rating}/5</dd>
-                  </div>
+                  {entryStats.map((stat) => (
+                    <div key={stat.label}>
+                      <dt>{stat.label}</dt>
+                      <dd>{stat.value}</dd>
+                    </div>
+                  ))}
                 </dl>
-                <p className={styles.entryNotes}>{entry.tastingNotes}</p>
+                {(tastingNotes || entry.pourNotes) && (
+                  <div className={styles.entryText}>
+                    {tastingNotes && (
+                      <p className={styles.entryNotes}>{tastingNotes}</p>
+                    )}
+                    {entry.pourNotes && (
+                      <p className={styles.entryNotes}>
+                        <span className={styles.entryNoteLabel}>
+                          Pour notes
+                        </span>
+                        {entry.pourNotes}
+                      </p>
+                    )}
+                  </div>
+                )}
               </article>
             );
           })

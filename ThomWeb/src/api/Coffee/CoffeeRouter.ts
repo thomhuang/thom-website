@@ -9,9 +9,22 @@ export interface CoffeeEntrySummary {
   origin: string;
   coffeeVarietal: string;
   processingMethod: string;
+  daysSinceRoast?: string;
+  roasterId?: string;
   roaster: string;
   brewMethod: string;
   ratio: string;
+  grinder?: string;
+  grindSetting?: string;
+  dose?: string;
+  yieldAmount?: string;
+  waterTemperature?: string;
+  brewTime?: string;
+  bloomTime?: string;
+  bloomWater?: string;
+  pourNotes?: string;
+  roastLevel?: string;
+  notes?: string;
   tastingNotes: string;
   rating: number;
 }

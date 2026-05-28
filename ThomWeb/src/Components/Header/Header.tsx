@@ -2,7 +2,6 @@ import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
-import phrases from '../../Assets/en.json';
 import { useAuth } from '../../Auth/AuthContext';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { toggleTheme } from '../../Reducers/ThemeSlice';
@@ -176,34 +175,22 @@ export default function Header() {
         <div className={navClass}>
             <div className={styles.leftContainer} onClick={() => goTo(PAGES.Home)}>
                 {brandIcon()}
-                <p className={styles.name}>{phrases.Name}</p>
+                <p className={styles.name}>Thomas Huang</p>
             </div>
             <div className={`${styles.middleContainer}`}>
             </div>
             <div className={styles.directory}>
-                {/* <p 
-                    className={styles.redirect}
-                    onClick={() => goTo(PAGES.Home)}
-                >
-                    {phrases.Projects}
-                </p> */}
-                <p 
-                    className={styles.redirect}
-                     onClick={() => goTo(PAGES.Posts)}
-                >
-                    {phrases.BlogPosts}
-                </p>
                 <p
                     className={styles.redirect}
                     onClick={() => goTo(PAGES.Coffee)}
                 >
-                    {phrases.Coffee}
+                    Coffee
                 </p>
                 {/* <p
                     className={styles.redirect} 
                     onClick={() => goTo(PAGES.Home)}
                 >
-                    {phrases.Hobbies}
+                    Hobbies
                 </p> */}
                 {authControl()}
                 {themeIcon()}

@@ -1,5 +1,5 @@
 .page {
-  width: min(100%, var(--project-page-width));
+  width: min(100%, var(--coffee-page-width));
   min-height: calc(100vh - var(--layout-header-height));
   margin: 0 auto;
   padding: clamp(var(--space-xl), 5vw, var(--space-3xl)) var(--space-md)

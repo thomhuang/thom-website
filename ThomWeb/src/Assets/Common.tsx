@@ -7,9 +7,6 @@ export default function Navigate(navigate : NavigateFunction, page : string) {
         case PAGES.Home:
             navigate(PAGES.Home)
             break
-        case PAGES.Posts:
-            navigate(PAGES.Posts)
-            break;
         case PAGES.Coffee:
             navigate(PAGES.Coffee)
             break;

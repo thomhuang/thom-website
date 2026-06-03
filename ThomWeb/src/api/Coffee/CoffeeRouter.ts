@@ -15,7 +15,7 @@ export interface CoffeeEntrySummary {
   brewMethod: string;
   ratio: string;
   grinder?: string;
-  grindSetting?: string;
+  grindSetting?: number;
   dose?: number;
   yieldAmount?: number;
   waterTemperature?: number;
@@ -33,7 +33,7 @@ export interface CoffeeEntry extends CoffeeEntrySummary {
   daysSinceRoast: number;
   roasterId: string;
   grinder: string;
-  grindSetting: string;
+  grindSetting: number;
   dose: number;
   yieldAmount: number;
   waterTemperature: number;

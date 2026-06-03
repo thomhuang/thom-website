@@ -21,18 +21,19 @@ const formatCoffeeMetadata = (entry: CoffeeEntrySummary) =>
     .filter(Boolean)
     .join(' / ');
 
-const formatDaysSinceRoast = (daysSinceRoast?: string) => {
-  const days = daysSinceRoast?.trim();
-
-  if (!days) {
+const formatDaysSinceRoast = (daysSinceRoast?: number) => {
+  if (!daysSinceRoast) {
     return '';
   }
 
-  return `${days} day${days === '1' ? '' : 's'} off roast`;
+  return `${daysSinceRoast} day${daysSinceRoast === 1 ? '' : 's'} off roast`;
 };
 
 const formatBloom = (entry: CoffeeEntrySummary) =>
-  [entry.bloomTime, entry.bloomWater].filter(Boolean).join(' / ');
+  [
+    entry.bloomTime,
+    entry.bloomWater != null ? String(entry.bloomWater) : '',
+  ].filter(Boolean).join(' / ');
 
 const getEntryStats = (entry: CoffeeEntrySummary): EntryStat[] =>
   [
@@ -41,9 +42,9 @@ const getEntryStats = (entry: CoffeeEntrySummary): EntryStat[] =>
     { label: 'Rating', value: `${entry.rating}/5` },
     { label: 'Grinder', value: entry.grinder || '' },
     { label: 'Grind', value: entry.grindSetting || '' },
-    { label: 'Dose', value: entry.dose || '' },
-    { label: 'Yield', value: entry.yieldAmount || '' },
-    { label: 'Water', value: entry.waterTemperature || '' },
+    { label: 'Dose', value: entry.dose != null ? String(entry.dose) : '' },
+    { label: 'Yield', value: entry.yieldAmount != null ? String(entry.yieldAmount) : '' },
+    { label: 'Water', value: entry.waterTemperature != null ? String(entry.waterTemperature) : '' },
     { label: 'Time', value: entry.brewTime || '' },
     { label: 'Bloom', value: formatBloom(entry) },
     { label: 'Roast', value: entry.roastLevel || '' },

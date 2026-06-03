@@ -9,19 +9,19 @@ export interface CoffeeEntrySummary {
   origin: string;
   coffeeVarietal: string;
   processingMethod: string;
-  daysSinceRoast?: string;
+  daysSinceRoast?: number;
   roasterId?: string;
   roaster: string;
   brewMethod: string;
   ratio: string;
   grinder?: string;
   grindSetting?: string;
-  dose?: string;
-  yieldAmount?: string;
-  waterTemperature?: string;
+  dose?: number;
+  yieldAmount?: number;
+  waterTemperature?: number;
   brewTime?: string;
   bloomTime?: string;
-  bloomWater?: string;
+  bloomWater?: number;
   pourNotes?: string;
   roastLevel?: string;
   notes?: string;
@@ -30,16 +30,16 @@ export interface CoffeeEntrySummary {
 }
 
 export interface CoffeeEntry extends CoffeeEntrySummary {
-  daysSinceRoast: string;
+  daysSinceRoast: number;
   roasterId: string;
   grinder: string;
   grindSetting: string;
-  dose: string;
-  yieldAmount: string;
-  waterTemperature: string;
+  dose: number;
+  yieldAmount: number;
+  waterTemperature: number;
   brewTime: string;
   bloomTime: string;
-  bloomWater: string;
+  bloomWater: number;
   pourNotes: string;
   roastLevel: string;
   notes: string;

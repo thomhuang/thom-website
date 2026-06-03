@@ -124,7 +124,7 @@ const createDraftFromEntry = (
   brewMethod: entry.brewMethod,
   ratio: entry.ratio,
   grinder: entry.grinder,
-  grindSetting: entry.grindSetting,
+  grindSetting: String(entry.grindSetting),
   dose: String(entry.dose),
   yieldAmount: String(entry.yieldAmount),
   waterTemperature: String(entry.waterTemperature),
@@ -172,6 +172,7 @@ const createRequestFromDraft = (
 ): CoffeeEntryRequest => ({
   ...draft,
   roaster: roaster.roaster,
+  grindSetting: draft.grindSetting ? Number(draft.grindSetting) : undefined,
   daysSinceRoast: draft.daysSinceRoast ? Number(draft.daysSinceRoast) : undefined,
   dose: draft.dose ? Number(draft.dose) : undefined,
   yieldAmount: draft.yieldAmount ? Number(draft.yieldAmount) : undefined,

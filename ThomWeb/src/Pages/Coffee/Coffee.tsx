@@ -41,7 +41,7 @@ const getEntryStats = (entry: CoffeeEntrySummary): EntryStat[] =>
     { label: 'Ratio', value: entry.ratio },
     { label: 'Rating', value: `${entry.rating}/5` },
     { label: 'Grinder', value: entry.grinder || '' },
-    { label: 'Grind', value: entry.grindSetting || '' },
+    { label: 'Grind', value: entry.grindSetting != null ? String(entry.grindSetting) : '' },
     { label: 'Dose', value: entry.dose != null ? String(entry.dose) : '' },
     { label: 'Yield', value: entry.yieldAmount != null ? String(entry.yieldAmount) : '' },
     { label: 'Water', value: entry.waterTemperature != null ? String(entry.waterTemperature) : '' },

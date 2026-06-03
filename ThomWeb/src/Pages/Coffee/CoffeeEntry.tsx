@@ -45,6 +45,8 @@ type BrewLogDraft = {
 
 type BrewLogTextField = Exclude<keyof BrewLogDraft, 'rating'>;
 
+type FieldErrors = Partial<Record<BrewLogTextField, string>>;
+
 type SelectOption = {
   value: string;
   label: string;
@@ -117,18 +119,18 @@ const createDraftFromEntry = (
   origin: entry.origin || '',
   coffeeVarietal: entry.coffeeVarietal || '',
   processingMethod: entry.processingMethod || '',
-  daysSinceRoast: entry.daysSinceRoast,
+  daysSinceRoast: String(entry.daysSinceRoast),
   roasterId,
   brewMethod: entry.brewMethod,
   ratio: entry.ratio,
   grinder: entry.grinder,
   grindSetting: entry.grindSetting,
-  dose: entry.dose,
-  yieldAmount: entry.yieldAmount,
-  waterTemperature: entry.waterTemperature,
+  dose: String(entry.dose),
+  yieldAmount: String(entry.yieldAmount),
+  waterTemperature: String(entry.waterTemperature),
   brewTime: entry.brewTime,
   bloomTime: entry.bloomTime,
-  bloomWater: entry.bloomWater,
+  bloomWater: String(entry.bloomWater),
   pourNotes: entry.pourNotes,
   roastLevel: entry.roastLevel,
   notes: entry.notes || entry.tastingNotes,
@@ -170,7 +172,40 @@ const createRequestFromDraft = (
 ): CoffeeEntryRequest => ({
   ...draft,
   roaster: roaster.roaster,
-});
+  daysSinceRoast: draft.daysSinceRoast ? Number(draft.daysSinceRoast) : undefined,
+  dose: draft.dose ? Number(draft.dose) : undefined,
+  yieldAmount: draft.yieldAmount ? Number(draft.yieldAmount) : undefined,
+  waterTemperature: draft.waterTemperature ? Number(draft.waterTemperature) : undefined,
+  bloomWater: draft.bloomWater ? Number(draft.bloomWater) : undefined,
+} as CoffeeEntryRequest);
+
+const validateDraft = (draft: BrewLogDraft): FieldErrors => {
+  const errors: FieldErrors = {};
+
+  if (draft.grindSetting && !/^\d+(\.\d+)?$/.test(String(draft.grindSetting).trim())) {
+    errors.grindSetting = 'Enter a number';
+  }
+  if (draft.dose && !/^\d+$/.test(String(draft.dose).trim())) {
+    errors.dose = 'Enter a whole number';
+  }
+  if (draft.yieldAmount && !/^\d+$/.test(String(draft.yieldAmount).trim())) {
+    errors.yieldAmount = 'Enter a whole number';
+  }
+  if (draft.waterTemperature && !/^\d+$/.test(String(draft.waterTemperature).trim())) {
+    errors.waterTemperature = 'Enter a whole number';
+  }
+  if (draft.brewTime && !/^\d{1,2}:[0-5]\d$/.test(String(draft.brewTime).trim())) {
+    errors.brewTime = 'Enter a time (e.g. 3:20)';
+  }
+  if (draft.bloomTime && !/^\d{1,2}:[0-5]\d$/.test(String(draft.bloomTime).trim())) {
+    errors.bloomTime = 'Enter a time (e.g. 0:45)';
+  }
+  if (draft.bloomWater && !/^\d+$/.test(String(draft.bloomWater).trim())) {
+    errors.bloomWater = 'Enter a whole number';
+  }
+
+  return errors;
+};
 
 export default function CoffeeEntry() {
   const { entryId } = useParams<{ entryId?: string }>();
@@ -182,6 +217,7 @@ export default function CoffeeEntry() {
   const [roasterSearch, setRoasterSearch] = useState('');
   const [newRoaster, setNewRoaster] = useState('');
   const [formError, setFormError] = useState('');
+  const fieldErrors = useMemo(() => validateDraft(draft), [draft]);
   const [entryLoadFailed, setEntryLoadFailed] = useState(false);
   const [isEntryLoading, setIsEntryLoading] = useState(isEditing);
   const [isRoasterLoading, setIsRoasterLoading] = useState(false);
@@ -385,6 +421,10 @@ export default function CoffeeEntry() {
 
   const saveEntry = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (Object.keys(fieldErrors).length > 0) {
+      return;
+    }
 
     if (!selectedRoaster) {
       setFormError('Select or add a roaster before saving.');
@@ -669,60 +709,87 @@ export default function CoffeeEntry() {
                   </span>
                   <input
                     id="grind-setting"
+                    className={fieldErrors.grindSetting ? styles.invalid : undefined}
                     type="text"
+                    inputMode="decimal"
+                    pattern="\d+(\.\d+)?"
+                    title="Enter a number"
                     value={draft.grindSetting}
                     onChange={updateDraft('grindSetting')}
                     required
                   />
+                  {fieldErrors.grindSetting && <span className={styles.fieldError}>{fieldErrors.grindSetting}</span>}
                 </label>
 
                 {renderSelect('roast-level', 'Roast level', 'roastLevel', roastLevels)}
 
                 <label className={styles.field} htmlFor="dose">
                   Dose
-                  <input
-                    id="dose"
-                    type="text"
-                    inputMode="decimal"
-                    value={draft.dose}
-                    onChange={updateDraft('dose')}
-                    placeholder="20g"
-                  />
+                  <div className={styles.unitField}>
+                    <input
+                      id="dose"
+                      className={fieldErrors.dose ? styles.invalid : undefined}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="\d+"
+                      value={draft.dose}
+                      onChange={updateDraft('dose')}
+                      placeholder="20"
+                    />
+                    <span className={styles.unitSuffix}>g</span>
+                  </div>
+                  {fieldErrors.dose && <span className={styles.fieldError}>{fieldErrors.dose}</span>}
                 </label>
 
                 <label className={styles.field} htmlFor="yield-amount">
                   Yield
-                  <input
-                    id="yield-amount"
-                    type="text"
-                    inputMode="decimal"
-                    value={draft.yieldAmount}
-                    onChange={updateDraft('yieldAmount')}
-                    placeholder="320g"
-                  />
+                  <div className={styles.unitField}>
+                    <input
+                      id="yield-amount"
+                      className={fieldErrors.yieldAmount ? styles.invalid : undefined}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="\d+"
+                      value={draft.yieldAmount}
+                      onChange={updateDraft('yieldAmount')}
+                      placeholder="320"
+                    />
+                    <span className={styles.unitSuffix}>g</span>
+                  </div>
+                  {fieldErrors.yieldAmount && <span className={styles.fieldError}>{fieldErrors.yieldAmount}</span>}
                 </label>
 
                 <label className={styles.field} htmlFor="water-temp">
                   Water temperature
-                  <input
-                    id="water-temp"
-                    type="text"
-                    inputMode="decimal"
-                    value={draft.waterTemperature}
-                    onChange={updateDraft('waterTemperature')}
-                    placeholder="203F"
-                  />
+                  <div className={styles.unitField}>
+                    <input
+                      id="water-temp"
+                      className={fieldErrors.waterTemperature ? styles.invalid : undefined}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="\d+"
+                      value={draft.waterTemperature}
+                      onChange={updateDraft('waterTemperature')}
+                      placeholder="203"
+                    />
+                    <span className={styles.unitSuffix}>°F</span>
+                  </div>
+                  {fieldErrors.waterTemperature && <span className={styles.fieldError}>{fieldErrors.waterTemperature}</span>}
                 </label>
 
                 <label className={styles.field} htmlFor="brew-time">
                   Brew time
                   <input
                     id="brew-time"
+                    className={fieldErrors.brewTime ? styles.invalid : undefined}
                     type="text"
                     value={draft.brewTime}
                     onChange={updateDraft('brewTime')}
                     placeholder="3:20"
+                    pattern="\d{1,2}:[0-5]\d"
+                    title="Enter a time like 3:20"
                   />
+                  {fieldErrors.brewTime && <span className={styles.fieldError}>{fieldErrors.brewTime}</span>}
                 </label>
               </div>
             </section>
@@ -738,23 +805,33 @@ export default function CoffeeEntry() {
                   Bloom time
                   <input
                     id="bloom-time"
+                    className={fieldErrors.bloomTime ? styles.invalid : undefined}
                     type="text"
                     value={draft.bloomTime}
                     onChange={updateDraft('bloomTime')}
-                    placeholder="45s"
+                    placeholder="0:45"
+                    pattern="\d{1,2}:[0-5]\d"
+                    title="Enter a time like 0:45"
                   />
+                  {fieldErrors.bloomTime && <span className={styles.fieldError}>{fieldErrors.bloomTime}</span>}
                 </label>
 
                 <label className={styles.field} htmlFor="bloom-water">
                   Bloom water
-                  <input
-                    id="bloom-water"
-                    type="text"
-                    inputMode="decimal"
-                    value={draft.bloomWater}
-                    onChange={updateDraft('bloomWater')}
-                    placeholder="50g"
-                  />
+                  <div className={styles.unitField}>
+                    <input
+                      id="bloom-water"
+                      className={fieldErrors.bloomWater ? styles.invalid : undefined}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="\d+"
+                      value={draft.bloomWater}
+                      onChange={updateDraft('bloomWater')}
+                      placeholder="50"
+                    />
+                    <span className={styles.unitSuffix}>g</span>
+                  </div>
+                  {fieldErrors.bloomWater && <span className={styles.fieldError}>{fieldErrors.bloomWater}</span>}
                 </label>
               </div>
 

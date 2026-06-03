@@ -67,6 +67,38 @@
   background: rgba(180, 35, 24, 0.08);
 }
 
+.fieldError {
+  margin-top: var(--space-2xs);
+  color: #b42318;
+  font-family: var(--regular-font), sans-serif;
+  font-size: var(--small-font-size);
+  line-height: var(--line-height-tight);
+}
+
+.unitField {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.unitField input {
+  padding-right: 2rem;
+}
+
+.unitSuffix {
+  position: absolute;
+  right: var(--space-md);
+  color: var(--muted-color);
+  font-family: var(--regular-font), sans-serif;
+  font-size: var(--regular-font-size);
+  pointer-events: none;
+  transition: color var(--transition-theme);
+}
+
+.invalid {
+  border-color: #b42318 !important;
+}
+
 .publicState {
   width: min(100%, var(--reading-width));
   padding-top: var(--space-xl);

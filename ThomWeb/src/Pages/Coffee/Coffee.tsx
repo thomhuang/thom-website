@@ -141,13 +141,12 @@ export default function Coffee() {
   return (
     <main className={styles.page}>
       <section className={styles.intro} aria-labelledby="coffee-title">
-        <p className={styles.eyebrow}>Coffee</p>
         <h1 id="coffee-title">Coffee journal</h1>
       </section>
 
       {!isAuthLoading && isAdmin && (
         <div className={styles.adminActions}>
-          <Link className={styles.primaryLink} to={PAGES.CoffeeEntry}>
+          <Link className={styles.textLink} to={PAGES.CoffeeEntry}>
             New brew entry
           </Link>
         </div>
@@ -158,10 +157,7 @@ export default function Coffee() {
       )}
 
       <section className={styles.entryList} aria-labelledby="coffee-entries">
-        <div className={styles.journalHeader}>
-          <p className={styles.sectionKicker}>Journal</p>
-          <h2 id="coffee-entries">Brew entries</h2>
-        </div>
+        <h2 id="coffee-entries">Brew entries</h2>
 
         {isLoading ? (
           <p className={styles.statusText}>Loading brew entries...</p>
@@ -172,38 +168,33 @@ export default function Coffee() {
             const tastingNotes = getTastingNotes(entry);
 
             return (
-              <article className={styles.entryCard} key={entry.id}>
-                <div className={styles.entryCardHeader}>
-                  <div>
-                    <p className={styles.entryMeta}>{entry.date}</p>
-                    <h3>{entry.coffeeName}</h3>
-                    <p className={styles.entryMeta}>{entry.roaster}</p>
-                    {coffeeMetadata && (
-                      <p className={styles.entryOriginDetails}>
-                        {coffeeMetadata}
-                      </p>
-                    )}
-                  </div>
-
-                  {!isAuthLoading && isAdmin && (
-                    <div className={styles.entryActions}>
-                      <Link
-                        className={styles.secondaryLink}
-                        to={`${PAGES.CoffeeEntry}/${entry.id}`}
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        type="button"
-                        className={styles.deleteButton}
-                        onClick={() => deleteEntry(entry)}
-                        disabled={deletingEntryId === entry.id}
-                      >
-                        {deletingEntryId === entry.id ? 'Deleting' : 'Delete'}
-                      </button>
-                    </div>
-                  )}
+              <article className={styles.entry} key={entry.id}>
+                <div className={styles.entryHeader}>
+                  <h3>{entry.coffeeName}</h3>
+                  <p className={styles.entryDate}>{entry.date}</p>
                 </div>
+                <p className={styles.entryMeta}>
+                  {[entry.roaster, coffeeMetadata].filter(Boolean).join(' · ')}
+                </p>
+
+                {!isAuthLoading && isAdmin && (
+                  <div className={styles.entryActions}>
+                    <Link
+                      className={styles.textLink}
+                      to={`${PAGES.CoffeeEntry}/${entry.id}`}
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      type="button"
+                      className={styles.deleteButton}
+                      onClick={() => deleteEntry(entry)}
+                      disabled={deletingEntryId === entry.id}
+                    >
+                      {deletingEntryId === entry.id ? 'Deleting' : 'Delete'}
+                    </button>
+                  </div>
+                )}
                 <dl className={styles.entryStats}>
                   {entryStats.map((stat) => (
                     <div key={stat.label}>
@@ -232,7 +223,7 @@ export default function Coffee() {
           })
         ) : (
           <div className={styles.emptyJournal}>
-            <h3>No published brew entries yet.</h3>
+            <p>No published brew entries yet.</p>
             <p>Published entries will show here.</p>
           </div>
         )}

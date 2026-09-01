@@ -1,37 +1,26 @@
-import {NavigateFunction} from 'react-router-dom';
+import { NavigateFunction } from 'react-router-dom';
 
-export const setLightTheme = () => {
-    document.getElementsByTagName('body')[0].setAttribute('data-theme', 'light')
-}
+import { PAGES } from './constants';
 
-export const setDarkTheme = () => {
-    document.getElementsByTagName('body')[0].setAttribute('data-theme', 'dark')
-}
-
-export enum PAGES {
-    Home = '/',
-    Posts = '/posts',
-    Projects = '/projects',
-    MobileHome = '/mobile',
-    Error = '/error',
-}
-
-export const ToPage = (page : PAGES): string => {
+export default function Navigate(navigate : NavigateFunction, page : string) {
     switch (page) {
         case PAGES.Home:
-            return "/";
-        case PAGES.MobileHome:
-            return "/mobile"
-        case PAGES.Projects:
-            return "/projects"
-        case PAGES.Posts:
-            return "/posts"
-        case PAGES.Error:
+            navigate(PAGES.Home)
+            break
+        case PAGES.Coffee:
+            navigate(PAGES.Coffee)
+            break;
+        case PAGES.CoffeeEntry:
+            navigate(PAGES.CoffeeEntry)
+            break;
+        case PAGES.Hobbies:
+            navigate(PAGES.Hobbies)
+            break
+        case PAGES.Contact:
+            navigate(PAGES.Contact)
+            break
         default:
-            return "/error"
+            navigate(PAGES.Error)
+            break;
     }
 }
-
-export const NavigatePage = (navigate: NavigateFunction, page: string): void => {
-    navigate(page);
-};

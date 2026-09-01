@@ -1,88 +1,201 @@
-import React from 'react';
+import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import {
-    NavigatePage,
-    PAGES,
-    setDarkTheme,
-    setLightTheme,
-
-} from '../../Assets/Common';
-import phrases from '../../Assets/en.json';
+import { PAGES } from '../../Assets/constants';
+import { useAuth } from '../../Auth/AuthContext';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { toggleTheme } from '../../Reducers/ThemeSlice';
 import { ReactComponent as Moon } from './Assets/moon.svg';
 import HandsDown from './Assets/stick_figure_down.png';
 import HandsUp from './Assets/stick_figure_up.png';
 import { ReactComponent as Sun } from './Assets/sun.svg';
-import styles from './Header.module.css';
-import {ResizeListener} from "../../Hooks/resizeListener";
+import styles from './Headers.module.css';
 
 export default function Header() {
     const dispatch = useAppDispatch();
-    const nav = useNavigate();
     const darkMode = useAppSelector((state) => state.theme.darkMode);
-    ResizeListener();
+    const nav = useNavigate();
+    const [authUsername, setAuthUsername] = useState('');
+    const [authPassword, setAuthPassword] = useState('');
+    const {
+        authUser,
+        authError,
+        clearAuthError,
+        isAuthLoading,
+        isAuthSubmitting,
+        login,
+        logout,
+    } = useAuth();
+    const iconThemeClass = darkMode ? styles.lightIcon : '';
+    const navClass = [
+        styles.header,
+        darkMode ? styles.darkNav : styles.lightNav,
+    ].join(' ');
+    const figureClass = [styles.figure, iconThemeClass].join(' ');
 
-    const handleThemeToggle = () => {
-        dispatch(toggleTheme());
-    };
-
-    const figureStyling = [styles.figure];
-    const iconStyling = [styles.icon];
-    const navStyling = [styles.container];
-
-    if (darkMode) {
-        setDarkTheme()
-        figureStyling.push(styles.figureDark)
-        iconStyling.push(styles.iconDark)
-        navStyling.push(styles.darkNav)
-    } else {
-        setLightTheme()
-        navStyling.push(styles.lightNav)
+    function goTo(page: PAGES) {
+        nav(page);
     }
 
-    const renderThemeIcon = () => {
-        const iconClass = iconStyling.join(' ');
-        return darkMode ? (
-            <Sun className={iconClass} onClick={handleThemeToggle} />
-        ) : (
-            <Moon className={iconClass} onClick={handleThemeToggle} />
-        );
-    };
+    function setTheme() {
+        dispatch(toggleTheme());
+    }
 
-    const renderBrandIcon = () => {
-        const figure = darkMode ? HandsUp : HandsDown;
-        const figureClass = figureStyling.join(' ');
+    async function submitLogin(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        const didSignIn = await login({
+            username: authUsername,
+            password: authPassword,
+        });
+
+        if (didSignIn) {
+            setAuthPassword('');
+        }
+    }
+
+    function updateAuthUsername(username: string) {
+        clearAuthError();
+        setAuthUsername(username);
+    }
+
+    function updateAuthPassword(password: string) {
+        clearAuthError();
+        setAuthPassword(password);
+    }
+
+    function themeIcon() {
+        return (
+            <button
+                type="button"
+                className={styles.themeButton}
+                onClick={setTheme}
+                aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+                <Moon
+                    className={[
+                        styles.icon,
+                        styles.themeIcon,
+                        iconThemeClass,
+                        darkMode ? '' : styles.themeIconVisible,
+                    ].join(' ')}
+                    aria-hidden="true"
+                />
+                <Sun
+                    className={[
+                        styles.icon,
+                        styles.themeIcon,
+                        iconThemeClass,
+                        darkMode ? styles.themeIconVisible : '',
+                    ].join(' ')}
+                    aria-hidden="true"
+                />
+            </button>
+        );
+    }
+
+    function authControl() {
+        if (authUser) {
+            return (
+                <div className={styles.authStatus}>
+                    <span className={styles.authUser}>{authUser.username}</span>
+                    <button
+                        type="button"
+                        className={styles.authButton}
+                        onClick={logout}
+                        disabled={isAuthSubmitting}
+                    >
+                        Sign out
+                    </button>
+                    {authError && <p className={styles.authError}>{authError}</p>}
+                </div>
+            );
+        }
+
+        return (
+            <details className={styles.authMenu}>
+                <summary className={styles.authSummary}>Login</summary>
+                <form className={styles.authForm} onSubmit={submitLogin}>
+                    <label className={styles.authField} htmlFor="header-auth-username">
+                        Username
+                        <input
+                            id="header-auth-username"
+                            type="text"
+                            value={authUsername}
+                            onChange={(event) => updateAuthUsername(event.target.value)}
+                            autoComplete="username"
+                        />
+                    </label>
+                    <label className={styles.authField} htmlFor="header-auth-password">
+                        Password
+                        <input
+                            id="header-auth-password"
+                            type="password"
+                            value={authPassword}
+                            onChange={(event) => updateAuthPassword(event.target.value)}
+                            autoComplete="current-password"
+                        />
+                    </label>
+                    <button
+                        type="submit"
+                        className={styles.authButton}
+                        disabled={
+                            isAuthLoading ||
+                            isAuthSubmitting ||
+                            !authUsername.trim() ||
+                            !authPassword
+                        }
+                    >
+                        {isAuthSubmitting ? 'Signing in...' : 'Sign in'}
+                    </button>
+                    {authError && <p className={styles.authError}>{authError}</p>}
+                </form>
+            </details>
+        );
+    }
+
+
+    function brandIcon() {
+        let figure = darkMode
+            ? HandsUp
+            : HandsDown;
+
         return (
             <img
                 className={figureClass}
                 src={figure}
-                alt="Brand figure"
-            />
+                alt='figure man'
+                onClick={() => goTo(PAGES.Home)}
+            >
+            </img>
         );
-    };
-
-    const navClass = navStyling.join(' ');
+    }
+    
     return (
-        <header className={styles.header}>
-            <div className={navClass}>
-                <a href={PAGES.Home} className={styles.logo}>
-                {renderBrandIcon()}
-                <p className={styles.name}>{phrases.Name}</p>
-                </a>
-
-                <div className={styles.navSection}>
-                    <nav className={styles.nav}>
-                        <ul className={styles.navList}>
-                            <li className={styles.navItem}>
-                                <a className={styles.navLink} href={PAGES.Posts}>Posts</a>
-                            </li>
-                        </ul>
-                    </nav>
-                    {renderThemeIcon()}
-                </div>
+        <div className={navClass}>
+            <div className={styles.leftContainer} onClick={() => goTo(PAGES.Home)}>
+                {brandIcon()}
+                <p className={styles.name}>Thomas Huang</p>
             </div>
-        </header>
+            <div className={`${styles.middleContainer}`}>
+            </div>
+            <div className={styles.directory}>
+                <p
+                    className={styles.redirect}
+                    onClick={() => goTo(PAGES.Coffee)}
+                >
+                    Coffee
+                </p>
+                {/* <p
+                    className={styles.redirect} 
+                    onClick={() => goTo(PAGES.Home)}
+                >
+                    Hobbies
+                </p> */}
+                {authControl()}
+                {themeIcon()}
+            </div>
+        </div>
+
     );
 }

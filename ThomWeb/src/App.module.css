@@ -1,41 +1,13 @@
 .container {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: column;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 1.25rem;
     min-height: 100vh;
-    width: 100%;
-    margin: 0;
-    padding: 0 0 var(--layout-footer-height);
-    overflow-x: clip;
-    transition:
-        background-color var(--transition-theme),
-        color var(--transition-theme);
+    display: flex;
+    flex-direction: column;
 }
 
-.dark {
-    --bg-color: var(--black);
-    --color: var(--minorwhite);
-    --muted-color: var(--muted-light);
-    --accent-color: var(--accent-dark);
-    --accent-soft-color: var(--accent-soft-dark);
-    --border-color: var(--charcoal);
-    --surface-color: var(--surface-dark);
-    --surface-elevated-color: var(--surface-elevated-dark);
-
-    background-color: var(--bg-color);
-    color: var(--color);
-}
-
-.light {
-    --bg-color: var(--mainwhite);
-    --color: var(--charcoal);
-    --muted-color: var(--muted-dark);
-    --accent-color: var(--accent-light);
-    --accent-soft-color: var(--accent-soft-light);
-    --border-color: var(--minorwhite);
-    --surface-color: var(--surface-light);
-    --surface-elevated-color: var(--surface-elevated-light);
-
-    background-color: var(--bg-color);
-    color: var(--color);
+.main {
+    margin: 2.5rem 0 3rem;
+    flex: 1;
 }

@@ -6,158 +6,57 @@
 
 :root {
   color-scheme: light;
-  --black: #1a1a1d;
-  --charcoal: #222225;
-  --minorwhite: #f6f6f6c1;
-  --mainwhite: #fefefe;
-  --muted-dark: #6f7177;
-  --muted-light: #c9cbd1;
-  --accent-light: #2d6f73;
-  --accent-dark: #8bcfd0;
-  --accent-soft-light: #e8f3f3;
-  --accent-soft-dark: #1f383a;
-  --surface-dark: #2a2a2e;
-  --surface-light: #ffffff;
-  --surface-elevated-dark: #303036;
-  --surface-elevated-light: #f7f7f4;
-  --shadow-soft: 0 1rem 2.5rem rgba(26, 26, 29, 0.08);
-  --light-font: "NotoSans-Light", sans-serif;
-  --regular-font: "NotoSans-Regular", sans-serif;
-  --medium-font: "NotoSans-Medium", sans-serif;
-  --semibold-font: "NotoSans-SemiBold", sans-serif;
-  --small-font-size: 0.75rem;
-  --regular-font-size: 1rem;
-  --medium-font-size: 1.25rem;
-  --large-font-size: 1.5rem;
-  --larger-font-size: 2rem;
-  --content-width: 72rem;
-  --reading-width: 60ch;
-  --mobile-reading-width: 50ch;
-  --section-header-width: 42rem;
-  --narrow-page-width: 48rem;
-  --coffee-page-width: 60rem;
-  --gallery-page-width: 64rem;
-  --gallery-card-min-width: 16rem;
-  --space-2xs: 0.25rem;
-  --space-xs: 0.5rem;
-  --space-sm: 0.75rem;
-  --space-md: 1rem;
-  --space-lg: 1.25rem;
-  --space-xl: 1.5rem;
-  --space-2xl: 2rem;
-  --space-3xl: 3rem;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-pill: 999rem;
-  --layout-header-height: 4.5rem;
-  --layout-footer-height: 4rem;
-  --logo-size: 2.5rem;
-  --icon-size: 1.25rem;
-  --textarea-min-height: 8rem;
-  --border-thin: 0.0625rem solid var(--border-color);
-  --border-regular: 0.125rem solid var(--border-color);
-  --border-strong: 0.125rem solid var(--color);
-  --focus-outline: 0.125rem solid var(--color);
-  --focus-outline-offset: 0.125rem;
-  --underline-offset: 0.125rem;
-  --nav-underline-thickness: 0.125rem;
-  --eyebrow-letter-spacing: 0.12rem;
-  --line-height-tight: 1.2;
-  --line-height-heading: 1.3;
-  --line-height-title: 1.4;
-  --line-height-copy: 1.6;
-  --line-height-relaxed: 1.7;
-  --line-height-loose: 1.8;
-  --opacity-hover: 0.85;
-  --opacity-action-hover: 0.9;
-  --opacity-disabled: 0.6;
-  --transition-fast: 0.15s ease;
-  --transition-regular: 0.2s ease;
-  --transition-theme: 0.35s ease;
-  --bg-color: var(--mainwhite);
-  --color: var(--charcoal);
-  --muted-color: var(--muted-dark);
-  --accent-color: var(--accent-light);
-  --accent-soft-color: var(--accent-soft-light);
-  --border-color: var(--minorwhite);
-  --surface-color: var(--surface-light);
-  --surface-elevated-color: var(--surface-elevated-light);
+  --bg: #fefefe;
+  --fg: #1a1a1d;
+  --muted: #6b6b6b;
+  --border: #e4e4e4;
+  --max-width: 42rem;
 }
 
 @font-face {
-  font-family: "NotoSans-Light";
+  font-family: "NotoSans";
   src: url("./Fonts/NotoSans-Light.ttf") format("truetype");
   font-weight: 300;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "NotoSans-Regular";
+  font-family: "NotoSans";
   src: url("./Fonts/NotoSans-Regular.ttf") format("truetype");
   font-weight: 400;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "NotoSans-Medium";
+  font-family: "NotoSans";
   src: url("./Fonts/NotoSans-Medium.ttf") format("truetype");
   font-weight: 500;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "NotoSans-SemiBold";
+  font-family: "NotoSans";
   src: url("./Fonts/NotoSans-SemiBold.ttf") format("truetype");
   font-weight: 600;
   font-display: swap;
 }
 
-body {
-  margin: 0;
-  font-family: var(--regular-font), -apple-system, BlinkMacSystemFont,
-    "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
-    "Droid Sans", "Helvetica Neue", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--bg-color);
-  color: var(--color);
-  line-height: 1.5;
-  transition: background-color var(--transition-theme),
-    color var(--transition-theme);
-}
-
-::selection {
-  background-color: var(--accent-soft-color);
-  color: var(--color);
-}
-
-#root {
-  min-height: 100vh;
-}
-
-body[data-theme="light"] {
-  color-scheme: light;
-  --bg-color: var(--mainwhite);
-  --color: var(--charcoal);
-  --muted-color: var(--muted-dark);
-  --accent-color: var(--accent-light);
-  --accent-soft-color: var(--accent-soft-light);
-  --border-color: var(--minorwhite);
-  --surface-color: var(--surface-light);
-  --surface-elevated-color: var(--surface-elevated-light);
-}
-
 body[data-theme="dark"] {
   color-scheme: dark;
-  --bg-color: var(--black);
-  --color: var(--minorwhite);
-  --muted-color: var(--muted-light);
-  --accent-color: var(--accent-dark);
-  --accent-soft-color: var(--accent-soft-dark);
-  --border-color: var(--charcoal);
-  --surface-color: var(--surface-dark);
-  --surface-elevated-color: var(--surface-elevated-dark);
+  --bg: #161616;
+  --fg: #eaeaea;
+  --muted: #9a9a9a;
+  --border: #2e2e2e;
+}
+
+body {
+  margin: 0;
+  font-family: "NotoSans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica,
+    Arial, sans-serif;
+  font-size: 100%;
+  line-height: 1.6;
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
 code {
@@ -179,19 +78,7 @@ button {
   color: inherit;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-*:focus {
-  outline: none;
-}
-
 *:focus-visible {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
 }

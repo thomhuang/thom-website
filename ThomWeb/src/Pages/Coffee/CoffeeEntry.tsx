@@ -492,7 +492,6 @@ export default function CoffeeEntry() {
   return (
     <main className={styles.page}>
       <section className={styles.intro} aria-labelledby="coffee-entry-title">
-        <p className={styles.eyebrow}>Coffee</p>
         <h1 id="coffee-entry-title">
           {isEditing ? 'Edit brew entry' : 'New brew entry'}
         </h1>
@@ -505,7 +504,6 @@ export default function CoffeeEntry() {
 
       {!isAuthLoading && !isAdmin && (
         <section className={styles.publicState} aria-labelledby="coffee-entry-admin">
-          <p className={styles.sectionKicker}>Admin</p>
           <h2 id="coffee-entry-admin">Sign in to manage brew entries.</h2>
           <p>The public coffee journal is view-only.</p>
         </section>
@@ -523,7 +521,7 @@ export default function CoffeeEntry() {
             <aside className={styles.errorNotice}>{formError}</aside>
           )}
           <div className={styles.actions}>
-            <Link className={styles.secondaryLink} to={PAGES.Coffee}>
+            <Link className={styles.textLink} to={PAGES.Coffee}>
               Back to coffee journal
             </Link>
           </div>
@@ -538,10 +536,7 @@ export default function CoffeeEntry() {
 
           <form className={styles.form} onSubmit={saveEntry}>
             <section className={styles.section} aria-labelledby="coffee-details">
-              <div className={styles.sectionHeader}>
-                <p className={styles.sectionKicker}>Entry</p>
-                <h2 id="coffee-details">Coffee details</h2>
-              </div>
+              <h2 id="coffee-details">Coffee details</h2>
 
               <div className={styles.fieldGrid}>
                 <label className={styles.field} htmlFor="brew-date">
@@ -694,10 +689,7 @@ export default function CoffeeEntry() {
             </section>
 
             <section className={styles.section} aria-labelledby="brew-setup">
-              <div className={styles.sectionHeader}>
-                <p className={styles.sectionKicker}>Setup</p>
-                <h2 id="brew-setup">Brew setup</h2>
-              </div>
+              <h2 id="brew-setup">Brew setup</h2>
 
               <div className={styles.fieldGrid}>
                 {renderSelect('ratio', 'Ratio', 'ratio', ratios, true)}
@@ -725,56 +717,47 @@ export default function CoffeeEntry() {
                 {renderSelect('roast-level', 'Roast level', 'roastLevel', roastLevels)}
 
                 <label className={styles.field} htmlFor="dose">
-                  Dose
-                  <div className={styles.unitField}>
-                    <input
-                      id="dose"
-                      className={fieldErrors.dose ? styles.invalid : undefined}
-                      type="text"
-                      inputMode="numeric"
-                      pattern="\d+"
-                      value={draft.dose}
-                      onChange={updateDraft('dose')}
-                      placeholder="20"
-                    />
-                    <span className={styles.unitSuffix}>g</span>
-                  </div>
+                  Dose (g)
+                  <input
+                    id="dose"
+                    className={fieldErrors.dose ? styles.invalid : undefined}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d+"
+                    value={draft.dose}
+                    onChange={updateDraft('dose')}
+                    placeholder="20"
+                  />
                   {fieldErrors.dose && <span className={styles.fieldError}>{fieldErrors.dose}</span>}
                 </label>
 
                 <label className={styles.field} htmlFor="yield-amount">
-                  Yield
-                  <div className={styles.unitField}>
-                    <input
-                      id="yield-amount"
-                      className={fieldErrors.yieldAmount ? styles.invalid : undefined}
-                      type="text"
-                      inputMode="numeric"
-                      pattern="\d+"
-                      value={draft.yieldAmount}
-                      onChange={updateDraft('yieldAmount')}
-                      placeholder="320"
-                    />
-                    <span className={styles.unitSuffix}>g</span>
-                  </div>
+                  Yield (g)
+                  <input
+                    id="yield-amount"
+                    className={fieldErrors.yieldAmount ? styles.invalid : undefined}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d+"
+                    value={draft.yieldAmount}
+                    onChange={updateDraft('yieldAmount')}
+                    placeholder="320"
+                  />
                   {fieldErrors.yieldAmount && <span className={styles.fieldError}>{fieldErrors.yieldAmount}</span>}
                 </label>
 
                 <label className={styles.field} htmlFor="water-temp">
-                  Water temperature
-                  <div className={styles.unitField}>
-                    <input
-                      id="water-temp"
-                      className={fieldErrors.waterTemperature ? styles.invalid : undefined}
-                      type="text"
-                      inputMode="numeric"
-                      pattern="\d+"
-                      value={draft.waterTemperature}
-                      onChange={updateDraft('waterTemperature')}
-                      placeholder="203"
-                    />
-                    <span className={styles.unitSuffix}>°F</span>
-                  </div>
+                  Water temperature (°F)
+                  <input
+                    id="water-temp"
+                    className={fieldErrors.waterTemperature ? styles.invalid : undefined}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d+"
+                    value={draft.waterTemperature}
+                    onChange={updateDraft('waterTemperature')}
+                    placeholder="203"
+                  />
                   {fieldErrors.waterTemperature && <span className={styles.fieldError}>{fieldErrors.waterTemperature}</span>}
                 </label>
 
@@ -796,10 +779,7 @@ export default function CoffeeEntry() {
             </section>
 
             <section className={styles.section} aria-labelledby="brew-flow">
-              <div className={styles.sectionHeader}>
-                <p className={styles.sectionKicker}>Process</p>
-                <h2 id="brew-flow">Bloom and pours</h2>
-              </div>
+              <h2 id="brew-flow">Bloom and pours</h2>
 
               <div className={styles.fieldGrid}>
                 <label className={styles.field} htmlFor="bloom-time">
@@ -818,20 +798,17 @@ export default function CoffeeEntry() {
                 </label>
 
                 <label className={styles.field} htmlFor="bloom-water">
-                  Bloom water
-                  <div className={styles.unitField}>
-                    <input
-                      id="bloom-water"
-                      className={fieldErrors.bloomWater ? styles.invalid : undefined}
-                      type="text"
-                      inputMode="numeric"
-                      pattern="\d+"
-                      value={draft.bloomWater}
-                      onChange={updateDraft('bloomWater')}
-                      placeholder="50"
-                    />
-                    <span className={styles.unitSuffix}>g</span>
-                  </div>
+                  Bloom water (g)
+                  <input
+                    id="bloom-water"
+                    className={fieldErrors.bloomWater ? styles.invalid : undefined}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d+"
+                    value={draft.bloomWater}
+                    onChange={updateDraft('bloomWater')}
+                    placeholder="50"
+                  />
                   {fieldErrors.bloomWater && <span className={styles.fieldError}>{fieldErrors.bloomWater}</span>}
                 </label>
               </div>
@@ -848,10 +825,7 @@ export default function CoffeeEntry() {
             </section>
 
             <section className={styles.section} aria-labelledby="tasting-notes">
-              <div className={styles.sectionHeader}>
-                <p className={styles.sectionKicker}>Cup</p>
-                <h2 id="tasting-notes">Tasting notes</h2>
-              </div>
+              <h2 id="tasting-notes">Tasting notes</h2>
 
               <label className={styles.field} htmlFor="notes">
                 <span className={styles.labelRow}>
@@ -897,7 +871,7 @@ export default function CoffeeEntry() {
             </section>
 
             <div className={styles.actions}>
-              <Link className={styles.secondaryLink} to={PAGES.Coffee}>
+              <Link className={styles.textLink} to={PAGES.Coffee}>
                 Cancel
               </Link>
               <button

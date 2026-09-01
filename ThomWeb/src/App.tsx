@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import styles from './App.module.css';
 import { AuthProvider } from './Auth/AuthContext';
+import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
 import { useAppSelector } from './hooks';
 import Coffee from './Pages/Coffee/Coffee';
@@ -32,8 +33,10 @@ const App = () => {
             <Route path ='/coffee/entry' Component={CoffeeEntry}/>
             <Route path ='/coffee/entry/:entryId' Component={CoffeeEntry}/>
             <Route path='/error' Component={ErrorPage} />
+            <Route path='*' Component={ErrorPage} />
           </Routes>
         </AuthProvider>
+        <Footer/>
       </div>
       </BrowserRouter>
   );

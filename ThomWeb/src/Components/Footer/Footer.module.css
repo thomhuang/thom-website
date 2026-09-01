@@ -1,7 +1,45 @@
 .footer {
-    display: grid;
-    grid-template-columns: 30% 1fr 30%;
-    height: 4.5rem;
-    position: sticky;
-    padding: 0 4rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    min-height: var(--layout-footer-height);
+    display: flex;
+    align-items: center;
+    border-top: var(--border-regular);
+    background-color: color-mix(in srgb, var(--bg-color) 88%, transparent);
+    backdrop-filter: blur(0.75rem);
+    color: var(--color);
+    transition:
+        background-color var(--transition-theme),
+        border-color var(--transition-theme),
+        color var(--transition-theme);
+}
+
+.inner {
+    width: 100%;
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: 0 clamp(var(--space-md), 5vw, var(--space-3xl));
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--small-font-size);
+}
+
+.link {
+    color: var(--muted-color);
+    text-decoration: none;
+    transition: color var(--transition-regular);
+}
+
+.link:hover,
+.link:focus-visible {
+    color: var(--color);
+}
+
+.sep {
+    color: var(--muted-color);
+    user-select: none;
 }

@@ -16,6 +16,11 @@ type EntryStat = {
   value: string;
 };
 
+type EntryStatGroup = {
+  title: string;
+  stats: EntryStat[];
+};
+
 const formatCoffeeMetadata = (entry: CoffeeEntrySummary) =>
   [entry.origin, entry.coffeeVarietal, entry.processingMethod]
     .filter(Boolean)
@@ -26,30 +31,58 @@ const formatDaysSinceRoast = (daysSinceRoast?: number) => {
     return '';
   }
 
-  return `${daysSinceRoast} day${daysSinceRoast === 1 ? '' : 's'} off roast`;
+  return `${daysSinceRoast} day${daysSinceRoast === 1 ? '' : 's'}`;
 };
+
+const formatGrams = (value?: number) =>
+  value != null ? `${value} g` : '';
+
+const formatTemperature = (value?: number) =>
+  value != null ? `${value} °C` : '';
 
 const formatBloom = (entry: CoffeeEntrySummary) =>
   [
     entry.bloomTime,
-    entry.bloomWater != null ? String(entry.bloomWater) : '',
+    formatGrams(entry.bloomWater),
   ].filter(Boolean).join(' / ');
 
-const getEntryStats = (entry: CoffeeEntrySummary): EntryStat[] =>
+const getEntryStatGroups = (entry: CoffeeEntrySummary): EntryStatGroup[] =>
   [
-    { label: 'Method', value: entry.brewMethod },
-    { label: 'Ratio', value: entry.ratio },
-    { label: 'Rating', value: `${entry.rating}/5` },
-    { label: 'Grinder', value: entry.grinder || '' },
-    { label: 'Grind', value: entry.grindSetting != null ? String(entry.grindSetting) : '' },
-    { label: 'Dose', value: entry.dose != null ? String(entry.dose) : '' },
-    { label: 'Yield', value: entry.yieldAmount != null ? String(entry.yieldAmount) : '' },
-    { label: 'Water', value: entry.waterTemperature != null ? String(entry.waterTemperature) : '' },
-    { label: 'Time', value: entry.brewTime || '' },
-    { label: 'Bloom', value: formatBloom(entry) },
-    { label: 'Roast', value: entry.roastLevel || '' },
-    { label: 'Rest', value: formatDaysSinceRoast(entry.daysSinceRoast) },
-  ].filter((stat) => Boolean(stat.value));
+    {
+      title: 'Brew',
+      stats: [
+        { label: 'Method', value: entry.brewMethod },
+        { label: 'Ratio', value: entry.ratio },
+        { label: 'Dose', value: formatGrams(entry.dose) },
+        { label: 'Yield', value: formatGrams(entry.yieldAmount) },
+        { label: 'Water', value: formatTemperature(entry.waterTemperature) },
+        { label: 'Time', value: entry.brewTime || '' },
+        { label: 'Bloom', value: formatBloom(entry) },
+      ],
+    },
+    {
+      title: 'Setup',
+      stats: [
+        { label: 'Grinder', value: entry.grinder || '' },
+        { label: 'Grind', value: entry.grindSetting != null ? String(entry.grindSetting) : '' },
+      ],
+    },
+    {
+      title: 'Bean',
+      stats: [
+        { label: 'Roast', value: entry.roastLevel || '' },
+        { label: 'Rest', value: formatDaysSinceRoast(entry.daysSinceRoast) },
+      ],
+    },
+  ]
+    .map((group) => ({
+      ...group,
+      stats: group.stats.filter((stat) => Boolean(stat.value)),
+    }))
+    .filter((group) => group.stats.length > 0);
+
+const formatRatingStars = (rating: number) =>
+  '★'.repeat(rating) + '☆'.repeat(Math.max(0, 5 - rating));
 
 const getTastingNotes = (entry: CoffeeEntrySummary) =>
   entry.tastingNotes || entry.notes || '';
@@ -162,65 +195,87 @@ export default function Coffee() {
         {isLoading ? (
           <p className={styles.statusText}>Loading brew entries...</p>
         ) : brewLogs.length > 0 ? (
-          brewLogs.map((entry) => {
-            const coffeeMetadata = formatCoffeeMetadata(entry);
-            const entryStats = getEntryStats(entry);
-            const tastingNotes = getTastingNotes(entry);
+          <div className={styles.entryGrid}>
+            {brewLogs.map((entry) => {
+              const coffeeMetadata = formatCoffeeMetadata(entry);
+              const statGroups = getEntryStatGroups(entry);
+              const tastingNotes = getTastingNotes(entry);
 
-            return (
-              <article className={styles.entry} key={entry.id}>
-                <div className={styles.entryHeader}>
-                  <h3>{entry.coffeeName}</h3>
-                  <p className={styles.entryDate}>{entry.date}</p>
-                </div>
-                <p className={styles.entryMeta}>
-                  {[entry.roaster, coffeeMetadata].filter(Boolean).join(' · ')}
-                </p>
-
-                {!isAuthLoading && isAdmin && (
-                  <div className={styles.entryActions}>
-                    <Link
-                      className={styles.textLink}
-                      to={`${PAGES.CoffeeEntry}/${entry.id}`}
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      type="button"
-                      className={styles.deleteButton}
-                      onClick={() => deleteEntry(entry)}
-                      disabled={deletingEntryId === entry.id}
-                    >
-                      {deletingEntryId === entry.id ? 'Deleting' : 'Delete'}
-                    </button>
-                  </div>
-                )}
-                <dl className={styles.entryStats}>
-                  {entryStats.map((stat) => (
-                    <div key={stat.label}>
-                      <dt>{stat.label}</dt>
-                      <dd>{stat.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-                {(tastingNotes || entry.pourNotes) && (
-                  <div className={styles.entryText}>
-                    {tastingNotes && (
-                      <p className={styles.entryNotes}>{tastingNotes}</p>
-                    )}
-                    {entry.pourNotes && (
-                      <p className={styles.entryNotes}>
-                        <span className={styles.entryNoteLabel}>
-                          Pour notes
-                        </span>
-                        {entry.pourNotes}
+              return (
+                <article className={styles.card} key={entry.id}>
+                  <details className={styles.cardDetails}>
+                    <summary className={styles.cardSummary}>
+                      <h3>{entry.coffeeName}</h3>
+                      <span className={styles.entryDate}>{entry.date}</span>
+                    </summary>
+                    {coffeeMetadata && (
+                      <p className={styles.entryMeta}>
+                        {[entry.roaster, coffeeMetadata].filter(Boolean).join(' · ')}
                       </p>
                     )}
-                  </div>
-                )}
-              </article>
-            );
-          })
+                    <p
+                      className={styles.ratingRow}
+                      aria-label={`Rated ${entry.rating} out of 5`}
+                    >
+                      <span className={styles.stars} aria-hidden="true">
+                        {formatRatingStars(entry.rating)}
+                      </span>
+                      <span className={styles.ratingValue}>{entry.rating}/5</span>
+                    </p>
+
+                    {!isAuthLoading && isAdmin && (
+                      <div className={styles.entryActions}>
+                        <Link
+                          className={styles.textLink}
+                          to={`${PAGES.CoffeeEntry}/${entry.id}`}
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          type="button"
+                          className={styles.deleteButton}
+                          onClick={() => deleteEntry(entry)}
+                          disabled={deletingEntryId === entry.id}
+                        >
+                          {deletingEntryId === entry.id ? 'Deleting' : 'Delete'}
+                        </button>
+                      </div>
+                    )}
+
+                    {statGroups.map((group) => (
+                      <div className={styles.statGroup} key={group.title}>
+                        <h4 className={styles.statGroupTitle}>{group.title}</h4>
+                        <dl className={styles.statList}>
+                          {group.stats.map((stat) => (
+                            <div className={styles.statRow} key={stat.label}>
+                              <dt>{stat.label}</dt>
+                              <dd>{stat.value}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </div>
+                    ))}
+
+                    {(tastingNotes || entry.pourNotes) && (
+                      <div className={styles.entryText}>
+                        {tastingNotes && (
+                          <p className={styles.entryNotes}>{tastingNotes}</p>
+                        )}
+                        {entry.pourNotes && (
+                          <p className={styles.entryNotes}>
+                            <span className={styles.entryNoteLabel}>
+                              Pour notes
+                            </span>
+                            {entry.pourNotes}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </details>
+                </article>
+              );
+            })}
+          </div>
         ) : (
           <div className={styles.emptyJournal}>
             <p>No published brew entries yet.</p>

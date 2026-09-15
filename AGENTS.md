@@ -62,23 +62,28 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Structure & Module Organization
 
-The React app lives in `ThomWeb/`; run project commands from that directory. Source code is under `ThomWeb/src/`. Routes are defined in `src/App.tsx`, entry wiring in `src/index.tsx` and `src/store.tsx`, pages in `src/Pages/`, reusable UI in `src/Components/`, auth context in `src/Auth/`, API clients in `src/api/`, Redux state in `src/Reducers/`, and shared copy/constants in `src/Assets/`. Global theme tokens, font-face declarations, and base styles live in `src/index.css`; font files live in `src/Fonts/`; component-local styles use CSS Modules such as `App.module.css`. Static public assets, including post images and documents, belong in `ThomWeb/public/`.
+The React app lives in `ThomWeb/`; run app commands from that directory. Source code is under `ThomWeb/src/`. Routes are defined in `src/App.tsx`, entry wiring in `src/index.tsx`, shared hooks in `src/hooks.tsx`, pages in `src/Pages/`, reusable UI in `src/Components/`, auth context in `src/Auth/`, API clients in `src/api/`, and shared copy/constants in `src/Assets/`. Global theme tokens, font-face declarations, and base styles live in `src/index.css`; font files live in `src/Fonts/`; component-local styles use CSS Modules such as `App.module.css`. Static public assets such as documents belong in `ThomWeb/public/`. Deployment lives at the repo root: `wrangler.jsonc`, `worker/index.js`, and `package.json` serve `ThomWeb/build` as static assets and proxy `/api/*` to the `thom-server` Worker. See `CLOUDFLARE.md`.
 
 ## Build, Test, and Development Commands
 
-Run commands from `ThomWeb/`:
+Run app commands from `ThomWeb/`:
 
-- `npm start` runs the local CRA dev server with `.env.local`.
+- `npm start` runs the local CRA dev server with `.env.local` (API at `REACT_APP_API_URL`).
 - `npm run start:production` runs locally with `.env.prd`.
-- `npm run build` creates a production build using the default environment.
+- `npm run build` creates a production build using `.env.production` (`REACT_APP_API_URL=/api`).
 - `npm run build:local` and `npm run build:production` build with the matching env file.
 - `npm run lint` runs ESLint over `src/**/*.{ts,tsx}`.
 - `npm run typecheck` runs `tsc --noEmit`.
 - `npm test` starts the CRA/Jest test runner.
 
+Run deploy commands from the repo root:
+
+- `npm run build` builds `ThomWeb/` into `ThomWeb/build`.
+- `npx wrangler deploy` deploys the Worker and its static assets. See `CLOUDFLARE.md`.
+
 ## Coding Style & Naming Conventions
 
-Use TypeScript and functional React components. Avoid `any`; type component props, API responses, and environment boundaries explicitly. Keep page-specific loading, form, and error state local; use Redux only for shared UI state. Use `src/Auth/` for shared authentication state. Match existing directory casing (`Auth`, `Components`, `Pages`, `Reducers`, `Assets`) and prefer `.ts` for non-JSX files and `.tsx` for JSX. Use CSS Modules for local component styling and tokens from `src/index.css` for colors, spacing, typography, transitions, and theme-aware values.
+Use TypeScript and functional React components. Avoid `any`; type component props, API responses, and environment boundaries explicitly. Keep page-specific loading, form, and error state local; use `src/Auth/` for shared authentication state and `src/hooks.tsx` for shared hooks. Match existing directory casing (`api`, `Assets`, `Auth`, `Components`, `Fonts`, `Pages`) and prefer `.ts` for non-JSX files and `.tsx` for JSX. Use CSS Modules for local component styling and tokens from `src/index.css` for colors, spacing, typography, transitions, and theme-aware values.
 
 ## Testing Guidelines
 
@@ -90,4 +95,4 @@ Recent commits are short and descriptive, for example `homepage/header cleanup +
 
 ## Security & Configuration Tips
 
-Keep fetch and service-access logic in `src/api/`; hidden UI is not security. Current public env variables are `REACT_APP_API_URL` and `REACT_APP_MODE`. Update `ThomWeb/.env.example` and `src/react-app-env.d.ts` when adding `REACT_APP_*` variables. Do not commit secrets or production-only credentials.
+Keep fetch and service-access logic in `src/api/`; hidden UI is not security. The only public build-time variable is `REACT_APP_API_URL`; production builds set it to `/api`, which the Worker proxies to `thom-server` on the same origin so auth cookies stay first-party. Update `ThomWeb/.env.example` and `src/react-app-env.d.ts` when adding `REACT_APP_*` variables. `REACT_APP_*` values are embedded in the bundle and must never contain secrets.

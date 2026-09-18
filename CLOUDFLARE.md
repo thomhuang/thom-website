@@ -25,6 +25,18 @@ and talks to `http://localhost:4000` directly.
 The test Worker has no `routes`, so it stays on its `workers.dev` hostname, and
 binds `thom-server-test`. Deploy the matching server Worker first.
 
+## Domains and listing images
+
+The site is served from `www.thomhuang.com`. The apex `thomhuang.com` has a
+proxied placeholder record and a zone Redirect Rule that 301s it to
+`https://www.thomhuang.com` (path and query preserved).
+
+Listing images are served from `https://img.thomhuang.com`, the R2 custom domain
+for the `listing-images` bucket. The server composes image URLs from its
+`R2_PUBLIC_BASE_URL` var at read time, so changing that host updates every
+listing without a data migration. The website CSP (`ThomWeb/public/_headers`)
+must keep that host in `img-src`.
+
 ## Prerequisites
 
 - Node.js 22+ (`wrangler` requires it).

@@ -132,8 +132,11 @@ orders page are committed (`main` == `origin/main` == `b880460`) and verified
 - **Two environments, one repo.** Production is `wrangler.jsonc` →
   `thom-website` (bound to `thom-server`); test is `wrangler.test.jsonc` →
   `thom-website-test` (bound to `thom-server-test`). See `CLOUDFLARE.md`.
-- **Uploads require a CSP `connect-src` entry** for the R2 S3 host in
-  `ThomWeb/public/_headers`. If the R2 account changes, update it or uploads
-  fail in the browser before leaving the page.
+- **CSP must allow the image and upload hosts.** Listing images are served from
+  `https://img.thomhuang.com` (the R2 custom domain for `listing-images`), so it
+  must stay in `img-src` in `ThomWeb/public/_headers`; `img-src` also keeps
+  `https://*.r2.dev`. Uploads PUT to the R2 S3 host, so that origin must stay in
+  `connect-src`. If the R2 account or public domain changes, update both or
+  images/uploads break in the browser.
 - See the `thom-server` `AGENTS.md` for server-side deploy state, secrets, and
   the Windows Smart App Control test workaround.

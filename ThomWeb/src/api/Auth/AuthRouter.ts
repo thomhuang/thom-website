@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_ROUTE = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from '../config';
 
 export interface AuthUser {
   authenticated: boolean;
@@ -15,7 +15,7 @@ export interface LoginRequest {
 export async function LoginAsync(request: LoginRequest): Promise<AuthUser> {
   const response = await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/auth/login`,
+    url: `${API_BASE_URL}/auth/login`,
     data: request,
     withCredentials: true,
   });
@@ -26,7 +26,7 @@ export async function LoginAsync(request: LoginRequest): Promise<AuthUser> {
 export async function LogoutAsync(): Promise<void> {
   await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/auth/logout`,
+    url: `${API_BASE_URL}/auth/logout`,
     withCredentials: true,
   });
 }
@@ -34,7 +34,7 @@ export async function LogoutAsync(): Promise<void> {
 export async function GetCurrentUserAsync(): Promise<AuthUser> {
   const response = await axios({
     method: 'GET',
-    url: `${BASE_ROUTE}/auth/me`,
+    url: `${API_BASE_URL}/auth/me`,
     withCredentials: true,
   });
 

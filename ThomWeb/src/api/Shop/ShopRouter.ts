@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_ROUTE = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from '../config';
 
 export interface ShopImage {
   id: string;
@@ -102,7 +102,7 @@ export async function GetShopItemsAsync(
   const response = await axios({
     method: 'GET',
     signal,
-    url: `${BASE_ROUTE}/shop/items`,
+    url: `${API_BASE_URL}/shop/items`,
     withCredentials: true,
   });
 
@@ -116,7 +116,7 @@ export async function GetShopItemByIdAsync(
   const response = await axios({
     method: 'GET',
     signal,
-    url: `${BASE_ROUTE}/shop/items/${id}`,
+    url: `${API_BASE_URL}/shop/items/${id}`,
     withCredentials: true,
   });
 
@@ -128,7 +128,7 @@ export async function CreateShopItemAsync(
 ): Promise<ShopItem> {
   const response = await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/shop/items`,
+    url: `${API_BASE_URL}/shop/items`,
     data: request,
     withCredentials: true,
   });
@@ -142,7 +142,7 @@ export async function UpdateShopItemAsync(
 ): Promise<ShopItem> {
   const response = await axios({
     method: 'PATCH',
-    url: `${BASE_ROUTE}/shop/items/${id}`,
+    url: `${API_BASE_URL}/shop/items/${id}`,
     data: request,
     withCredentials: true,
   });
@@ -153,7 +153,7 @@ export async function UpdateShopItemAsync(
 export async function DeleteShopItemAsync(id: string): Promise<void> {
   await axios({
     method: 'DELETE',
-    url: `${BASE_ROUTE}/shop/items/${id}`,
+    url: `${API_BASE_URL}/shop/items/${id}`,
     withCredentials: true,
   });
 }
@@ -164,7 +164,7 @@ export async function GetShopBrandsAsync(
   const response = await axios({
     method: 'GET',
     signal,
-    url: `${BASE_ROUTE}/shop/brands`,
+    url: `${API_BASE_URL}/shop/brands`,
   });
 
   return response.data;
@@ -175,7 +175,7 @@ export async function CreateShopBrandAsync(
 ): Promise<ShopBrand> {
   const response = await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/shop/brands`,
+    url: `${API_BASE_URL}/shop/brands`,
     data: request,
     withCredentials: true,
   });
@@ -189,7 +189,7 @@ export async function CreateShopImageUploadAsync(
 ): Promise<ShopImageUploadTicket> {
   const response = await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/shop/items/${itemId}/images/presign`,
+    url: `${API_BASE_URL}/shop/items/${itemId}/images/presign`,
     data: { contentType },
     withCredentials: true,
   });
@@ -203,7 +203,7 @@ export async function CreateShopImageAsync(
 ): Promise<ShopImage> {
   const response = await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/shop/items/${itemId}/images`,
+    url: `${API_BASE_URL}/shop/items/${itemId}/images`,
     data: request,
     withCredentials: true,
   });
@@ -217,7 +217,7 @@ export async function DeleteShopImageAsync(
 ): Promise<void> {
   await axios({
     method: 'DELETE',
-    url: `${BASE_ROUTE}/shop/items/${itemId}/images/${imageId}`,
+    url: `${API_BASE_URL}/shop/items/${itemId}/images/${imageId}`,
     withCredentials: true,
   });
 }
@@ -228,7 +228,7 @@ export async function StartShopCheckoutAsync(
 ): Promise<ShopCheckoutSession> {
   const response = await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/shop/checkout`,
+    url: `${API_BASE_URL}/shop/checkout`,
     data: { itemId, quantity },
     withCredentials: true,
   });

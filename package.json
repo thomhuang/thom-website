@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "cd ThomWeb && npm ci && npm run build",
+    "build": "cd ThomWeb && npm ci --include=dev && npm run build",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "test": "node --test worker/index.test.js"

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_ROUTE = process.env.REACT_APP_API_URL;
+import { API_BASE_URL } from '../config';
 
 export interface CoffeeEntrySummary {
   id: string;
@@ -73,7 +73,7 @@ export async function GetCoffeeEntriesAsync(
   const response = await axios({
     method: 'GET',
     signal,
-    url: `${BASE_ROUTE}/coffee`,
+    url: `${API_BASE_URL}/coffee`,
   });
 
   return response.data;
@@ -85,7 +85,7 @@ export async function GetCoffeeRoastersAsync(
   const response = await axios({
     method: 'GET',
     signal,
-    url: `${BASE_ROUTE}/coffee/roasters`,
+    url: `${API_BASE_URL}/coffee/roasters`,
   });
 
   return response.data;
@@ -96,7 +96,7 @@ export async function CreateCoffeeRoasterAsync(
 ): Promise<CoffeeRoaster> {
   const response = await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/coffee/roasters`,
+    url: `${API_BASE_URL}/coffee/roasters`,
     data: request,
     withCredentials: true,
   });
@@ -110,7 +110,7 @@ export async function GetCoffeeGrindersAsync(
   const response = await axios({
     method: 'GET',
     signal,
-    url: `${BASE_ROUTE}/coffee/grinders`,
+    url: `${API_BASE_URL}/coffee/grinders`,
   });
 
   return response.data;
@@ -121,7 +121,7 @@ export async function CreateCoffeeGrinderAsync(
 ): Promise<CoffeeGrinder> {
   const response = await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/coffee/grinders`,
+    url: `${API_BASE_URL}/coffee/grinders`,
     data: request,
     withCredentials: true,
   });
@@ -136,7 +136,7 @@ export async function GetCoffeeEntryByIdAsync(
   const response = await axios({
     method: 'GET',
     signal,
-    url: `${BASE_ROUTE}/coffee/${id}`,
+    url: `${API_BASE_URL}/coffee/${id}`,
   });
 
   return response.data;
@@ -147,7 +147,7 @@ export async function CreateCoffeeEntryAsync(
 ): Promise<CoffeeEntry> {
   const response = await axios({
     method: 'POST',
-    url: `${BASE_ROUTE}/coffee`,
+    url: `${API_BASE_URL}/coffee`,
     data: request,
     withCredentials: true,
   });
@@ -161,7 +161,7 @@ export async function UpdateCoffeeEntryAsync(
 ): Promise<CoffeeEntry> {
   const response = await axios({
     method: 'PATCH',
-    url: `${BASE_ROUTE}/coffee/${id}`,
+    url: `${API_BASE_URL}/coffee/${id}`,
     data: request,
     withCredentials: true,
   });
@@ -172,7 +172,7 @@ export async function UpdateCoffeeEntryAsync(
 export async function DeleteCoffeeEntryAsync(id: string): Promise<void> {
   await axios({
     method: 'DELETE',
-    url: `${BASE_ROUTE}/coffee/${id}`,
+    url: `${API_BASE_URL}/coffee/${id}`,
     withCredentials: true,
   });
 }

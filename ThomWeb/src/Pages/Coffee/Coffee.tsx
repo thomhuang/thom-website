@@ -8,7 +8,14 @@ import {
   DeleteCoffeeEntryAsync,
   GetCoffeeEntriesAsync,
   GetCoffeeEntryByIdAsync,
+  GetCoffeeGrindersAsync,
+  GetCoffeeRoastersAsync,
 } from '../../api/Coffee/CoffeeRouter';
+import type {
+  CoffeeGrinder,
+  CoffeeRoaster,
+} from '../../api/Coffee/CoffeeRouter';
+import { brewMethods } from './CoffeeEntry';
 import styles from './Coffee.module.css';
 
 type EntryStat = {
@@ -87,6 +94,9 @@ const formatRatingStars = (rating: number) =>
 const getTastingNotes = (entry: CoffeeEntrySummary) =>
   entry.tastingNotes || entry.notes || '';
 
+const formatBrewMethod = (value: string) =>
+  brewMethods.find((option) => option.value === value)?.label ?? value;
+
 const loadCoffeeEntryDetails = async (
   entry: CoffeeEntrySummary,
   signal: AbortSignal
@@ -108,6 +118,11 @@ export default function Coffee() {
   const [isLoading, setIsLoading] = useState(true);
   const [journalError, setJournalError] = useState('');
   const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
+  const [roasterOptions, setRoasterOptions] = useState<CoffeeRoaster[]>([]);
+  const [grinderOptions, setGrinderOptions] = useState<CoffeeGrinder[]>([]);
+  const [selectedRoasterId, setSelectedRoasterId] = useState('');
+  const [selectedGrinderId, setSelectedGrinderId] = useState('');
+  const [selectedBrewMethod, setSelectedBrewMethod] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -123,9 +138,17 @@ export default function Coffee() {
             loadCoffeeEntryDetails(entry, controller.signal)
           )
         );
+        const roasters = await GetCoffeeRoastersAsync(controller.signal).catch(
+          () => [] as CoffeeRoaster[]
+        );
+        const grinders = await GetCoffeeGrindersAsync(controller.signal).catch(
+          () => [] as CoffeeGrinder[]
+        );
 
         if (isMounted) {
           setBrewLogs(entriesWithDetails);
+          setRoasterOptions(roasters);
+          setGrinderOptions(grinders);
         }
       } catch {
         if (!controller.signal.aborted && isMounted) {
@@ -171,6 +194,35 @@ export default function Coffee() {
     }
   };
 
+  const brewMethodOptions = Array.from(
+    new Set(brewLogs.map((entry) => entry.brewMethod))
+  ).sort((a, b) => formatBrewMethod(a).localeCompare(formatBrewMethod(b)));
+
+  const visibleLogs = brewLogs.filter((entry) => {
+    if (selectedRoasterId) {
+      if (entry.roasterId) {
+        if (entry.roasterId !== selectedRoasterId) {
+          return false;
+        }
+      } else {
+        const selected = roasterOptions.find(
+          (roaster) => roaster.id === selectedRoasterId
+        );
+        if (selected && entry.roaster !== selected.roaster) {
+          return false;
+        }
+      }
+    }
+    if (selectedGrinderId && entry.grinderId !== selectedGrinderId) {
+      return false;
+    }
+    if (selectedBrewMethod && entry.brewMethod !== selectedBrewMethod) {
+      return false;
+    }
+
+    return true;
+  });
+
   return (
     <main className={styles.page}>
       <section className={styles.intro} aria-labelledby="coffee-title">
@@ -189,14 +241,74 @@ export default function Coffee() {
         <aside className={styles.errorNotice}>{journalError}</aside>
       )}
 
+      {(roasterOptions.length > 0 ||
+        grinderOptions.length > 0 ||
+        brewMethodOptions.length > 0) && (
+        <div className={styles.filterBar}>
+          {roasterOptions.length > 0 && (
+            <label className={styles.field} htmlFor="coffee-roaster-filter">
+              Roaster
+              <select
+                id="coffee-roaster-filter"
+                value={selectedRoasterId}
+                onChange={(event) => setSelectedRoasterId(event.target.value)}
+              >
+                <option value="">All roasters</option>
+                {roasterOptions.map((roaster) => (
+                  <option value={roaster.id} key={roaster.id}>
+                    {roaster.roaster}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          {grinderOptions.length > 0 && (
+            <label className={styles.field} htmlFor="coffee-grinder-filter">
+              Grinder
+              <select
+                id="coffee-grinder-filter"
+                value={selectedGrinderId}
+                onChange={(event) => setSelectedGrinderId(event.target.value)}
+              >
+                <option value="">All grinders</option>
+                {grinderOptions.map((grinder) => (
+                  <option value={grinder.id} key={grinder.id}>
+                    {grinder.grinder}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          {brewMethodOptions.length > 0 && (
+            <label className={styles.field} htmlFor="coffee-method-filter">
+              Brew method
+              <select
+                id="coffee-method-filter"
+                value={selectedBrewMethod}
+                onChange={(event) => setSelectedBrewMethod(event.target.value)}
+              >
+                <option value="">All methods</option>
+                {brewMethodOptions.map((method) => (
+                  <option value={method} key={method}>
+                    {formatBrewMethod(method)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
+      )}
+
       <section className={styles.entryList} aria-labelledby="coffee-entries">
         <h2 id="coffee-entries">Brew entries</h2>
 
         {isLoading ? (
           <p className={styles.statusText}>Loading brew entries...</p>
-        ) : brewLogs.length > 0 ? (
+        ) : visibleLogs.length > 0 ? (
           <div className={styles.entryGrid}>
-            {brewLogs.map((entry) => {
+            {visibleLogs.map((entry) => {
               const coffeeMetadata = formatCoffeeMetadata(entry);
               const statGroups = getEntryStatGroups(entry);
               const tastingNotes = getTastingNotes(entry);
@@ -278,7 +390,11 @@ export default function Coffee() {
           </div>
         ) : (
           <div className={styles.emptyJournal}>
-            <p>No published brew entries yet.</p>
+            <p>
+              {brewLogs.length > 0
+                ? 'No brew entries match these filters.'
+                : 'No published brew entries yet.'}
+            </p>
             <p>Published entries will show here.</p>
           </div>
         )}

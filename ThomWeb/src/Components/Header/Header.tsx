@@ -115,6 +115,9 @@ export default function Header() {
                 <Link to={PAGES.Coffee} className={styles.navLink}>
                     coffee
                 </Link>
+                <Link to={PAGES.Shop} className={styles.navLink}>
+                    shop
+                </Link>
                 {authControl()}
                 <button
                     type="button"

@@ -96,3 +96,18 @@ Recent commits are short and descriptive, for example `homepage/header cleanup +
 ## Security & Configuration Tips
 
 Keep fetch and service-access logic in `src/api/`; hidden UI is not security. The only public build-time variable is `REACT_APP_API_URL`; production builds set it to `/api`, which the Worker proxies to `thom-server` on the same origin so auth cookies stay first-party. Update `ThomWeb/.env.example` and `src/react-app-env.d.ts` when adding `REACT_APP_*` variables. `REACT_APP_*` values are embedded in the bundle and must never contain secrets.
+
+## Outstanding work — Shop (2026-09-17)
+
+The storefront, admin listing form, and Stripe Checkout redirect are complete
+and verified (`npm run typecheck`, `npm run lint`, `npm run build`). Remaining:
+
+- Product images will not display until an R2 custom domain is connected and
+  `R2_PUBLIC_BASE_URL` matches it.
+- No admin orders page yet. `StartShopCheckoutAsync` / `GetShopOrderAsync` exist
+  in `src/api/Shop/ShopRouter.ts`, and the buyer-facing order confirmation lives
+  at `/shop/order`.
+- Sign in to the Cloudflare MCP servers via `/mcps`; see the `thom-server`
+  `AGENTS.md` for the full outstanding-work list, deploy steps, and the Windows
+  Smart App Control test workaround.
+- Nothing is committed.

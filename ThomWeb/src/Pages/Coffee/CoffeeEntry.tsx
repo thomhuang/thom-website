@@ -5,19 +5,23 @@ import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import {
   CreateCoffeeEntryAsync,
+  CreateCoffeeGrinderAsync,
   CreateCoffeeRoasterAsync,
   GetCoffeeEntryByIdAsync,
+  GetCoffeeGrindersAsync,
   GetCoffeeRoastersAsync,
   UpdateCoffeeEntryAsync,
 } from '../../api/Coffee/CoffeeRouter';
 import type {
   CoffeeEntry as CoffeeEntryResponse,
   CoffeeEntryRequest,
+  CoffeeGrinder,
   CoffeeRoaster,
 } from '../../api/Coffee/CoffeeRouter';
 import styles from './Coffee.module.css';
 
 export type RoasterOption = CoffeeRoaster;
+export type GrinderOption = CoffeeGrinder;
 
 type BrewLogDraft = {
   date: string;
@@ -29,6 +33,7 @@ type BrewLogDraft = {
   roasterId: string;
   brewMethod: string;
   ratio: string;
+  grinderId: string;
   grinder: string;
   grindSetting: string;
   dose: string;
@@ -52,7 +57,7 @@ type SelectOption = {
   label: string;
 };
 
-const brewMethods: SelectOption[] = [
+export const brewMethods: SelectOption[] = [
   { value: 'v60', label: 'V60' },
   { value: 'turbo-shot', label: 'Turbo Shot' },
   { value: 'orea-z1', label: 'Orea Z1' },
@@ -64,11 +69,6 @@ const ratios: SelectOption[] = [
   { value: '1:16.67', label: '1:16.67' },
   { value: '1:17', label: '1:17' },
   { value: '1:18', label: '1:18' },
-];
-
-const grinders: SelectOption[] = [
-  { value: 'k-ultra', label: '1zpresso K-Ultra' },
-  { value: 'df64', label: 'DF64V mk. II with SSP MP Burrs' },
 ];
 
 const roastLevels: SelectOption[] = [
@@ -96,6 +96,7 @@ const createEmptyDraft = (): BrewLogDraft => ({
   roasterId: '',
   brewMethod: '',
   ratio: '',
+  grinderId: '',
   grinder: '',
   grindSetting: '',
   dose: '',
@@ -112,7 +113,8 @@ const createEmptyDraft = (): BrewLogDraft => ({
 
 const createDraftFromEntry = (
   entry: CoffeeEntryResponse,
-  roasterId: string
+  roasterId: string,
+  grinderId: string
 ): BrewLogDraft => ({
   date: entry.date,
   coffeeName: entry.coffeeName,
@@ -123,6 +125,7 @@ const createDraftFromEntry = (
   roasterId,
   brewMethod: entry.brewMethod,
   ratio: entry.ratio,
+  grinderId,
   grinder: entry.grinder,
   grindSetting: String(entry.grindSetting),
   dose: String(entry.dose),
@@ -139,7 +142,7 @@ const createDraftFromEntry = (
 
 const formatRoasterLabel = (roaster: RoasterOption) => roaster.roaster;
 
-const slugifyRoaster = (value: string) =>
+const slugifyCoffeeValue = (value: string) =>
   value
     .trim()
     .toLowerCase()
@@ -147,7 +150,7 @@ const slugifyRoaster = (value: string) =>
     .replace(/^-+|-+$/g, '');
 
 const createRoasterOption = (roaster: string): RoasterOption => ({
-  id: slugifyRoaster(roaster) || `custom-${Date.now()}`,
+  id: slugifyCoffeeValue(roaster) || `custom-${Date.now()}`,
   roaster,
 });
 
@@ -166,12 +169,36 @@ const mergeRoasterOptions = (
   return Array.from(optionsById.values());
 };
 
+const formatGrinderLabel = (grinder: GrinderOption) => grinder.grinder;
+
+const createGrinderOption = (grinder: string): GrinderOption => ({
+  id: slugifyCoffeeValue(grinder) || `custom-${Date.now()}`,
+  grinder,
+});
+
+const mergeGrinderOptions = (
+  primaryOptions: GrinderOption[],
+  secondaryOptions: GrinderOption[] = []
+): GrinderOption[] => {
+  const optionsById = new Map<string, GrinderOption>();
+
+  [...primaryOptions, ...secondaryOptions].forEach((grinder) => {
+    if (!optionsById.has(grinder.id)) {
+      optionsById.set(grinder.id, grinder);
+    }
+  });
+
+  return Array.from(optionsById.values());
+};
+
 const createRequestFromDraft = (
   draft: BrewLogDraft,
-  roaster: RoasterOption
+  roaster: RoasterOption,
+  grinder: GrinderOption
 ): CoffeeEntryRequest => ({
   ...draft,
   roaster: roaster.roaster,
+  grinder: grinder.grinder,
   grindSetting: draft.grindSetting ? Number(draft.grindSetting) : undefined,
   daysSinceRoast: draft.daysSinceRoast ? Number(draft.daysSinceRoast) : undefined,
   dose: draft.dose ? Number(draft.dose) : undefined,
@@ -214,17 +241,22 @@ export default function CoffeeEntry() {
   const { isAdmin, isAuthLoading } = useAuth();
   const isEditing = Boolean(entryId);
   const [roasterOptions, setRoasterOptions] = useState<RoasterOption[]>([]);
+  const [grinderOptions, setGrinderOptions] = useState<GrinderOption[]>([]);
   const [draft, setDraft] = useState<BrewLogDraft>(createEmptyDraft);
   const [roasterSearch, setRoasterSearch] = useState('');
+  const [grinderSearch, setGrinderSearch] = useState('');
   const [newRoaster, setNewRoaster] = useState('');
+  const [newGrinder, setNewGrinder] = useState('');
   const [formError, setFormError] = useState('');
   const fieldErrors = useMemo(() => validateDraft(draft), [draft]);
   const [entryLoadFailed, setEntryLoadFailed] = useState(false);
   const [isEntryLoading, setIsEntryLoading] = useState(isEditing);
   const [isRoasterLoading, setIsRoasterLoading] = useState(false);
   const [isRoasterSubmitting, setIsRoasterSubmitting] = useState(false);
+  const [isGrinderLoading, setIsGrinderLoading] = useState(false);
+  const [isGrinderSubmitting, setIsGrinderSubmitting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isFormLoading = isEntryLoading || isRoasterLoading;
+  const isFormLoading = isEntryLoading || isRoasterLoading || isGrinderLoading;
   const canShowEntryFailure =
     !isAuthLoading && isAdmin && !isFormLoading && entryLoadFailed;
   const canShowForm =
@@ -232,6 +264,9 @@ export default function CoffeeEntry() {
 
   const selectedRoaster = roasterOptions.find(
     (roaster) => roaster.id === draft.roasterId
+  );
+  const selectedGrinder = grinderOptions.find(
+    (grinder) => grinder.id === draft.grinderId
   );
   const filteredRoasterOptions = useMemo(() => {
     const normalizedSearch = roasterSearch.trim().toLowerCase();
@@ -244,6 +279,17 @@ export default function CoffeeEntry() {
       formatRoasterLabel(roaster).toLowerCase().includes(normalizedSearch)
     );
   }, [roasterOptions, roasterSearch]);
+  const filteredGrinderOptions = useMemo(() => {
+    const normalizedSearch = grinderSearch.trim().toLowerCase();
+
+    if (!normalizedSearch) {
+      return grinderOptions;
+    }
+
+    return grinderOptions.filter((grinder) =>
+      formatGrinderLabel(grinder).toLowerCase().includes(normalizedSearch)
+    );
+  }, [grinderOptions, grinderSearch]);
 
   useEffect(() => {
     if (isAuthLoading || !isAdmin) {
@@ -285,9 +331,49 @@ export default function CoffeeEntry() {
   }, [isAdmin, isAuthLoading]);
 
   useEffect(() => {
+    if (isAuthLoading || !isAdmin) {
+      setIsGrinderLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    let isMounted = true;
+
+    const loadGrinders = async () => {
+      setIsGrinderLoading(true);
+
+      try {
+        const grinders = await GetCoffeeGrindersAsync(controller.signal);
+
+        if (isMounted) {
+          setGrinderOptions((currentOptions) =>
+            mergeGrinderOptions(grinders, currentOptions)
+          );
+        }
+      } catch {
+        if (!controller.signal.aborted && isMounted) {
+          setFormError('Grinders could not be loaded.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsGrinderLoading(false);
+        }
+      }
+    };
+
+    loadGrinders();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [isAdmin, isAuthLoading]);
+
+  useEffect(() => {
     if (!isEditing || !entryId) {
       setDraft(createEmptyDraft());
       setRoasterSearch('');
+      setGrinderSearch('');
       setFormError('');
       setEntryLoadFailed(false);
       setIsEntryLoading(false);
@@ -317,7 +403,14 @@ export default function CoffeeEntry() {
           ...createRoasterOption(entry.roaster),
           id:
             entry.roasterId ||
-            slugifyRoaster(entry.roaster) ||
+            slugifyCoffeeValue(entry.roaster) ||
+            `custom-${Date.now()}`,
+        };
+        const grinderOption = {
+          ...createGrinderOption(entry.grinder),
+          id:
+            entry.grinderId ||
+            slugifyCoffeeValue(entry.grinder) ||
             `custom-${Date.now()}`,
         };
 
@@ -325,8 +418,14 @@ export default function CoffeeEntry() {
           setRoasterOptions((currentOptions) =>
             mergeRoasterOptions(currentOptions, [roasterOption])
           );
-          setDraft(createDraftFromEntry(entry, roasterOption.id));
+          setGrinderOptions((currentOptions) =>
+            mergeGrinderOptions(currentOptions, [grinderOption])
+          );
+          setDraft(
+            createDraftFromEntry(entry, roasterOption.id, grinderOption.id)
+          );
           setRoasterSearch(formatRoasterLabel(roasterOption));
+          setGrinderSearch(formatGrinderLabel(grinderOption));
         }
       } catch {
         if (!controller.signal.aborted && isMounted) {
@@ -420,6 +519,67 @@ export default function CoffeeEntry() {
     }
   };
 
+  const updateGrinderSearch = (event: ChangeEvent<HTMLInputElement>) => {
+    const nextSearch = event.target.value;
+
+    setGrinderSearch(nextSearch);
+
+    if (
+      selectedGrinder &&
+      nextSearch !== formatGrinderLabel(selectedGrinder)
+    ) {
+      setDraft((currentDraft) => ({
+        ...currentDraft,
+        grinderId: '',
+      }));
+    }
+  };
+
+  const selectGrinder = (grinder: GrinderOption) => {
+    setDraft((currentDraft) => ({
+      ...currentDraft,
+      grinderId: grinder.id,
+    }));
+    setGrinderSearch(formatGrinderLabel(grinder));
+  };
+
+  const addGrinder = async () => {
+    const trimmedGrinder = newGrinder.trim();
+
+    if (!trimmedGrinder) {
+      return;
+    }
+
+    const existingGrinder = grinderOptions.find(
+      (grinder) => grinder.grinder.toLowerCase() === trimmedGrinder.toLowerCase()
+    );
+
+    if (existingGrinder) {
+      selectGrinder(existingGrinder);
+      setNewGrinder('');
+      return;
+    }
+
+    const grinder = createGrinderOption(trimmedGrinder);
+
+    setFormError('');
+    setIsGrinderSubmitting(true);
+
+    try {
+      const savedGrinder = await CreateCoffeeGrinderAsync(grinder);
+
+      setGrinderOptions((currentOptions) =>
+        mergeGrinderOptions(currentOptions, [savedGrinder])
+      );
+      selectGrinder(savedGrinder);
+      setNewGrinder('');
+    } catch {
+      setFormError('Grinder could not be saved.');
+    } finally {
+      setIsGrinderSubmitting(false);
+    }
+  };
+
   const saveEntry = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -432,6 +592,11 @@ export default function CoffeeEntry() {
       return;
     }
 
+    if (!selectedGrinder) {
+      setFormError('Select or add a grinder before saving.');
+      return;
+    }
+
     if (isEditing && !entryId) {
       setFormError('Coffee entry could not be found.');
       return;
@@ -441,7 +606,11 @@ export default function CoffeeEntry() {
     setIsSubmitting(true);
 
     try {
-      const request = createRequestFromDraft(draft, selectedRoaster);
+      const request = createRequestFromDraft(
+        draft,
+        selectedRoaster,
+        selectedGrinder
+      );
 
       if (isEditing && entryId) {
         await UpdateCoffeeEntryAsync(entryId, request);
@@ -511,7 +680,7 @@ export default function CoffeeEntry() {
 
       {!isAuthLoading && isAdmin && isFormLoading && (
         <aside className={styles.notice}>
-          {isEntryLoading ? 'Loading brew entry...' : 'Loading roasters...'}
+          {isEntryLoading ? 'Loading brew entry...' : 'Loading lookups...'}
         </aside>
       )}
 
@@ -693,7 +862,6 @@ export default function CoffeeEntry() {
 
               <div className={styles.fieldGrid}>
                 {renderSelect('ratio', 'Ratio', 'ratio', ratios, true)}
-                {renderSelect('grinder', 'Grinder', 'grinder', grinders, true)}
 
                 <label className={styles.field} htmlFor="grind-setting">
                   <span className={styles.labelRow}>
@@ -775,6 +943,75 @@ export default function CoffeeEntry() {
                   />
                   {fieldErrors.brewTime && <span className={styles.fieldError}>{fieldErrors.brewTime}</span>}
                 </label>
+              </div>
+
+              <div
+                className={styles.roasterPicker}
+                role="group"
+                aria-labelledby="grinder-picker-label"
+              >
+                <div className={styles.labelRow} id="grinder-picker-label">
+                  Grinder
+                  <span className={styles.required}>Required</span>
+                </div>
+                <input
+                  type="search"
+                  value={grinderSearch}
+                  onChange={updateGrinderSearch}
+                  placeholder="Search grinder"
+                  aria-label="Search grinder"
+                />
+                {selectedGrinder && (
+                  <p className={styles.selectedRoaster}>
+                    Selected: {formatGrinderLabel(selectedGrinder)}
+                  </p>
+                )}
+                <div className={styles.roasterResults}>
+                  {filteredGrinderOptions.map((grinder) => (
+                    <button
+                      type="button"
+                      className={[
+                        styles.roasterOption,
+                        draft.grinderId === grinder.id
+                          ? styles.selectedOption
+                          : '',
+                      ].join(' ')}
+                      key={grinder.id}
+                      onClick={() => selectGrinder(grinder)}
+                      aria-pressed={draft.grinderId === grinder.id}
+                    >
+                      <span>{grinder.grinder}</span>
+                    </button>
+                  ))}
+                  {filteredGrinderOptions.length === 0 && (
+                    <p className={styles.emptyResults}>
+                      No matching grinders yet.
+                    </p>
+                  )}
+                </div>
+
+                <div className={styles.inlineAdd}>
+                  <p className={styles.inlineTitle}>Add grinder</p>
+                  <div className={styles.inlineFields}>
+                    <label className={styles.field} htmlFor="new-grinder">
+                      Grinder
+                      <input
+                        id="new-grinder"
+                        type="text"
+                        value={newGrinder}
+                        onChange={(event) => setNewGrinder(event.target.value)}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className={styles.addButton}
+                      onClick={addGrinder}
+                      disabled={!newGrinder.trim() || isGrinderSubmitting}
+                    >
+                      {isGrinderSubmitting ? 'Saving' : 'Add'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </section>
 

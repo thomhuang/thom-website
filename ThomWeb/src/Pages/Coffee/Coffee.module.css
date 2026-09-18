@@ -56,6 +56,17 @@
   color: var(--muted);
 }
 
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.filterBar .field {
+  min-width: 12rem;
+}
+
 .entryGrid {
   margin-top: 1.5rem;
   display: grid;

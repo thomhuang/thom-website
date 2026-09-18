@@ -14,6 +14,7 @@ export interface CoffeeEntrySummary {
   roaster: string;
   brewMethod: string;
   ratio: string;
+  grinderId?: string;
   grinder?: string;
   grindSetting?: number;
   dose?: number;
@@ -32,6 +33,7 @@ export interface CoffeeEntrySummary {
 export interface CoffeeEntry extends CoffeeEntrySummary {
   daysSinceRoast: number;
   roasterId: string;
+  grinderId: string;
   grinder: string;
   grindSetting: number;
   dose: number;
@@ -49,6 +51,12 @@ export interface CoffeeEntry extends CoffeeEntrySummary {
 export interface CoffeeRoaster {
   id: string;
   roaster: string;
+  createdAt?: string;
+}
+
+export interface CoffeeGrinder {
+  id: string;
+  grinder: string;
   createdAt?: string;
 }
 
@@ -89,6 +97,31 @@ export async function CreateCoffeeRoasterAsync(
   const response = await axios({
     method: 'POST',
     url: `${BASE_ROUTE}/coffee/roasters`,
+    data: request,
+    withCredentials: true,
+  });
+
+  return response.data;
+}
+
+export async function GetCoffeeGrindersAsync(
+  signal?: AbortSignal
+): Promise<CoffeeGrinder[]> {
+  const response = await axios({
+    method: 'GET',
+    signal,
+    url: `${BASE_ROUTE}/coffee/grinders`,
+  });
+
+  return response.data;
+}
+
+export async function CreateCoffeeGrinderAsync(
+  request: CoffeeGrinder
+): Promise<CoffeeGrinder> {
+  const response = await axios({
+    method: 'POST',
+    url: `${BASE_ROUTE}/coffee/grinders`,
     data: request,
     withCredentials: true,
   });

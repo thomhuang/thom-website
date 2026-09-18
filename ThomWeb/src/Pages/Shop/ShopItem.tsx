@@ -94,7 +94,13 @@ export default function ShopItem() {
 
     try {
       const session = await StartShopCheckoutAsync(item.id);
-      window.location.assign(session.url);
+      // Stripe's URL is server-controlled, but validate the origin anyway so a
+      // tampered response cannot turn this into an open redirect.
+      const checkout = new URL(session.url);
+      if (checkout.protocol !== 'https:' || checkout.hostname !== 'checkout.stripe.com') {
+        throw new Error('unexpected checkout URL');
+      }
+      window.location.assign(checkout.href);
     } catch {
       setCheckoutError('Checkout could not be started.');
       setIsCheckingOut(false);

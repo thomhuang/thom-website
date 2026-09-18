@@ -23,14 +23,14 @@ export default function Header() {
     async function submitLogin(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        const didSignIn = await login({
+        await login({
             username: authUsername,
             password: authPassword,
         });
 
-        if (didSignIn) {
-            setAuthPassword('');
-        }
+        // Clear the password either way so it does not linger in component
+        // state after a failed attempt.
+        setAuthPassword('');
     }
 
     function updateAuthUsername(username: string) {

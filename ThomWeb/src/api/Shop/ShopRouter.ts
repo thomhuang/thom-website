@@ -254,13 +254,14 @@ export async function GetShopOrderAsync(
 // no API base URL, no auth cookie, and the exact Content-Type that was signed.
 export async function UploadShopImageAsync(
   uploadUrl: string,
-  file: File,
+  blob: Blob,
   contentType: string
 ): Promise<void> {
   const response = await fetch(uploadUrl, {
     method: 'PUT',
     headers: { 'Content-Type': contentType },
-    body: file,
+    body: blob,
+    referrerPolicy: 'no-referrer',
   });
 
   if (!response.ok) {

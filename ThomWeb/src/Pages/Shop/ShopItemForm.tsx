@@ -16,6 +16,11 @@ import {
   UploadShopImageAsync,
 } from '../../api/Shop/ShopRouter';
 import { formatPriceInput, parsePriceToCents } from './format';
+import {
+  MAX_IMAGE_BYTES,
+  MAX_SOURCE_IMAGE_BYTES,
+  prepareImageForUpload,
+} from './imageUpload';
 import styles from './Shop.module.css';
 
 const ALLOWED_IMAGE_TYPES = [
@@ -25,10 +30,6 @@ const ALLOWED_IMAGE_TYPES = [
   'image/avif',
   'image/gif',
 ];
-
-// The presigned PUT cannot cap the body size, so the browser enforces it. The
-// server still controls which content types are accepted.
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 type ShopItemDraft = {
   title: string;
@@ -240,17 +241,33 @@ export default function ShopItemForm() {
       setUploadError('Use a JPEG, PNG, WebP, AVIF, or GIF image.');
       return;
     }
-    if (file.size > MAX_IMAGE_BYTES) {
-      setUploadError('Images must be 10 MB or smaller.');
+    if (file.size > MAX_SOURCE_IMAGE_BYTES) {
+      setUploadError('That image is too large to process (over 50 MB).');
       return;
     }
 
     setIsUploading(true);
 
     try {
-      const ticket = await CreateShopImageUploadAsync(itemId, file.type);
+      // Re-encoding may change the content type, so prepare the bytes before
+      // asking the server to sign for them.
+      const prepared = await prepareImageForUpload(file);
 
-      await UploadShopImageAsync(ticket.uploadUrl, file, ticket.contentType);
+      if (prepared.blob.size > MAX_IMAGE_BYTES) {
+        setUploadError('Images must be 10 MB or smaller.');
+        return;
+      }
+
+      const ticket = await CreateShopImageUploadAsync(
+        itemId,
+        prepared.contentType
+      );
+
+      await UploadShopImageAsync(
+        ticket.uploadUrl,
+        prepared.blob,
+        ticket.contentType
+      );
 
       const image = await CreateShopImageAsync(itemId, {
         objectKey: ticket.objectKey,
@@ -495,7 +512,7 @@ export default function ShopItemForm() {
                   <p className={styles.hint}>
                     {isUploading
                       ? 'Uploading image...'
-                      : 'Uploads go straight to storage. JPEG, PNG, WebP, AVIF, or GIF up to 10 MB.'}
+                      : 'Uploads go straight to storage. JPEG, PNG, WebP, AVIF, or GIF up to 10 MB; large photos are resized to 2000px and converted to WebP.'}
                   </p>
                 </>
               ) : (

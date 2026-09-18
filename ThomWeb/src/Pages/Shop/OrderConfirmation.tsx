@@ -2,15 +2,14 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
-import { GetShopOrderAsync, ShopOrder } from '../../api/Shop/ShopRouter';
+import { GetShopOrderAsync, PublicShopOrder } from '../../api/Shop/ShopRouter';
 import { formatPrice } from './format';
-import ShippingAddress from './ShippingAddress';
 import styles from './Shop.module.css';
 
 export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id') ?? '';
-  const [order, setOrder] = useState<ShopOrder | null>(null);
+  const [order, setOrder] = useState<PublicShopOrder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [orderError, setOrderError] = useState('');
 
@@ -82,6 +81,7 @@ export default function OrderConfirmation() {
 
   const isPaid = order.status === 'paid';
   const isRefunded = order.status === 'refunded';
+  const isRefundPending = order.status === 'refund_pending';
 
   return (
     <main className={styles.page}>
@@ -94,14 +94,22 @@ export default function OrderConfirmation() {
       <article className={styles.detail}>
         <div className={styles.detailBody}>
           <h1 className={styles.detailTitle}>
-            {isRefunded ? 'Order refunded' : isPaid ? 'Thank you' : 'Order received'}
+            {isRefunded
+              ? 'Order refunded'
+              : isRefundPending
+                ? 'Order being refunded'
+                : isPaid
+                  ? 'Thank you'
+                  : 'Order received'}
           </h1>
           <p className={styles.cardMeta}>
             {isRefunded
               ? 'This order could not be fulfilled and has been refunded.'
-              : isPaid
-                ? 'Payment received. Your order is confirmed.'
-                : 'Payment is still being confirmed. Refresh in a moment.'}
+              : isRefundPending
+                ? 'This order could not be fulfilled and is being refunded.'
+                : isPaid
+                  ? 'Payment received. Your order is confirmed.'
+                  : 'Payment is still being confirmed. Refresh in a moment.'}
           </p>
 
           <p className={styles.detailPrice}>
@@ -116,13 +124,11 @@ export default function OrderConfirmation() {
             ))}
           </ul>
 
-          <ShippingAddress order={order} />
-
-          {order.customerEmail && (
-            <p className={styles.cardMeta}>
-              A receipt was sent to {order.customerEmail}.
-            </p>
-          )}
+          {/* The confirmation endpoint returns no personal data, so the buyer's
+              email and shipping address are not shown here. */}
+          <p className={styles.cardMeta}>
+            A receipt was sent to the email you provided.
+          </p>
         </div>
       </article>
     </main>

@@ -75,7 +75,7 @@ export interface ShopOrderLine {
 export interface ShopOrder {
   id: string;
   stripeSessionId: string;
-  status: string;
+  status: ShopOrderStatus;
   customerEmail: string;
   customerName: string;
   shippingAddress: string;
@@ -98,6 +98,25 @@ export interface ShopOrder {
 export interface ShopOrdersPage {
   orders: ShopOrder[];
   nextCursor: string;
+}
+
+export type ShopOrderStatus =
+  | 'pending'
+  | 'paid'
+  | 'refund_pending'
+  | 'refunded';
+
+// The confirmation endpoint is public, so it returns no personal data. Customer
+// and shipping fields are only available from the authenticated admin list.
+export interface PublicShopOrder {
+  id: string;
+  status: ShopOrderStatus;
+  amountTotalCents: number;
+  currency: string;
+  lines: ShopOrderLine[];
+  refundedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ShopCheckoutSession {
@@ -219,8 +238,8 @@ export async function StartShopCheckoutAsync(
 export async function GetShopOrderAsync(
   sessionId: string,
   signal?: AbortSignal
-): Promise<ShopOrder> {
-  return apiRequest<ShopOrder>({
+): Promise<PublicShopOrder> {
+  return apiRequest<PublicShopOrder>({
     method: 'GET',
     signal,
     url: `/shop/orders/${sessionId}`,

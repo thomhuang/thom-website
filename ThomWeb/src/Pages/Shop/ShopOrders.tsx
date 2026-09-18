@@ -3,14 +3,18 @@ import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
-import { GetShopOrdersAsync, ShopOrder } from '../../api/Shop/ShopRouter';
+import {
+  GetShopOrdersAsync,
+  ShopOrder,
+  ShopOrderStatus,
+} from '../../api/Shop/ShopRouter';
 import { formatDateTime, formatPrice } from './format';
 import ShippingAddress from './ShippingAddress';
 import styles from './Shop.module.css';
 
 const ORDERS_PAGE_SIZE = 20;
 
-function statusClass(status: string) {
+function statusClass(status: ShopOrderStatus) {
   switch (status) {
     case 'paid':
       return styles.statusPaid;

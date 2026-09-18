@@ -113,7 +113,7 @@ Local `.env*` and `.dev.vars*` files (except the committed `.example` files) are
 ## Outstanding work — deployment & shop (2026-09-18)
 
 The storefront, admin listing form, brand/grinder filters, listing sort, and admin
-orders page are committed (`main` == `origin/main` == `b880460`) and verified
+orders page are committed (current tip: `D:\Repos\BOARD.md`) and verified
 (`npm run typecheck`, `npm run lint`, `npm run build`). Live deploy state lives in
 `D:\Repos\BOARD.md`; this section only records durable gotchas.
 
@@ -144,7 +144,11 @@ orders page are committed (`main` == `origin/main` == `b880460`) and verified
   appends pages via a "Load more" button. `ShopOrder` carries a structured
   shipping address (`shipName`/`shipLine1`/`shipLine2`/`shipCity`/`shipState`/
   `shipPostalCode`/`shipCountry`) plus the legacy `shippingAddress`;
-  `Pages/Shop/ShippingAddress.tsx` renders the structured form and falls back.
-  Order statuses include `refunded` and `refund_pending` (oversold orders).
+  `Pages/Shop/ShippingAddress.tsx` (admin orders only) renders the structured
+  form and falls back. The public confirmation lookup
+  (`GET /shop/orders/{sessionId}` → `PublicShopOrder`) returns **no personal
+  data**, so `OrderConfirmation.tsx` shows only status/total/lines and never the
+  buyer's email or address. Order statuses include `refunded` and
+  `refund_pending` (oversold orders).
 - See the `thom-server` `AGENTS.md` for server-side deploy state, secrets, and
   the Windows Smart App Control test workaround.

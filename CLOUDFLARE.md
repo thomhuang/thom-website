@@ -15,12 +15,23 @@ assets with a small `/api` proxy:
 Local development is unchanged: `cd ThomWeb && npm start` uses `ThomWeb/.env.local`
 and talks to `http://localhost:4000` directly.
 
+## Environments
+
+| Environment | Config | Worker | API binding | URL |
+|---|---|---|---|---|
+| production | `wrangler.jsonc` | `thom-website` | `thom-server` | `https://www.thomhuang.com` (route `www.thomhuang.com`) |
+| test | `wrangler.test.jsonc` | `thom-website-test` | `thom-server-test` | `https://thom-website-test.thomhuang.workers.dev` |
+
+The test Worker has no `routes`, so it stays on its `workers.dev` hostname, and
+binds `thom-server-test`. Deploy the matching server Worker first.
+
 ## Prerequisites
 
 - Node.js 22+ (`wrangler` requires it).
 - `npx wrangler login` once.
-- Deploy **thom-server first** so the `thom-server` Worker exists as a service
-  binding target.
+- Deploy the matching **thom-server** Worker first (`wrangler.jsonc` for
+  production, `wrangler.test.jsonc` for test) so the service binding target
+  exists.
 
 ## Deploy
 
@@ -29,7 +40,8 @@ Locally:
 ```sh
 npm install
 npm run build     # builds ThomWeb
-npx wrangler deploy
+npx wrangler deploy                          # production
+npx wrangler deploy -c wrangler.test.jsonc   # test (thom-website-test)
 ```
 
 Or connect the repository under **Workers & Pages → thom-website → Settings →
@@ -38,13 +50,18 @@ Builds** and use:
 - Build command: `npm install && npm run build`
 - Deploy command: `npx wrangler deploy`
 
+Workers Builds deploys production only. The test Worker is deployed manually with
+`-c wrangler.test.jsonc`.
+
 ## Wire the two together
 
 1. Deploy and note the website URL, e.g.
-   `https://thom-website.your-subdomain.workers.dev`.
-2. In `thom-server/wrangler.jsonc`, set `CLIENT_ORIGIN_URLS` to that URL and
-   redeploy `thom-server`. This origin allow-list is what the Go server checks for
-   mutating requests.
+   `https://thom-website-test.thomhuang.workers.dev` (test) or
+   `https://www.thomhuang.com` (production).
+2. In the matching `thom-server` config file, set `CLIENT_ORIGIN_URLS` to that
+   URL and redeploy `thom-server`. This origin allow-list is what the Go server
+   checks for mutating requests. (Production uses `https://www.thomhuang.com`;
+   test uses `https://thom-website-test.thomhuang.workers.dev`.)
 3. Visit the site and sign in; requests go to `/api/...` on the website origin and
    are proxied to the container.
 

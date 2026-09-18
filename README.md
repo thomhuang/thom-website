@@ -7,8 +7,10 @@ React app (Create React App) for the coffee journal, backed by
 
 The site is deployed to Cloudflare as static Worker assets. A small Worker serves
 `ThomWeb/build` with SPA fallback and proxies `/api/*` to the `thom-server` Worker
-over a service binding, so auth cookies stay first-party. See
-[CLOUDFLARE.md](CLOUDFLARE.md).
+over a service binding, so auth cookies stay first-party. Two environments deploy
+from this repository: production (`wrangler.jsonc` → `thom-website`, bound to
+`thom-server`) and test (`wrangler.test.jsonc` → `thom-website-test`, bound to
+`thom-server-test`). See [CLOUDFLARE.md](CLOUDFLARE.md).
 
 ## Local development
 
@@ -22,9 +24,10 @@ npm run lint
 npm test
 ```
 
-`ThomWeb/.env.local` sets `REACT_APP_API_URL` to the local API
-(`http://localhost:4000`). Production builds use `ThomWeb/.env.production`, which
-sets it to `/api`.
+`ThomWeb/.env.local` is not needed. The API base URL is defined in
+`ThomWeb/src/api/config.ts`: `REACT_APP_API_URL` overrides it, otherwise
+development uses `http://localhost:4000` and production uses `/api` (same-origin,
+proxied by the Worker). `ThomWeb/.env.example` documents the override.
 
 ## Build and deploy
 
@@ -32,5 +35,6 @@ From the repo root:
 
 ```sh
 npm run build    # builds ThomWeb/ into ThomWeb/build
-npx wrangler deploy
+npx wrangler deploy                          # production
+npx wrangler deploy -c wrangler.test.jsonc   # test
 ```

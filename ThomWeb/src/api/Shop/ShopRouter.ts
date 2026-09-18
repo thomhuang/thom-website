@@ -247,6 +247,20 @@ export async function GetShopOrderAsync(
   });
 }
 
+// The emailed token is the credential for a buyer's own order, so unlike the
+// session-keyed confirmation endpoint this returns the full order including the
+// customer and shipping fields.
+export async function GetShopOrderByTokenAsync(
+  token: string,
+  signal?: AbortSignal
+): Promise<ShopOrder> {
+  return apiRequest<ShopOrder>({
+    method: 'GET',
+    signal,
+    url: `/shop/orders/view/${encodeURIComponent(token)}`,
+  });
+}
+
 // Orders are keyset-paginated: pass the previous page's nextCursor to fetch the
 // page after it, and stop when the returned nextCursor is empty.
 export async function GetShopOrdersAsync(options: {

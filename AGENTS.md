@@ -144,11 +144,18 @@ orders page are committed (current tip: `D:\Repos\BOARD.md`) and verified
   appends pages via a "Load more" button. `ShopOrder` carries a structured
   shipping address (`shipName`/`shipLine1`/`shipLine2`/`shipCity`/`shipState`/
   `shipPostalCode`/`shipCountry`) plus the legacy `shippingAddress`;
-  `Pages/Shop/ShippingAddress.tsx` (admin orders only) renders the structured
-  form and falls back. The public confirmation lookup
-  (`GET /shop/orders/{sessionId}` → `PublicShopOrder`) returns **no personal
-  data**, so `OrderConfirmation.tsx` shows only status/total/lines and never the
-  buyer's email or address. Order statuses include `refunded` and
+  `Pages/Shop/ShippingAddress.tsx` renders the structured form and falls back
+  (used by admin orders and the emailed order view). The public confirmation
+  lookup (`GET /shop/orders/{sessionId}` → `PublicShopOrder`) returns **no
+  personal data**, so `OrderConfirmation.tsx` shows only status/total/lines and
+  never the buyer's email or address. Order statuses include `refunded` and
   `refund_pending` (oversold orders).
+- **Buyer order-view page (2026-09-18).** The confirmation email links to
+  `PAGES.OrderView` (`/shop/order/view?token=...`), served by
+  `Pages/Shop/OrderView.tsx`. It calls `GetShopOrderByTokenAsync(token)`, which
+  hits `GET /shop/orders/view/{token}` and returns the **full** `ShopOrder`
+  (customer + shipping) because the emailed token is the credential — unlike the
+  session-keyed `PublicShopOrder` confirmation lookup. Treat the token as a
+  secret: do not log or forward the URL.
 - See the `thom-server` `AGENTS.md` for server-side deploy state, secrets, and
   the Windows Smart App Control test workaround.

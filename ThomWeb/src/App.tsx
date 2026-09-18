@@ -10,6 +10,7 @@ import CoffeeEntry from './Pages/Coffee/CoffeeEntry';
 import ErrorPage from './Pages/ErrorPage/ErrorPage';
 import HomePage from './Pages/HomePage/HomePage';
 import OrderConfirmation from './Pages/Shop/OrderConfirmation';
+import OrderView from './Pages/Shop/OrderView';
 import Shop from './Pages/Shop/Shop';
 import ShopItem from './Pages/Shop/ShopItem';
 import ShopItemForm from './Pages/Shop/ShopItemForm';
@@ -32,6 +33,7 @@ const App = () => {
               />
               <Route path={PAGES.Shop} Component={Shop} />
               <Route path={PAGES.ShopOrder} Component={OrderConfirmation} />
+              <Route path={PAGES.OrderView} Component={OrderView} />
               <Route path={PAGES.ShopOrders} Component={ShopOrders} />
               <Route path={`${PAGES.ShopItem}/:itemId`} Component={ShopItem} />
               <Route path={PAGES.ShopEntry} Component={ShopItemForm} />

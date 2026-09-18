@@ -11,6 +11,7 @@ import {
 import {
   formatMeasurement,
   formatPrice,
+  formatStock,
   getPrimaryImage,
   MeasurementUnit,
 } from './format';
@@ -183,9 +184,7 @@ export default function ShopItem() {
           <p className={styles.detailPrice}>
             {formatPrice(item.priceCents, item.currency)}
           </p>
-          <p className={styles.cardMeta}>
-            {isSoldOut ? 'Sold out' : `${item.stock} available`}
-          </p>
+          <p className={styles.cardMeta}>{formatStock(item.stock)}</p>
 
           {!item.isPublished && <p className={styles.draftTag}>Draft</p>}
 
@@ -249,7 +248,7 @@ export default function ShopItem() {
             disabled={isSoldOut || isCheckingOut}
           >
             {isSoldOut
-              ? 'Sold out'
+              ? formatStock(item.stock)
               : isCheckingOut
               ? 'Redirecting...'
               : 'Buy now'}

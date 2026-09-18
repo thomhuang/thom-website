@@ -138,5 +138,13 @@ orders page are committed (`main` == `origin/main` == `b880460`) and verified
   `https://*.r2.dev`. Uploads PUT to the R2 S3 host, so that origin must stay in
   `connect-src`. If the R2 account or public domain changes, update both or
   images/uploads break in the browser.
+- **Orders API (2026-09-18).** `GET /shop/orders` is paginated:
+  `GetShopOrdersAsync({ cursor?, limit?, signal? })` returns
+  `{ orders, nextCursor }` (`""` nextCursor means the last page); the admin page
+  appends pages via a "Load more" button. `ShopOrder` carries a structured
+  shipping address (`shipName`/`shipLine1`/`shipLine2`/`shipCity`/`shipState`/
+  `shipPostalCode`/`shipCountry`) plus the legacy `shippingAddress`;
+  `Pages/Shop/ShippingAddress.tsx` renders the structured form and falls back.
+  Order statuses include `refunded` and `refund_pending` (oversold orders).
 - See the `thom-server` `AGENTS.md` for server-side deploy state, secrets, and
   the Windows Smart App Control test workaround.

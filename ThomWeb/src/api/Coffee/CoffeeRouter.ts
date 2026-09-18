@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { API_BASE_URL } from '../config';
+import { apiRequest } from '../client';
 
 export interface CoffeeEntrySummary {
   id: string;
@@ -60,119 +58,120 @@ export interface CoffeeGrinder {
   createdAt?: string;
 }
 
+// The optional numeric fields are blank-able in the form, so they are optional
+// here and omitted from the request rather than sent as zero.
 export type CoffeeEntryRequest = Omit<
   CoffeeEntry,
-  'id' | 'createdAt' | 'tastingNotes'
->;
+  | 'id'
+  | 'createdAt'
+  | 'tastingNotes'
+  | 'daysSinceRoast'
+  | 'grindSetting'
+  | 'dose'
+  | 'yieldAmount'
+  | 'waterTemperature'
+  | 'bloomWater'
+> & {
+  daysSinceRoast?: number;
+  grindSetting?: number;
+  dose?: number;
+  yieldAmount?: number;
+  waterTemperature?: number;
+  bloomWater?: number;
+};
 
 export type CoffeeEntryPatch = Partial<CoffeeEntryRequest>;
 
 export async function GetCoffeeEntriesAsync(
   signal?: AbortSignal
 ): Promise<CoffeeEntrySummary[]> {
-  const response = await axios({
+  return apiRequest<CoffeeEntrySummary[]>({
     method: 'GET',
     signal,
-    url: `${API_BASE_URL}/coffee`,
+    url: '/coffee',
   });
-
-  return response.data;
 }
 
 export async function GetCoffeeRoastersAsync(
   signal?: AbortSignal
 ): Promise<CoffeeRoaster[]> {
-  const response = await axios({
+  return apiRequest<CoffeeRoaster[]>({
     method: 'GET',
     signal,
-    url: `${API_BASE_URL}/coffee/roasters`,
+    url: '/coffee/roasters',
   });
-
-  return response.data;
 }
 
 export async function CreateCoffeeRoasterAsync(
   request: CoffeeRoaster
 ): Promise<CoffeeRoaster> {
-  const response = await axios({
+  return apiRequest<CoffeeRoaster>({
     method: 'POST',
-    url: `${API_BASE_URL}/coffee/roasters`,
+    url: '/coffee/roasters',
     data: request,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function GetCoffeeGrindersAsync(
   signal?: AbortSignal
 ): Promise<CoffeeGrinder[]> {
-  const response = await axios({
+  return apiRequest<CoffeeGrinder[]>({
     method: 'GET',
     signal,
-    url: `${API_BASE_URL}/coffee/grinders`,
+    url: '/coffee/grinders',
   });
-
-  return response.data;
 }
 
 export async function CreateCoffeeGrinderAsync(
   request: CoffeeGrinder
 ): Promise<CoffeeGrinder> {
-  const response = await axios({
+  return apiRequest<CoffeeGrinder>({
     method: 'POST',
-    url: `${API_BASE_URL}/coffee/grinders`,
+    url: '/coffee/grinders',
     data: request,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function GetCoffeeEntryByIdAsync(
   id: string,
   signal?: AbortSignal
 ): Promise<CoffeeEntry> {
-  const response = await axios({
+  return apiRequest<CoffeeEntry>({
     method: 'GET',
     signal,
-    url: `${API_BASE_URL}/coffee/${id}`,
+    url: `/coffee/${id}`,
   });
-
-  return response.data;
 }
 
 export async function CreateCoffeeEntryAsync(
   request: CoffeeEntryRequest
 ): Promise<CoffeeEntry> {
-  const response = await axios({
+  return apiRequest<CoffeeEntry>({
     method: 'POST',
-    url: `${API_BASE_URL}/coffee`,
+    url: '/coffee',
     data: request,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function UpdateCoffeeEntryAsync(
   id: string,
   request: CoffeeEntryPatch
 ): Promise<CoffeeEntry> {
-  const response = await axios({
+  return apiRequest<CoffeeEntry>({
     method: 'PATCH',
-    url: `${API_BASE_URL}/coffee/${id}`,
+    url: `/coffee/${id}`,
     data: request,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function DeleteCoffeeEntryAsync(id: string): Promise<void> {
-  await axios({
+  await apiRequest<void>({
     method: 'DELETE',
-    url: `${API_BASE_URL}/coffee/${id}`,
+    url: `/coffee/${id}`,
     withCredentials: true,
   });
 }

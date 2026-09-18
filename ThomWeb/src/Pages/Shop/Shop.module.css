@@ -67,6 +67,20 @@
   gap: 1rem;
 }
 
+.loadMore {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.loadMore:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
 /* Storefront grid */
 
 .filterBar {
@@ -505,7 +519,9 @@
 }
 
 .statusPaid,
-.statusPending {
+.statusPending,
+.statusRefunded,
+.statusRefundPending {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -518,6 +534,14 @@
 
 .statusPending {
   color: var(--muted);
+}
+
+.statusRefunded {
+  color: #b3261e;
+}
+
+.statusRefundPending {
+  color: #9a6700;
 }
 
 .orderLines {

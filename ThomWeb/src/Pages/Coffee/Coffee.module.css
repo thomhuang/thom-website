@@ -74,6 +74,13 @@
   gap: 1.5rem;
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .card {
   padding: 1.25rem;
   border: 1px solid var(--border);
@@ -204,7 +211,6 @@
   gap: 1rem;
 }
 
-.linkButton,
 .addButton,
 .deleteButton {
   padding: 0;
@@ -220,7 +226,6 @@
   color: #b42318;
 }
 
-.linkButton:disabled,
 .addButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -383,6 +388,27 @@
 }
 
 .activeStar {
+  color: var(--fg);
+}
+
+.unitToggle {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.unitToggleButton {
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.selectedUnit {
+  border-color: var(--fg);
   color: var(--fg);
 }
 

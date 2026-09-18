@@ -19,9 +19,11 @@ import type {
   CoffeeRoaster,
 } from '../../api/Coffee/CoffeeRouter';
 import styles from './Coffee.module.css';
+import { fromCelsius, roundToTenth, toCelsius } from './format';
+import type { TemperatureUnit } from './format';
 
-export type RoasterOption = CoffeeRoaster;
-export type GrinderOption = CoffeeGrinder;
+type RoasterOption = CoffeeRoaster;
+type GrinderOption = CoffeeGrinder;
 
 type BrewLogDraft = {
   date: string;
@@ -34,7 +36,6 @@ type BrewLogDraft = {
   brewMethod: string;
   ratio: string;
   grinderId: string;
-  grinder: string;
   grindSetting: string;
   dose: string;
   yieldAmount: string;
@@ -97,7 +98,6 @@ const createEmptyDraft = (): BrewLogDraft => ({
   brewMethod: '',
   ratio: '',
   grinderId: '',
-  grinder: '',
   grindSetting: '',
   dose: '',
   yieldAmount: '',
@@ -126,7 +126,6 @@ const createDraftFromEntry = (
   brewMethod: entry.brewMethod,
   ratio: entry.ratio,
   grinderId,
-  grinder: entry.grinder,
   grindSetting: String(entry.grindSetting),
   dose: String(entry.dose),
   yieldAmount: String(entry.yieldAmount),
@@ -149,20 +148,28 @@ const slugifyCoffeeValue = (value: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
+const createCustomId = () => `custom-${Date.now()}`;
+
 const createRoasterOption = (roaster: string): RoasterOption => ({
-  id: slugifyCoffeeValue(roaster) || `custom-${Date.now()}`,
+  id: slugifyCoffeeValue(roaster) || createCustomId(),
   roaster,
 });
 
-const mergeRoasterOptions = (
-  primaryOptions: RoasterOption[],
-  secondaryOptions: RoasterOption[] = []
-): RoasterOption[] => {
-  const optionsById = new Map<string, RoasterOption>();
+const createGrinderOption = (grinder: string): GrinderOption => ({
+  id: slugifyCoffeeValue(grinder) || createCustomId(),
+  grinder,
+});
 
-  [...primaryOptions, ...secondaryOptions].forEach((roaster) => {
-    if (!optionsById.has(roaster.id)) {
-      optionsById.set(roaster.id, roaster);
+// Merge fetched and locally-added options, keeping the first occurrence of an id.
+const mergeById = <T extends { id: string }>(
+  primaryOptions: T[],
+  secondaryOptions: T[] = []
+): T[] => {
+  const optionsById = new Map<string, T>();
+
+  [...primaryOptions, ...secondaryOptions].forEach((option) => {
+    if (!optionsById.has(option.id)) {
+      optionsById.set(option.id, option);
     }
   });
 
@@ -171,30 +178,13 @@ const mergeRoasterOptions = (
 
 const formatGrinderLabel = (grinder: GrinderOption) => grinder.grinder;
 
-const createGrinderOption = (grinder: string): GrinderOption => ({
-  id: slugifyCoffeeValue(grinder) || `custom-${Date.now()}`,
-  grinder,
-});
-
-const mergeGrinderOptions = (
-  primaryOptions: GrinderOption[],
-  secondaryOptions: GrinderOption[] = []
-): GrinderOption[] => {
-  const optionsById = new Map<string, GrinderOption>();
-
-  [...primaryOptions, ...secondaryOptions].forEach((grinder) => {
-    if (!optionsById.has(grinder.id)) {
-      optionsById.set(grinder.id, grinder);
-    }
-  });
-
-  return Array.from(optionsById.values());
-};
-
+// Water temperature is stored as whole degrees Celsius. The form can display it
+// in Fahrenheit, so convert and round back to the server's integer on save.
 const createRequestFromDraft = (
   draft: BrewLogDraft,
   roaster: RoasterOption,
-  grinder: GrinderOption
+  grinder: GrinderOption,
+  temperatureUnit: TemperatureUnit
 ): CoffeeEntryRequest => ({
   ...draft,
   roaster: roaster.roaster,
@@ -203,9 +193,11 @@ const createRequestFromDraft = (
   daysSinceRoast: draft.daysSinceRoast ? Number(draft.daysSinceRoast) : undefined,
   dose: draft.dose ? Number(draft.dose) : undefined,
   yieldAmount: draft.yieldAmount ? Number(draft.yieldAmount) : undefined,
-  waterTemperature: draft.waterTemperature ? Number(draft.waterTemperature) : undefined,
+  waterTemperature: draft.waterTemperature
+    ? Math.round(toCelsius(Number(draft.waterTemperature), temperatureUnit))
+    : undefined,
   bloomWater: draft.bloomWater ? Number(draft.bloomWater) : undefined,
-} as CoffeeEntryRequest);
+});
 
 const validateDraft = (draft: BrewLogDraft): FieldErrors => {
   const errors: FieldErrors = {};
@@ -219,8 +211,11 @@ const validateDraft = (draft: BrewLogDraft): FieldErrors => {
   if (draft.yieldAmount && !/^\d+$/.test(String(draft.yieldAmount).trim())) {
     errors.yieldAmount = 'Enter a whole number';
   }
-  if (draft.waterTemperature && !/^\d+$/.test(String(draft.waterTemperature).trim())) {
-    errors.waterTemperature = 'Enter a whole number';
+  if (
+    draft.waterTemperature &&
+    !/^\d+(\.\d+)?$/.test(String(draft.waterTemperature).trim())
+  ) {
+    errors.waterTemperature = 'Enter a number';
   }
   if (draft.brewTime && !/^\d{1,2}:[0-5]\d$/.test(String(draft.brewTime).trim())) {
     errors.brewTime = 'Enter a time (e.g. 3:20)';
@@ -243,6 +238,7 @@ export default function CoffeeEntry() {
   const [roasterOptions, setRoasterOptions] = useState<RoasterOption[]>([]);
   const [grinderOptions, setGrinderOptions] = useState<GrinderOption[]>([]);
   const [draft, setDraft] = useState<BrewLogDraft>(createEmptyDraft);
+  const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('C');
   const [roasterSearch, setRoasterSearch] = useState('');
   const [grinderSearch, setGrinderSearch] = useState('');
   const [newRoaster, setNewRoaster] = useState('');
@@ -308,7 +304,7 @@ export default function CoffeeEntry() {
 
         if (isMounted) {
           setRoasterOptions((currentOptions) =>
-            mergeRoasterOptions(roasters, currentOptions)
+            mergeById(roasters, currentOptions)
           );
         }
       } catch {
@@ -347,7 +343,7 @@ export default function CoffeeEntry() {
 
         if (isMounted) {
           setGrinderOptions((currentOptions) =>
-            mergeGrinderOptions(grinders, currentOptions)
+            mergeById(grinders, currentOptions)
           );
         }
       } catch {
@@ -416,10 +412,10 @@ export default function CoffeeEntry() {
 
         if (isMounted) {
           setRoasterOptions((currentOptions) =>
-            mergeRoasterOptions(currentOptions, [roasterOption])
+            mergeById(currentOptions, [roasterOption])
           );
           setGrinderOptions((currentOptions) =>
-            mergeGrinderOptions(currentOptions, [grinderOption])
+            mergeById(currentOptions, [grinderOption])
           );
           setDraft(
             createDraftFromEntry(entry, roasterOption.id, grinderOption.id)
@@ -457,6 +453,32 @@ export default function CoffeeEntry() {
         [field]: event.target.value,
       }));
     };
+
+  const changeTemperatureUnit = (nextUnit: TemperatureUnit) => {
+    if (nextUnit === temperatureUnit) {
+      return;
+    }
+
+    setDraft((currentDraft) => {
+      const trimmed = currentDraft.waterTemperature.trim();
+      const parsed = Number(trimmed);
+
+      if (!trimmed || Number.isNaN(parsed)) {
+        return currentDraft;
+      }
+
+      const converted = fromCelsius(
+        toCelsius(parsed, temperatureUnit),
+        nextUnit
+      );
+
+      return {
+        ...currentDraft,
+        waterTemperature: String(roundToTenth(converted)),
+      };
+    });
+    setTemperatureUnit(nextUnit);
+  };
 
   const updateRoasterSearch = (event: ChangeEvent<HTMLInputElement>) => {
     const nextSearch = event.target.value;
@@ -508,7 +530,7 @@ export default function CoffeeEntry() {
       const savedRoaster = await CreateCoffeeRoasterAsync(roaster);
 
       setRoasterOptions((currentOptions) =>
-        mergeRoasterOptions(currentOptions, [savedRoaster])
+        mergeById(currentOptions, [savedRoaster])
       );
       selectRoaster(savedRoaster);
       setNewRoaster('');
@@ -569,7 +591,7 @@ export default function CoffeeEntry() {
       const savedGrinder = await CreateCoffeeGrinderAsync(grinder);
 
       setGrinderOptions((currentOptions) =>
-        mergeGrinderOptions(currentOptions, [savedGrinder])
+        mergeById(currentOptions, [savedGrinder])
       );
       selectGrinder(savedGrinder);
       setNewGrinder('');
@@ -597,11 +619,6 @@ export default function CoffeeEntry() {
       return;
     }
 
-    if (isEditing && !entryId) {
-      setFormError('Coffee entry could not be found.');
-      return;
-    }
-
     setFormError('');
     setIsSubmitting(true);
 
@@ -609,7 +626,8 @@ export default function CoffeeEntry() {
       const request = createRequestFromDraft(
         draft,
         selectedRoaster,
-        selectedGrinder
+        selectedGrinder,
+        temperatureUnit
       );
 
       if (isEditing && entryId) {
@@ -915,16 +933,39 @@ export default function CoffeeEntry() {
                 </label>
 
                 <label className={styles.field} htmlFor="water-temp">
-                  Water temperature (°F)
+                  <span className={styles.labelRow}>
+                    Water temperature
+                    <span
+                      className={styles.unitToggle}
+                      role="group"
+                      aria-label="Temperature units"
+                    >
+                      {(['C', 'F'] as TemperatureUnit[]).map((unit) => (
+                        <button
+                          type="button"
+                          key={unit}
+                          className={[
+                            styles.unitToggleButton,
+                            temperatureUnit === unit ? styles.selectedUnit : '',
+                          ].join(' ')}
+                          onClick={() => changeTemperatureUnit(unit)}
+                          aria-pressed={temperatureUnit === unit}
+                        >
+                          °{unit}
+                        </button>
+                      ))}
+                    </span>
+                  </span>
                   <input
                     id="water-temp"
                     className={fieldErrors.waterTemperature ? styles.invalid : undefined}
                     type="text"
-                    inputMode="numeric"
-                    pattern="\d+"
+                    inputMode="decimal"
+                    pattern="\d+(\.\d+)?"
+                    title="Enter a number"
                     value={draft.waterTemperature}
                     onChange={updateDraft('waterTemperature')}
-                    placeholder="203"
+                    placeholder={temperatureUnit === 'C' ? '93' : '199'}
                   />
                   {fieldErrors.waterTemperature && <span className={styles.fieldError}>{fieldErrors.waterTemperature}</span>}
                 </label>

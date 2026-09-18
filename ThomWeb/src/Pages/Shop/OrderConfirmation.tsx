@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { PAGES } from '../../Assets/constants';
 import { GetShopOrderAsync, ShopOrder } from '../../api/Shop/ShopRouter';
 import { formatPrice } from './format';
+import ShippingAddress from './ShippingAddress';
 import styles from './Shop.module.css';
 
 export default function OrderConfirmation() {
@@ -80,6 +81,7 @@ export default function OrderConfirmation() {
   }
 
   const isPaid = order.status === 'paid';
+  const isRefunded = order.status === 'refunded';
 
   return (
     <main className={styles.page}>
@@ -92,12 +94,14 @@ export default function OrderConfirmation() {
       <article className={styles.detail}>
         <div className={styles.detailBody}>
           <h1 className={styles.detailTitle}>
-            {isPaid ? 'Thank you' : 'Order received'}
+            {isRefunded ? 'Order refunded' : isPaid ? 'Thank you' : 'Order received'}
           </h1>
           <p className={styles.cardMeta}>
-            {isPaid
-              ? 'Payment received. Your order is confirmed.'
-              : 'Payment is still being confirmed. Refresh in a moment.'}
+            {isRefunded
+              ? 'This order could not be fulfilled and has been refunded.'
+              : isPaid
+                ? 'Payment received. Your order is confirmed.'
+                : 'Payment is still being confirmed. Refresh in a moment.'}
           </p>
 
           <p className={styles.detailPrice}>
@@ -111,6 +115,8 @@ export default function OrderConfirmation() {
               </li>
             ))}
           </ul>
+
+          <ShippingAddress order={order} />
 
           {order.customerEmail && (
             <p className={styles.cardMeta}>

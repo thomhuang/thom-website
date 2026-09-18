@@ -5,12 +5,30 @@ import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import { GetShopOrdersAsync, ShopOrder } from '../../api/Shop/ShopRouter';
 import { formatDateTime, formatPrice } from './format';
+import ShippingAddress from './ShippingAddress';
 import styles from './Shop.module.css';
+
+const ORDERS_PAGE_SIZE = 20;
+
+function statusClass(status: string) {
+  switch (status) {
+    case 'paid':
+      return styles.statusPaid;
+    case 'refunded':
+      return styles.statusRefunded;
+    case 'refund_pending':
+      return styles.statusRefundPending;
+    default:
+      return styles.statusPending;
+  }
+}
 
 export default function ShopOrders() {
   const { isAdmin, isAuthLoading } = useAuth();
   const [orders, setOrders] = useState<ShopOrder[]>([]);
+  const [nextCursor, setNextCursor] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [ordersError, setOrdersError] = useState('');
 
   useEffect(() => {
@@ -26,14 +44,19 @@ export default function ShopOrders() {
       setOrdersError('');
 
       try {
-        const loadedOrders = await GetShopOrdersAsync(controller.signal);
+        const page = await GetShopOrdersAsync({
+          signal: controller.signal,
+          limit: ORDERS_PAGE_SIZE,
+        });
 
         if (isMounted) {
-          setOrders(loadedOrders);
+          setOrders(page.orders ?? []);
+          setNextCursor(page.nextCursor);
         }
       } catch {
         if (!controller.signal.aborted && isMounted) {
           setOrders([]);
+          setNextCursor('');
           setOrdersError('Orders could not be loaded.');
         }
       } finally {
@@ -50,6 +73,29 @@ export default function ShopOrders() {
       controller.abort();
     };
   }, [isAdmin, isAuthLoading]);
+
+  const loadMore = async () => {
+    if (!nextCursor || isLoadingMore) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+    setOrdersError('');
+
+    try {
+      const page = await GetShopOrdersAsync({
+        cursor: nextCursor,
+        limit: ORDERS_PAGE_SIZE,
+      });
+
+      setOrders((current) => [...current, ...(page.orders ?? [])]);
+      setNextCursor(page.nextCursor);
+    } catch {
+      setOrdersError('More orders could not be loaded.');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   return (
     <main className={styles.page}>
@@ -102,14 +148,8 @@ export default function ShopOrders() {
                   </p>
                 </div>
                 <div className={styles.orderHeaderMeta}>
-                  <span
-                    className={
-                      order.status === 'paid'
-                        ? styles.statusPaid
-                        : styles.statusPending
-                    }
-                  >
-                    {order.status}
+                  <span className={statusClass(order.status)}>
+                    {order.status.replace('_', ' ')}
                   </span>
                   <p className={styles.orderTotal}>
                     {formatPrice(order.amountTotalCents, order.currency)}
@@ -125,9 +165,7 @@ export default function ShopOrders() {
                 </p>
               )}
 
-              {order.shippingAddress && (
-                <p className={styles.cardMeta}>{order.shippingAddress}</p>
-              )}
+              <ShippingAddress order={order} />
 
               <ul className={styles.orderLines}>
                 {(order.lines ?? []).map((line) => (
@@ -149,6 +187,19 @@ export default function ShopOrders() {
             </article>
           ))}
         </section>
+      )}
+
+      {!isAuthLoading && isAdmin && !isLoading && nextCursor && (
+        <div className={styles.adminActions}>
+          <button
+            type="button"
+            className={styles.loadMore}
+            onClick={loadMore}
+            disabled={isLoadingMore}
+          >
+            {isLoadingMore ? 'Loading...' : 'Load more orders'}
+          </button>
+        </div>
       )}
     </main>
   );

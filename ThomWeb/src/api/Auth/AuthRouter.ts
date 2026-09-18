@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { API_BASE_URL } from '../config';
+import { apiRequest } from '../client';
 
 export interface AuthUser {
   authenticated: boolean;
@@ -13,30 +11,26 @@ export interface LoginRequest {
 }
 
 export async function LoginAsync(request: LoginRequest): Promise<AuthUser> {
-  const response = await axios({
+  return apiRequest<AuthUser>({
     method: 'POST',
-    url: `${API_BASE_URL}/auth/login`,
+    url: '/auth/login',
     data: request,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function LogoutAsync(): Promise<void> {
-  await axios({
+  await apiRequest<void>({
     method: 'POST',
-    url: `${API_BASE_URL}/auth/logout`,
+    url: '/auth/logout',
     withCredentials: true,
   });
 }
 
 export async function GetCurrentUserAsync(): Promise<AuthUser> {
-  const response = await axios({
+  return apiRequest<AuthUser>({
     method: 'GET',
-    url: `${API_BASE_URL}/auth/me`,
+    url: '/auth/me',
     withCredentials: true,
   });
-
-  return response.data;
 }

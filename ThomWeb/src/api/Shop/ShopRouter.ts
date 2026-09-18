@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { API_BASE_URL } from '../config';
+import { apiRequest } from '../client';
 
 export interface ShopImage {
   id: string;
@@ -40,19 +38,10 @@ export interface ShopItem {
   updatedAt?: string;
 }
 
-export interface ShopItemRequest {
-  title: string;
-  description: string;
-  brandId: string;
-  brand: string;
-  priceCents: number;
-  currency: string;
-  stock: number;
-  isPublished: boolean;
-  pitToPitInches?: number;
-  backLengthInches?: number;
-  shoulderInches?: number;
-}
+export type ShopItemRequest = Omit<
+  ShopItem,
+  'id' | 'images' | 'createdAt' | 'updatedAt'
+>;
 
 export interface ShopBrand {
   id: string;
@@ -90,11 +79,25 @@ export interface ShopOrder {
   customerEmail: string;
   customerName: string;
   shippingAddress: string;
+  shipName: string;
+  shipLine1: string;
+  shipLine2: string;
+  shipCity: string;
+  shipState: string;
+  shipPostalCode: string;
+  shipCountry: string;
   amountTotalCents: number;
   currency: string;
   lines: ShopOrderLine[];
+  refundedAt: string;
+  refundReason: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ShopOrdersPage {
+  orders: ShopOrder[];
+  nextCursor: string;
 }
 
 export interface ShopCheckoutSession {
@@ -105,61 +108,53 @@ export interface ShopCheckoutSession {
 export async function GetShopItemsAsync(
   signal?: AbortSignal
 ): Promise<ShopItemSummary[]> {
-  const response = await axios({
+  return apiRequest<ShopItemSummary[]>({
     method: 'GET',
     signal,
-    url: `${API_BASE_URL}/shop/items`,
+    url: '/shop/items',
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function GetShopItemByIdAsync(
   id: string,
   signal?: AbortSignal
 ): Promise<ShopItem> {
-  const response = await axios({
+  return apiRequest<ShopItem>({
     method: 'GET',
     signal,
-    url: `${API_BASE_URL}/shop/items/${id}`,
+    url: `/shop/items/${id}`,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function CreateShopItemAsync(
   request: ShopItemRequest
 ): Promise<ShopItem> {
-  const response = await axios({
+  return apiRequest<ShopItem>({
     method: 'POST',
-    url: `${API_BASE_URL}/shop/items`,
+    url: '/shop/items',
     data: request,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function UpdateShopItemAsync(
   id: string,
   request: ShopItemPatch
 ): Promise<ShopItem> {
-  const response = await axios({
+  return apiRequest<ShopItem>({
     method: 'PATCH',
-    url: `${API_BASE_URL}/shop/items/${id}`,
+    url: `/shop/items/${id}`,
     data: request,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function DeleteShopItemAsync(id: string): Promise<void> {
-  await axios({
+  await apiRequest<void>({
     method: 'DELETE',
-    url: `${API_BASE_URL}/shop/items/${id}`,
+    url: `/shop/items/${id}`,
     withCredentials: true,
   });
 }
@@ -167,63 +162,44 @@ export async function DeleteShopItemAsync(id: string): Promise<void> {
 export async function GetShopBrandsAsync(
   signal?: AbortSignal
 ): Promise<ShopBrand[]> {
-  const response = await axios({
+  return apiRequest<ShopBrand[]>({
     method: 'GET',
     signal,
-    url: `${API_BASE_URL}/shop/brands`,
+    url: '/shop/brands',
   });
-
-  return response.data;
-}
-
-export async function CreateShopBrandAsync(
-  request: ShopBrand
-): Promise<ShopBrand> {
-  const response = await axios({
-    method: 'POST',
-    url: `${API_BASE_URL}/shop/brands`,
-    data: request,
-    withCredentials: true,
-  });
-
-  return response.data;
 }
 
 export async function CreateShopImageUploadAsync(
   itemId: string,
   contentType: string
 ): Promise<ShopImageUploadTicket> {
-  const response = await axios({
+  return apiRequest<ShopImageUploadTicket>({
     method: 'POST',
-    url: `${API_BASE_URL}/shop/items/${itemId}/images/presign`,
+    url: `/shop/items/${itemId}/images/presign`,
     data: { contentType },
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function CreateShopImageAsync(
   itemId: string,
   request: ShopImageRequest
 ): Promise<ShopImage> {
-  const response = await axios({
+  return apiRequest<ShopImage>({
     method: 'POST',
-    url: `${API_BASE_URL}/shop/items/${itemId}/images`,
+    url: `/shop/items/${itemId}/images`,
     data: request,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function DeleteShopImageAsync(
   itemId: string,
   imageId: string
 ): Promise<void> {
-  await axios({
+  await apiRequest<void>({
     method: 'DELETE',
-    url: `${API_BASE_URL}/shop/items/${itemId}/images/${imageId}`,
+    url: `/shop/items/${itemId}/images/${imageId}`,
     withCredentials: true,
   });
 }
@@ -232,41 +208,48 @@ export async function StartShopCheckoutAsync(
   itemId: string,
   quantity = 1
 ): Promise<ShopCheckoutSession> {
-  const response = await axios({
+  return apiRequest<ShopCheckoutSession>({
     method: 'POST',
-    url: `${API_BASE_URL}/shop/checkout`,
+    url: '/shop/checkout',
     data: { itemId, quantity },
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 export async function GetShopOrderAsync(
   sessionId: string,
   signal?: AbortSignal
 ): Promise<ShopOrder> {
-  const response = await axios({
+  return apiRequest<ShopOrder>({
     method: 'GET',
     signal,
-    url: `${API_BASE_URL}/shop/orders/${sessionId}`,
+    url: `/shop/orders/${sessionId}`,
     withCredentials: true,
   });
-
-  return response.data;
 }
 
-export async function GetShopOrdersAsync(
-  signal?: AbortSignal
-): Promise<ShopOrder[]> {
-  const response = await axios({
+// Orders are keyset-paginated: pass the previous page's nextCursor to fetch the
+// page after it, and stop when the returned nextCursor is empty.
+export async function GetShopOrdersAsync(options: {
+  cursor?: string;
+  limit?: number;
+  signal?: AbortSignal;
+} = {}): Promise<ShopOrdersPage> {
+  const params = new URLSearchParams();
+  if (options.cursor) {
+    params.set('cursor', options.cursor);
+  }
+  if (options.limit !== undefined) {
+    params.set('limit', String(options.limit));
+  }
+  const query = params.toString();
+
+  return apiRequest<ShopOrdersPage>({
     method: 'GET',
-    signal,
-    url: `${API_BASE_URL}/shop/orders`,
+    signal: options.signal,
+    url: query ? `/shop/orders?${query}` : '/shop/orders',
     withCredentials: true,
   });
-
-  return response.data;
 }
 
 // The upload goes straight to R2 with a signed URL, so it must bypass axios:

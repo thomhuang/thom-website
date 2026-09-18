@@ -16,6 +16,8 @@ import type {
   CoffeeRoaster,
 } from '../../api/Coffee/CoffeeRouter';
 import { brewMethods } from './CoffeeEntry';
+import { formatTemperature } from './format';
+import type { TemperatureUnit } from './format';
 import styles from './Coffee.module.css';
 
 type EntryStat = {
@@ -34,7 +36,7 @@ const formatCoffeeMetadata = (entry: CoffeeEntrySummary) =>
     .join(' / ');
 
 const formatDaysSinceRoast = (daysSinceRoast?: number) => {
-  if (!daysSinceRoast) {
+  if (daysSinceRoast == null) {
     return '';
   }
 
@@ -44,16 +46,16 @@ const formatDaysSinceRoast = (daysSinceRoast?: number) => {
 const formatGrams = (value?: number) =>
   value != null ? `${value} g` : '';
 
-const formatTemperature = (value?: number) =>
-  value != null ? `${value} °C` : '';
-
 const formatBloom = (entry: CoffeeEntrySummary) =>
   [
     entry.bloomTime,
     formatGrams(entry.bloomWater),
   ].filter(Boolean).join(' / ');
 
-const getEntryStatGroups = (entry: CoffeeEntrySummary): EntryStatGroup[] =>
+const getEntryStatGroups = (
+  entry: CoffeeEntrySummary,
+  temperatureUnit: TemperatureUnit
+): EntryStatGroup[] =>
   [
     {
       title: 'Brew',
@@ -62,7 +64,10 @@ const getEntryStatGroups = (entry: CoffeeEntrySummary): EntryStatGroup[] =>
         { label: 'Ratio', value: entry.ratio },
         { label: 'Dose', value: formatGrams(entry.dose) },
         { label: 'Yield', value: formatGrams(entry.yieldAmount) },
-        { label: 'Water', value: formatTemperature(entry.waterTemperature) },
+        {
+          label: 'Water',
+          value: formatTemperature(entry.waterTemperature, temperatureUnit),
+        },
         { label: 'Time', value: entry.brewTime || '' },
         { label: 'Bloom', value: formatBloom(entry) },
       ],
@@ -123,6 +128,7 @@ export default function Coffee() {
   const [selectedRoasterId, setSelectedRoasterId] = useState('');
   const [selectedGrinderId, setSelectedGrinderId] = useState('');
   const [selectedBrewMethod, setSelectedBrewMethod] = useState('');
+  const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('C');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -302,7 +308,31 @@ export default function Coffee() {
       )}
 
       <section className={styles.entryList} aria-labelledby="coffee-entries">
-        <h2 id="coffee-entries">Brew entries</h2>
+        <div className={styles.sectionHeader}>
+          <h2 id="coffee-entries">Brew entries</h2>
+          {!isLoading && visibleLogs.length > 0 && (
+            <div
+              className={styles.unitToggle}
+              role="group"
+              aria-label="Temperature units"
+            >
+              {(['C', 'F'] as TemperatureUnit[]).map((unit) => (
+                <button
+                  type="button"
+                  key={unit}
+                  className={[
+                    styles.unitToggleButton,
+                    temperatureUnit === unit ? styles.selectedUnit : '',
+                  ].join(' ')}
+                  onClick={() => setTemperatureUnit(unit)}
+                  aria-pressed={temperatureUnit === unit}
+                >
+                  °{unit}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {isLoading ? (
           <p className={styles.statusText}>Loading brew entries...</p>
@@ -310,7 +340,7 @@ export default function Coffee() {
           <div className={styles.entryGrid}>
             {visibleLogs.map((entry) => {
               const coffeeMetadata = formatCoffeeMetadata(entry);
-              const statGroups = getEntryStatGroups(entry);
+              const statGroups = getEntryStatGroups(entry, temperatureUnit);
               const tastingNotes = getTastingNotes(entry);
 
               return (

@@ -87,6 +87,40 @@ const parseMeasurement = (value: string): number | null => {
   return parsed >= 0 && parsed <= 100 ? parsed : null;
 };
 
+type MeasurementFieldProps = {
+  id: string;
+  label: string;
+  placeholder: string;
+  value: string;
+  error?: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+};
+
+function MeasurementField({
+  id,
+  label,
+  placeholder,
+  value,
+  error,
+  onChange,
+}: MeasurementFieldProps) {
+  return (
+    <label className={styles.field} htmlFor={id}>
+      {label}
+      <input
+        id={id}
+        className={error ? styles.invalid : undefined}
+        type="text"
+        inputMode="decimal"
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+      />
+      {error && <span className={styles.fieldError}>{error}</span>}
+    </label>
+  );
+}
+
 export default function ShopItemForm() {
   const { itemId } = useParams<{ itemId?: string }>();
   const navigate = useNavigate();
@@ -230,17 +264,7 @@ export default function ShopItemForm() {
   const saveItem = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (
-      fieldErrors.title ||
-      fieldErrors.price ||
-      fieldErrors.stock ||
-      fieldErrors.pitToPit ||
-      fieldErrors.backLength ||
-      fieldErrors.shoulder
-    ) {
-      return;
-    }
-    if (priceCents === null) {
+    if (Object.values(fieldErrors).some(Boolean) || priceCents === null) {
       return;
     }
 
@@ -528,59 +552,32 @@ export default function ShopItemForm() {
               </p>
 
               <div className={styles.fieldGrid}>
-                <label className={styles.field} htmlFor="shop-pit-to-pit">
-                  Pit to pit
-                  <input
-                    id="shop-pit-to-pit"
-                    className={fieldErrors.pitToPit ? styles.invalid : undefined}
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="e.g. 22.5"
-                    value={draft.pitToPit}
-                    onChange={updateDraft('pitToPit')}
-                  />
-                  {fieldErrors.pitToPit && (
-                    <span className={styles.fieldError}>
-                      {fieldErrors.pitToPit}
-                    </span>
-                  )}
-                </label>
+                <MeasurementField
+                  id="shop-pit-to-pit"
+                  label="Pit to pit"
+                  placeholder="e.g. 22.5"
+                  value={draft.pitToPit}
+                  error={fieldErrors.pitToPit ?? undefined}
+                  onChange={updateDraft('pitToPit')}
+                />
 
-                <label className={styles.field} htmlFor="shop-back-length">
-                  Back length
-                  <input
-                    id="shop-back-length"
-                    className={fieldErrors.backLength ? styles.invalid : undefined}
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="e.g. 28.0"
-                    value={draft.backLength}
-                    onChange={updateDraft('backLength')}
-                  />
-                  {fieldErrors.backLength && (
-                    <span className={styles.fieldError}>
-                      {fieldErrors.backLength}
-                    </span>
-                  )}
-                </label>
+                <MeasurementField
+                  id="shop-back-length"
+                  label="Back length"
+                  placeholder="e.g. 28.0"
+                  value={draft.backLength}
+                  error={fieldErrors.backLength ?? undefined}
+                  onChange={updateDraft('backLength')}
+                />
 
-                <label className={styles.field} htmlFor="shop-shoulder">
-                  Shoulder
-                  <input
-                    id="shop-shoulder"
-                    className={fieldErrors.shoulder ? styles.invalid : undefined}
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="e.g. 18.5"
-                    value={draft.shoulder}
-                    onChange={updateDraft('shoulder')}
-                  />
-                  {fieldErrors.shoulder && (
-                    <span className={styles.fieldError}>
-                      {fieldErrors.shoulder}
-                    </span>
-                  )}
-                </label>
+                <MeasurementField
+                  id="shop-shoulder"
+                  label="Shoulder"
+                  placeholder="e.g. 18.5"
+                  value={draft.shoulder}
+                  error={fieldErrors.shoulder ?? undefined}
+                  onChange={updateDraft('shoulder')}
+                />
               </div>
             </section>
 

@@ -10,16 +10,8 @@ import {
   ShopBrand,
   ShopItemSummary,
 } from '../../api/Shop/ShopRouter';
-import { formatPrice } from './format';
+import { formatPrice, formatStock } from './format';
 import styles from './Shop.module.css';
-
-const formatStock = (stock: number) => {
-  if (stock < 1) {
-    return 'Sold out';
-  }
-
-  return stock === 1 ? '1 available' : `${stock} available`;
-};
 
 type SortOrder = 'newest' | 'oldest' | 'price-asc' | 'price-desc';
 
@@ -78,7 +70,7 @@ export default function Shop() {
       try {
         const loadedItems = await GetShopItemsAsync(controller.signal);
         const loadedBrands = await GetShopBrandsAsync(controller.signal).catch(
-          () => [] as ShopBrand[]
+          (): ShopBrand[] => []
         );
 
         if (isMounted) {

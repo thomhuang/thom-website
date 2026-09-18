@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import { PAGES } from './Assets/constants';
 import styles from './App.module.css';
 import { AuthProvider } from './Auth/AuthContext';
 import Footer from './Components/Footer/Footer';
@@ -22,18 +23,24 @@ const App = () => {
           <Header/>
           <main className={styles.main}>
             <Routes>
-              <Route path='/' Component={HomePage} />
-              <Route path ='/coffee' Component={Coffee}/>
-              <Route path ='/coffee/entry' Component={CoffeeEntry}/>
-              <Route path ='/coffee/entry/:entryId' Component={CoffeeEntry}/>
-              <Route path='/shop' Component={Shop} />
-              <Route path='/shop/order' Component={OrderConfirmation} />
-              <Route path='/shop/orders' Component={ShopOrders} />
-              <Route path='/shop/item/:itemId' Component={ShopItem} />
-              <Route path='/shop/entry' Component={ShopItemForm} />
-              <Route path='/shop/entry/:itemId' Component={ShopItemForm} />
-              <Route path='/error' Component={ErrorPage} />
-              <Route path='*' Component={ErrorPage} />
+              <Route path={PAGES.Home} Component={HomePage} />
+              <Route path={PAGES.Coffee} Component={Coffee} />
+              <Route path={PAGES.CoffeeEntry} Component={CoffeeEntry} />
+              <Route
+                path={`${PAGES.CoffeeEntry}/:entryId`}
+                Component={CoffeeEntry}
+              />
+              <Route path={PAGES.Shop} Component={Shop} />
+              <Route path={PAGES.ShopOrder} Component={OrderConfirmation} />
+              <Route path={PAGES.ShopOrders} Component={ShopOrders} />
+              <Route path={`${PAGES.ShopItem}/:itemId`} Component={ShopItem} />
+              <Route path={PAGES.ShopEntry} Component={ShopItemForm} />
+              <Route
+                path={`${PAGES.ShopEntry}/:itemId`}
+                Component={ShopItemForm}
+              />
+              <Route path={PAGES.Error} Component={ErrorPage} />
+              <Route path="*" Component={ErrorPage} />
             </Routes>
           </main>
           <Footer/>

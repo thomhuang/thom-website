@@ -287,6 +287,65 @@
   border-top: 1px solid var(--border);
 }
 
+.measurements {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.measurementsHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.measurementsTitle {
+  font-size: 1rem;
+}
+
+.unitToggle {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.unitToggleButton {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.selectedUnit {
+  border-color: var(--fg);
+}
+
+.measurementsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.measurementsTable th,
+.measurementsTable td {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+  text-align: left;
+}
+
+.measurementsTable th {
+  color: var(--muted);
+}
+
+.measurementsTable td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Admin form */
 
 .form {

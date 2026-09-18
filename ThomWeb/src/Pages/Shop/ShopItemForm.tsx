@@ -37,10 +37,21 @@ type ShopItemDraft = {
   brand: string;
   price: string;
   stock: string;
+  pitToPit: string;
+  backLength: string;
+  shoulder: string;
   isPublished: boolean;
 };
 
-type DraftField = 'title' | 'description' | 'brand' | 'price' | 'stock';
+type DraftField =
+  | 'title'
+  | 'description'
+  | 'brand'
+  | 'price'
+  | 'stock'
+  | 'pitToPit'
+  | 'backLength'
+  | 'shoulder';
 
 const createEmptyDraft = (): ShopItemDraft => ({
   title: '',
@@ -48,11 +59,33 @@ const createEmptyDraft = (): ShopItemDraft => ({
   brand: '',
   price: '',
   stock: '1',
+  pitToPit: '',
+  backLength: '',
+  shoulder: '',
   isPublished: false,
 });
 
 const validateStock = (value: string) =>
   /^\d+$/.test(value.trim()) ? null : 'Enter a whole number';
+
+const MEASUREMENT_ERROR = 'Enter inches between 0 and 100';
+
+// Optional garment measurements, entered in inches. Blank means "not
+// provided" (stored as 0); invalid or out-of-range input returns null.
+const parseMeasurement = (value: string): number | null => {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return 0;
+  }
+  if (!/^\d+(\.\d+)?$/.test(trimmed)) {
+    return null;
+  }
+
+  const parsed = Number(trimmed);
+
+  return parsed >= 0 && parsed <= 100 ? parsed : null;
+};
 
 export default function ShopItemForm() {
   const { itemId } = useParams<{ itemId?: string }>();
@@ -76,7 +109,17 @@ export default function ShopItemForm() {
   const titleError = draft.title.trim() ? null : 'Title is required';
   const priceError =
     priceCents === null || priceCents < 1 ? 'Enter a price like 18.00' : null;
-  const fieldErrors = { title: titleError, price: priceError, stock: stockError };
+  const pitToPit = parseMeasurement(draft.pitToPit);
+  const backLength = parseMeasurement(draft.backLength);
+  const shoulder = parseMeasurement(draft.shoulder);
+  const fieldErrors = {
+    title: titleError,
+    price: priceError,
+    stock: stockError,
+    pitToPit: pitToPit === null ? MEASUREMENT_ERROR : null,
+    backLength: backLength === null ? MEASUREMENT_ERROR : null,
+    shoulder: shoulder === null ? MEASUREMENT_ERROR : null,
+  };
   const canShowForm =
     !isAuthLoading && isAdmin && !isItemLoading && !itemLoadFailed;
 
@@ -118,6 +161,9 @@ export default function ShopItemForm() {
             brand: item.brand || '',
             price: formatPriceInput(item.priceCents),
             stock: String(item.stock),
+            pitToPit: item.pitToPitInches ? String(item.pitToPitInches) : '',
+            backLength: item.backLengthInches ? String(item.backLengthInches) : '',
+            shoulder: item.shoulderInches ? String(item.shoulderInches) : '',
             isPublished: item.isPublished,
           });
           setImages(item.images);
@@ -184,7 +230,14 @@ export default function ShopItemForm() {
   const saveItem = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (fieldErrors.title || fieldErrors.price || fieldErrors.stock) {
+    if (
+      fieldErrors.title ||
+      fieldErrors.price ||
+      fieldErrors.stock ||
+      fieldErrors.pitToPit ||
+      fieldErrors.backLength ||
+      fieldErrors.shoulder
+    ) {
       return;
     }
     if (priceCents === null) {
@@ -202,6 +255,9 @@ export default function ShopItemForm() {
       priceCents,
       currency: 'usd',
       stock: Number(draft.stock),
+      pitToPitInches: pitToPit ?? 0,
+      backLengthInches: backLength ?? 0,
+      shoulderInches: shoulder ?? 0,
       isPublished: draft.isPublished,
     };
 
@@ -462,6 +518,70 @@ export default function ShopItemForm() {
                   Drafts are only visible while signed in.
                 </span>
               </label>
+            </section>
+
+            <section className={styles.section} aria-labelledby="shop-measurements">
+              <h2 id="shop-measurements">Measurements</h2>
+              <p className={styles.hint}>
+                Optional. Enter inches (0–100) for clothing and leave blank
+                otherwise. The listing page converts to cm on request.
+              </p>
+
+              <div className={styles.fieldGrid}>
+                <label className={styles.field} htmlFor="shop-pit-to-pit">
+                  Pit to pit
+                  <input
+                    id="shop-pit-to-pit"
+                    className={fieldErrors.pitToPit ? styles.invalid : undefined}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="e.g. 22.5"
+                    value={draft.pitToPit}
+                    onChange={updateDraft('pitToPit')}
+                  />
+                  {fieldErrors.pitToPit && (
+                    <span className={styles.fieldError}>
+                      {fieldErrors.pitToPit}
+                    </span>
+                  )}
+                </label>
+
+                <label className={styles.field} htmlFor="shop-back-length">
+                  Back length
+                  <input
+                    id="shop-back-length"
+                    className={fieldErrors.backLength ? styles.invalid : undefined}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="e.g. 28.0"
+                    value={draft.backLength}
+                    onChange={updateDraft('backLength')}
+                  />
+                  {fieldErrors.backLength && (
+                    <span className={styles.fieldError}>
+                      {fieldErrors.backLength}
+                    </span>
+                  )}
+                </label>
+
+                <label className={styles.field} htmlFor="shop-shoulder">
+                  Shoulder
+                  <input
+                    id="shop-shoulder"
+                    className={fieldErrors.shoulder ? styles.invalid : undefined}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="e.g. 18.5"
+                    value={draft.shoulder}
+                    onChange={updateDraft('shoulder')}
+                  />
+                  {fieldErrors.shoulder && (
+                    <span className={styles.fieldError}>
+                      {fieldErrors.shoulder}
+                    </span>
+                  )}
+                </label>
+              </div>
             </section>
 
             <section className={styles.section} aria-labelledby="shop-images">

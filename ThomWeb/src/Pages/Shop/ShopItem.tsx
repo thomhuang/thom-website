@@ -8,8 +8,18 @@ import {
   ShopItem as ShopItemResponse,
   StartShopCheckoutAsync,
 } from '../../api/Shop/ShopRouter';
-import { formatPrice, getPrimaryImage } from './format';
+import {
+  formatMeasurement,
+  formatPrice,
+  getPrimaryImage,
+  MeasurementUnit,
+} from './format';
 import styles from './Shop.module.css';
+
+const measurementUnitStorageKey = 'shop-measurement-unit';
+
+const getInitialMeasurementUnit = (): MeasurementUnit =>
+  localStorage.getItem(measurementUnitStorageKey) === 'cm' ? 'cm' : 'in';
 
 export default function ShopItem() {
   const { itemId } = useParams<{ itemId?: string }>();
@@ -21,6 +31,13 @@ export default function ShopItem() {
   const [checkoutError, setCheckoutError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [itemError, setItemError] = useState('');
+  const [measurementUnit, setMeasurementUnit] = useState<MeasurementUnit>(
+    getInitialMeasurementUnit
+  );
+
+  useEffect(() => {
+    localStorage.setItem(measurementUnitStorageKey, measurementUnit);
+  }, [measurementUnit]);
 
   useEffect(() => {
     if (!itemId) {
@@ -87,6 +104,15 @@ export default function ShopItem() {
   }
 
   const isSoldOut = item.stock < 1;
+
+  const measurements = [
+    { label: 'Pit to pit', inches: item.pitToPitInches },
+    { label: 'Back length', inches: item.backLengthInches },
+    { label: 'Shoulder', inches: item.shoulderInches },
+  ].filter(
+    (measurement): measurement is { label: string; inches: number } =>
+      Boolean(measurement.inches)
+  );
 
   const startCheckout = async () => {
     setIsCheckingOut(true);
@@ -165,6 +191,55 @@ export default function ShopItem() {
 
           {item.description && (
             <p className={styles.detailDescription}>{item.description}</p>
+          )}
+
+          {measurements.length > 0 && (
+            <section
+              className={styles.measurements}
+              aria-labelledby="shop-measurements-title"
+            >
+              <div className={styles.measurementsHeader}>
+                <h2
+                  id="shop-measurements-title"
+                  className={styles.measurementsTitle}
+                >
+                  Measurements
+                </h2>
+                <div
+                  className={styles.unitToggle}
+                  role="group"
+                  aria-label="Measurement units"
+                >
+                  {(['in', 'cm'] as MeasurementUnit[]).map((unit) => (
+                    <button
+                      type="button"
+                      key={unit}
+                      className={[
+                        styles.unitToggleButton,
+                        measurementUnit === unit ? styles.selectedUnit : '',
+                      ].join(' ')}
+                      onClick={() => setMeasurementUnit(unit)}
+                      aria-pressed={measurementUnit === unit}
+                    >
+                      {unit}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <table className={styles.measurementsTable}>
+                <tbody>
+                  {measurements.map((measurement) => (
+                    <tr key={measurement.label}>
+                      <th scope="row">{measurement.label}</th>
+                      <td>
+                        {formatMeasurement(measurement.inches, measurementUnit)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
           )}
 
           <button

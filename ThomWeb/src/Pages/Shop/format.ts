@@ -41,3 +41,13 @@ export const formatDateTime = (value: string): string => {
 
 export const getPrimaryImage = (images: ShopImage[]) =>
   images.length > 0 ? images[0].url : '';
+
+export type MeasurementUnit = 'in' | 'cm';
+
+// Measurements are stored in inches. Display converts to cm on request,
+// rounded to one decimal to match the server's storage precision.
+export const formatMeasurement = (inches: number, unit: MeasurementUnit) => {
+  const value = unit === 'cm' ? inches * 2.54 : inches;
+
+  return `${value.toFixed(1)} ${unit}`;
+};

@@ -32,6 +32,9 @@ export interface ShopItem {
   currency: string;
   stock: number;
   isPublished: boolean;
+  pitToPitInches?: number;
+  backLengthInches?: number;
+  shoulderInches?: number;
   images: ShopImage[];
   createdAt?: string;
   updatedAt?: string;
@@ -46,6 +49,9 @@ export interface ShopItemRequest {
   currency: string;
   stock: number;
   isPublished: boolean;
+  pitToPitInches?: number;
+  backLengthInches?: number;
+  shoulderInches?: number;
 }
 
 export interface ShopBrand {

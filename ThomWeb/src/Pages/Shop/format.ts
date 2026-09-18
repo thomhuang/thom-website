@@ -24,5 +24,20 @@ export const parsePriceToCents = (value: string): number | null => {
 export const formatPriceInput = (priceCents: number) =>
   (priceCents / 100).toFixed(2);
 
+// The API stores timestamps as UTC "YYYY-MM-DD HH:MM:SS". Normalize that form
+// before parsing so the browser does not read it as local time.
+export const formatDateTime = (value: string): string => {
+  if (!value) {
+    return '';
+  }
+
+  const normalized = value.includes('T')
+    ? value
+    : `${value.replace(' ', 'T')}Z`;
+  const parsed = new Date(normalized);
+
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+};
+
 export const getPrimaryImage = (images: ShopImage[]) =>
   images.length > 0 ? images[0].url : '';

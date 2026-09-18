@@ -12,6 +12,7 @@ import OrderConfirmation from './Pages/Shop/OrderConfirmation';
 import Shop from './Pages/Shop/Shop';
 import ShopItem from './Pages/Shop/ShopItem';
 import ShopItemForm from './Pages/Shop/ShopItemForm';
+import ShopOrders from './Pages/Shop/ShopOrders';
 
 const App = () => {
   return(
@@ -27,6 +28,7 @@ const App = () => {
               <Route path ='/coffee/entry/:entryId' Component={CoffeeEntry}/>
               <Route path='/shop' Component={Shop} />
               <Route path='/shop/order' Component={OrderConfirmation} />
+              <Route path='/shop/orders' Component={ShopOrders} />
               <Route path='/shop/item/:itemId' Component={ShopItem} />
               <Route path='/shop/entry' Component={ShopItemForm} />
               <Route path='/shop/entry/:itemId' Component={ShopItemForm} />

@@ -243,7 +243,20 @@ export async function GetShopOrderAsync(
   const response = await axios({
     method: 'GET',
     signal,
-    url: `${BASE_ROUTE}/shop/orders/${sessionId}`,
+    url: `${API_BASE_URL}/shop/orders/${sessionId}`,
+    withCredentials: true,
+  });
+
+  return response.data;
+}
+
+export async function GetShopOrdersAsync(
+  signal?: AbortSignal
+): Promise<ShopOrder[]> {
+  const response = await axios({
+    method: 'GET',
+    signal,
+    url: `${API_BASE_URL}/shop/orders`,
     withCredentials: true,
   });
 

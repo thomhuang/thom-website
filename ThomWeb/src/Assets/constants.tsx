@@ -6,5 +6,6 @@ export enum PAGES {
     ShopItem = '/shop/item',
     ShopEntry = '/shop/entry',
     ShopOrder = '/shop/order',
+    ShopOrders = '/shop/orders',
     Error = '/error'
 }

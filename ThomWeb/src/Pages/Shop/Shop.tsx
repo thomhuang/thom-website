@@ -21,6 +21,25 @@ const formatStock = (stock: number) => {
   return stock === 1 ? '1 available' : `${stock} available`;
 };
 
+type SortOrder = 'newest' | 'oldest' | 'price-asc' | 'price-desc';
+
+// Listings arrive newest first. `id` is the insertion order, so ascending id is
+// oldest first; the price orders are plain numeric comparisons.
+const sortItems = (items: ShopItemSummary[], sortOrder: SortOrder) => {
+  const sortedItems = [...items];
+
+  switch (sortOrder) {
+    case 'oldest':
+      return sortedItems.sort((a, b) => Number(a.id) - Number(b.id));
+    case 'price-asc':
+      return sortedItems.sort((a, b) => a.priceCents - b.priceCents);
+    case 'price-desc':
+      return sortedItems.sort((a, b) => b.priceCents - a.priceCents);
+    default:
+      return sortedItems;
+  }
+};
+
 function CardImage({ src, alt }: { src: string; alt: string }) {
   const [hasError, setHasError] = useState(false);
 
@@ -44,6 +63,7 @@ export default function Shop() {
   const [items, setItems] = useState<ShopItemSummary[]>([]);
   const [brands, setBrands] = useState<ShopBrand[]>([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [isLoading, setIsLoading] = useState(true);
   const [shopError, setShopError] = useState('');
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
@@ -107,9 +127,12 @@ export default function Shop() {
     }
   };
 
-  const visibleItems = selectedBrandId
-    ? items.filter((item) => item.brandId === selectedBrandId)
-    : items;
+  const visibleItems = sortItems(
+    selectedBrandId
+      ? items.filter((item) => item.brandId === selectedBrandId)
+      : items,
+    sortOrder
+  );
 
   return (
     <main className={styles.page}>
@@ -123,26 +146,45 @@ export default function Shop() {
           <Link className={styles.textLink} to={PAGES.ShopEntry}>
             New listing
           </Link>
+          <Link className={styles.textLink} to={PAGES.ShopOrders}>
+            Orders
+          </Link>
         </div>
       )}
 
       {shopError && <aside className={styles.errorNotice}>{shopError}</aside>}
 
-      {brands.length > 0 && (
+      {!isLoading && (brands.length > 0 || items.length > 0) && (
         <div className={styles.filterBar}>
-          <label className={styles.field} htmlFor="shop-brand-filter">
-            Brand
+          {brands.length > 0 && (
+            <label className={styles.field} htmlFor="shop-brand-filter">
+              Brand
+              <select
+                id="shop-brand-filter"
+                value={selectedBrandId}
+                onChange={(event) => setSelectedBrandId(event.target.value)}
+              >
+                <option value="">All brands</option>
+                {brands.map((brand) => (
+                  <option value={brand.id} key={brand.id}>
+                    {brand.brand}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          <label className={styles.field} htmlFor="shop-sort">
+            Sort
             <select
-              id="shop-brand-filter"
-              value={selectedBrandId}
-              onChange={(event) => setSelectedBrandId(event.target.value)}
+              id="shop-sort"
+              value={sortOrder}
+              onChange={(event) => setSortOrder(event.target.value as SortOrder)}
             >
-              <option value="">All brands</option>
-              {brands.map((brand) => (
-                <option value={brand.id} key={brand.id}>
-                  {brand.brand}
-                </option>
-              ))}
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="price-asc">Price: low to high</option>
+              <option value="price-desc">Price: high to low</option>
             </select>
           </label>
         </div>

@@ -405,6 +405,85 @@
   cursor: not-allowed;
 }
 
+/* Admin orders */
+
+.orderList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.orderCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+}
+
+.orderHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.orderTitle {
+  font-size: 1.125rem;
+}
+
+.orderHeaderMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.orderTotal {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.statusPaid,
+.statusPending {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusPaid {
+  color: #12805c;
+}
+
+.statusPending {
+  color: var(--muted);
+}
+
+.orderLines {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.orderLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.orderSession {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 640px) {
   .fieldGrid {
     grid-template-columns: 1fr;

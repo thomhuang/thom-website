@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '../../Auth/AuthContext';
 import styles from './Headers.module.css';
@@ -8,6 +8,7 @@ import styles from './Headers.module.css';
 export default function AuthControl() {
   const [authUsername, setAuthUsername] = useState('');
   const [authPassword, setAuthPassword] = useState('');
+  const authMenuRef = useRef<HTMLDetailsElement>(null);
   const {
     authUser,
     authError,
@@ -17,6 +18,19 @@ export default function AuthControl() {
     login,
     logout,
   } = useAuth();
+
+  useEffect(() => {
+    function closeOnOutsideClick(event: MouseEvent) {
+      const menu = authMenuRef.current;
+      if (!menu?.open) return;
+      if (!(event.target instanceof Node) || !menu.contains(event.target)) {
+        menu.open = false;
+      }
+    }
+
+    document.addEventListener('click', closeOnOutsideClick);
+    return () => document.removeEventListener('click', closeOnOutsideClick);
+  }, []);
 
   async function submitLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,7 +73,7 @@ export default function AuthControl() {
   }
 
   return (
-    <details className={styles.authMenu}>
+    <details ref={authMenuRef} className={styles.authMenu}>
       <summary className={styles.textButton}>login</summary>
       <form className={styles.authForm} onSubmit={submitLogin}>
         <label className={styles.authField} htmlFor="header-auth-username">

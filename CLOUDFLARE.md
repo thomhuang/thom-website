@@ -63,8 +63,10 @@ Builds** and use:
 - Build command: `npm install && npm run build`
 - Deploy command: `npx wrangler deploy`
 
-Workers Builds deploys production only. The test Worker is deployed manually with
-`-c wrangler.test.jsonc`.
+Set the **production branch** to `release`. Pushes to `main` do not trigger a
+production build; promote with `git push origin main:release` (a fast-forward)
+when shipping. Workers Builds deploys production only. The test Worker is
+deployed manually with `-c wrangler.test.jsonc`.
 
 ## Wire the two together
 

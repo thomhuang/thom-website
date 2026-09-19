@@ -3,8 +3,15 @@ import { Link } from "react-router-dom";
 import { PAGES } from "../../Assets/constants";
 import styles from "./HomePage.module.css";
 
+const documents = import.meta.glob("/public/documents/*", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
+
 export default function HomePage() {
-  const resumeHref = "/documents/curr_resume.pdf";
+  const files = Object.values(documents).sort();
+  const resumeHref = (files[files.length - 1] ?? "").replace("/public", "");
 
   return (
     <div className={styles.text}>

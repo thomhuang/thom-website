@@ -2,11 +2,10 @@
 
 ## Session board
 
-Concurrent agent sessions working under `D:\Repos` log status to
-`D:\Repos\BOARD.md`. **Read it before starting work**, and when you stop, append
-an entry above the END sentinel using `edit` (never `write`, which replaces the
-whole file). It is a shared live log, not a lock, and the repos remain the
-source of truth.
+If a shared session board (a `BOARD.md` next to the repositories you work on)
+exists, read it before starting work, and when you stop, append an entry above
+its END sentinel using `edit` (never `write`, which replaces the whole file).
+It is a shared live log, not a lock, and the repos remain the source of truth.
 
 ## 1. Think Before Coding
 
@@ -68,96 +67,38 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
-## Project Structure & Module Organization
+## Coding Style
 
-The React app lives in `ThomWeb/`; run app commands from that directory. Source code is under `ThomWeb/src/`. Routes are defined in `src/App.tsx`, entry wiring in `src/index.tsx`, shared hooks in `src/hooks.tsx`, pages in `src/Pages/`, reusable UI in `src/Components/`, auth context in `src/Auth/`, API clients in `src/api/`, and shared copy/constants in `src/Assets/`. Global theme tokens, font-face declarations, and base styles live in `src/index.css`; font files live in `src/Fonts/`; component-local styles use CSS Modules such as `App.module.css`. Static public assets such as documents belong in `ThomWeb/public/`. Deployment lives at the repo root: `wrangler.jsonc`, `worker/index.js`, and `package.json` serve `ThomWeb/dist` as static assets and proxy `/api/*` to the matching `thom-server`/`thom-server-test` Worker. See `CLOUDFLARE.md`.
+Use TypeScript with functional React components where the stack is React. Avoid
+`any`; type component props, API responses, and environment boundaries
+explicitly. Keep page-specific loading, form, and error state local; shared
+state belongs in dedicated auth/context modules. Use the project's existing
+styling approach (e.g., CSS Modules and design tokens) instead of inventing new
+conventions. Match the surrounding files' casing, quotes, and structure.
 
-## Build, Test, and Development Commands
+## Testing
 
-Run app commands from `ThomWeb/`:
+Write tests near the code they cover. Prioritize route smoke tests, API-client
+behavior, loading states, empty states, errors, and responsive rendering for
+user-facing changes. Run the project's checks (typecheck, lint, tests) before
+declaring work done.
 
-- `npm start` runs the Vite dev server; the API base defaults to `http://localhost:4000`.
-- `npm run build` creates a production build in `ThomWeb/dist`; the API base defaults to `/api`.
-- `npm run lint` runs ESLint over `src/**/*.{ts,tsx}` (flat config in `eslint.config.mjs`).
-- `npm run typecheck` runs `tsc --noEmit`.
-- `npm test` starts the Vitest test runner (watch mode; use `npx vitest run` for CI).
+## Committing
 
-The API base URL lives in `ThomWeb/src/api/config.ts`. `VITE_API_URL`
-overrides it; otherwise development uses `http://localhost:4000` and everything
-else uses `/api`. No `.env` file is required or committed.
+Keep commits short, descriptive, and focused: avoid mixing broad refactors with
+feature work. Pull requests should include a concise summary, the verification
+commands run, linked issues when relevant, and screenshots or recordings for
+visual changes.
 
-Run deploy commands from the repo root:
+## Security
 
-- `npm run build` builds `ThomWeb/` into `ThomWeb/dist`.
-- `npx wrangler deploy` deploys the Worker and its static assets. See `CLOUDFLARE.md`.
-- `npx wrangler deploy -c wrangler.test.jsonc` deploys the test Worker (`thom-website-test`).
+Never commit secrets or keys. Keep network and service-access logic in a
+dedicated API layer; hidden UI is not security. Build-time environment
+variables are public by design, so never put secrets in them. Consult the
+committed `.example` env files for config shape; treat real `.env*` and
+`.dev.vars*` files as off-limits for reading or printing.
 
-## Coding Style & Naming Conventions
+## Remaining Work
 
-Use TypeScript and functional React components. Avoid `any`; type component props, API responses, and environment boundaries explicitly. Keep page-specific loading, form, and error state local; use `src/Auth/` for shared authentication state and `src/hooks.tsx` for shared hooks. Match existing directory casing (`api`, `Assets`, `Auth`, `Components`, `Fonts`, `Pages`) and prefer `.ts` for non-JSX files and `.tsx` for JSX. Use CSS Modules for local component styling and tokens from `src/index.css` for colors, spacing, typography, transitions, and theme-aware values.
-
-## Testing Guidelines
-
-Tests use Vitest with React Testing Library in a jsdom environment (`npm test`,
-setup in `src/setupTests.ts`). Place tests near the code they cover and name them like `Component.test.tsx` or `client.test.ts`. Prioritize route smoke tests, API-client behavior, loading states, empty states, errors, and responsive desktop/mobile rendering for user-facing changes.
-
-## Commit & Pull Request Guidelines
-
-Recent commits are short and descriptive, for example `homepage/header cleanup + env` or `refactors and cleanups, start of something new`. Keep commits focused and avoid mixing broad refactors with feature work. Pull requests should include a concise summary, verification commands, linked issues when relevant, and screenshots or recordings for visual changes.
-
-## Security & Configuration Tips
-
-Keep fetch and service-access logic in `src/api/`; hidden UI is not security. The only public build-time variable is `VITE_API_URL`; it defaults to `/api` in production, which the Worker proxies to `thom-server` on the same origin so auth cookies stay first-party. Update `ThomWeb/.env.example`, `src/api/config.ts`, and `src/vite-env.d.ts` when adding `VITE_*` variables. `VITE_*` values are embedded in the bundle and must never contain secrets.
-
-Local `.env*` and `.dev.vars*` files (except the committed `.example` files) are gitignored and denied to the `read` tool via global OpenCode permissions. Do not work around that with `grep` or shell commands — a pattern match prints the value into the transcript. Read the `.example` files for the shape of the config instead.
-
-## Outstanding work — deployment & shop (2026-09-18)
-
-The storefront, admin listing form, brand/grinder filters, listing sort, and admin
-orders page are committed (current tip: `D:\Repos\BOARD.md`) and verified
-(`npm run typecheck`, `npm run lint`, `npm run build`). Live deploy state lives in
-`D:\Repos\BOARD.md`; this section only records durable gotchas.
-
-- **Garment measurements are open-ended.** `GET /shop/items/{id}` returns
-  `category` (free-form string) and `measurements: [{ label, valueInches }]`
-  (inches, `0 < v ≤ 100`). Any label is allowed; absence is a missing row, not a
-  `0`. They are accepted on create and update; on PATCH an omitted `measurements`
-  preserves the stored set and an empty array clears it. `GET /shop/items`
-  summaries include neither. See the `thom-server` `AGENTS.md` for the full spec.
-
-  UI: the admin form (`ShopItemForm.tsx`) has a repeatable label/value editor
-  with per-category quick-add chips from `measurements.ts` (`tops`/`pants`/
-  `outerwear`/`other`); the listing detail page (`ShopItem.tsx`) renders whatever
-  rows exist in a table with an in/cm toggle. Conversion lives in
-  `formatMeasurement` (`format.ts`): `inches * 2.54`, one decimal. The chosen
-  unit persists in `localStorage` under `shop-measurement-unit`; default inches.
-- **Two environments, one repo.** Production is `wrangler.jsonc` →
-  `thom-website` (bound to `thom-server`); test is `wrangler.test.jsonc` →
-  `thom-website-test` (bound to `thom-server-test`). See `CLOUDFLARE.md`.
-- **CSP must allow the image and upload hosts.** Listing images are served from
-  `https://img.thomhuang.com` (the R2 custom domain for `listing-images`), so it
-  must stay in `img-src` in `ThomWeb/public/_headers`; `img-src` also keeps
-  `https://*.r2.dev`. Uploads PUT to the R2 S3 host, so that origin must stay in
-  `connect-src`. If the R2 account or public domain changes, update both or
-  images/uploads break in the browser.
-- **Orders API (2026-09-18).** `GET /shop/orders` is paginated:
-  `GetShopOrdersAsync({ cursor?, limit?, signal? })` returns
-  `{ orders, nextCursor }` (`""` nextCursor means the last page); the admin page
-  appends pages via a "Load more" button. `ShopOrder` carries a structured
-  shipping address (`shipName`/`shipLine1`/`shipLine2`/`shipCity`/`shipState`/
-  `shipPostalCode`/`shipCountry`) plus the legacy `shippingAddress`;
-  `Pages/Shop/ShippingAddress.tsx` renders the structured form and falls back
-  (used by admin orders and the emailed order view). The public confirmation
-  lookup (`GET /shop/orders/{sessionId}` → `PublicShopOrder`) returns **no
-  personal data**, so `OrderConfirmation.tsx` shows only status/total/lines and
-  never the buyer's email or address. Order statuses include `refunded` and
-  `refund_pending` (oversold orders).
-- **Buyer order-view page (2026-09-18).** The confirmation email links to
-  `PAGES.OrderView` (`/shop/order/view?token=...`), served by
-  `Pages/Shop/OrderView.tsx`. It calls `GetShopOrderByTokenAsync(token)`, which
-  hits `GET /shop/orders/view/{token}` and returns the **full** `ShopOrder`
-  (customer + shipping) because the emailed token is the credential — unlike the
-  session-keyed `PublicShopOrder` confirmation lookup. Treat the token as a
-  secret: do not log or forward the URL.
-- See the `thom-server` `AGENTS.md` for server-side deploy state, secrets, and
-  the Windows Smart App Control test workaround.
+Track open items in `checklist.md` when one exists; tick items off as they land
+and add new ones as they come up.

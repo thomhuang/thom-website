@@ -22,6 +22,8 @@ function statusClass(status: ShopOrderStatus) {
       return styles.statusRefunded;
     case 'refund_pending':
       return styles.statusRefundPending;
+    case 'expired':
+      return styles.statusExpired;
     default:
       return styles.statusPending;
   }

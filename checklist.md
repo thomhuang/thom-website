@@ -11,7 +11,13 @@ Remaining work. Tick items off as they land; add new ones as they come up.
 
 ## Code cleanup (from the audit)
 
-- [ ] Remove unused exports `categoryLabel` and `CATEGORY_LABELS` in `ThomWeb/src/Pages/Shop/measurements.ts`
+- [x] Remove unused exports `categoryLabel` and `CATEGORY_LABELS` in `ThomWeb/src/Pages/Shop/measurements.ts`
+
+## Shop admin (server parity)
+
+- [x] Handle the new `expired` order status from stock reservation:
+      `ShopOrderStatus` type, admin orders list badge, and buyer confirmation
+      copy (2026-09-19)
 
 ## Local env
 

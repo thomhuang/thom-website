@@ -187,6 +187,7 @@ export default function ShopItem() {
         <div className={styles.detailBody}>
           <h1 className={styles.detailTitle}>{item.title}</h1>
           {item.brand && <p className={styles.cardMeta}>{item.brand}</p>}
+          {item.size && <p className={styles.cardMeta}>Size {item.size}</p>}
           <p className={styles.detailPrice}>
             {formatPrice(item.priceCents, item.currency)}
           </p>

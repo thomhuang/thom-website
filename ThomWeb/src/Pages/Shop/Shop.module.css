@@ -661,7 +661,8 @@
 .statusPaid,
 .statusPending,
 .statusRefunded,
-.statusRefundPending {
+.statusRefundPending,
+.statusExpired {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -682,6 +683,10 @@
 
 .statusRefundPending {
   color: #9a6700;
+}
+
+.statusExpired {
+  color: #6f6f6f;
 }
 
 .orderLines {

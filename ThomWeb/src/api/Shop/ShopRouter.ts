@@ -33,6 +33,7 @@ export interface ShopItem {
   brandId: string;
   brand: string;
   category: string;
+  size: string;
   priceCents: number;
   currency: string;
   stock: number;
@@ -109,7 +110,8 @@ export type ShopOrderStatus =
   | 'pending'
   | 'paid'
   | 'refund_pending'
-  | 'refunded';
+  | 'refunded'
+  | 'expired';
 
 // The confirmation endpoint is public, so it returns no personal data. Customer
 // and shipping fields are only available from the authenticated admin list.

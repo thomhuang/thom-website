@@ -24,6 +24,7 @@ type ShopItemDraft = {
   description: string;
   brand: string;
   category: string;
+  size: string;
   price: string;
   stock: string;
   measurements: MeasurementDraft[];
@@ -35,6 +36,7 @@ type DraftField =
   | 'description'
   | 'brand'
   | 'category'
+  | 'size'
   | 'price'
   | 'stock';
 
@@ -43,6 +45,7 @@ const createEmptyDraft = (): ShopItemDraft => ({
   description: '',
   brand: '',
   category: '',
+  size: '',
   price: '',
   stock: '1',
   measurements: [],
@@ -101,6 +104,7 @@ const serializeDraft = (draft: ShopItemDraft) =>
     description: draft.description.trim(),
     brand: draft.brand.trim(),
     category: draft.category.trim(),
+    size: draft.size.trim(),
     price: draft.price.trim(),
     stock: draft.stock.trim(),
     measurements: draft.measurements.map((measurement) => ({
@@ -174,6 +178,7 @@ export default function ShopItemForm() {
             description: item.description,
             brand: item.brand || '',
             category: item.category || '',
+            size: item.size || '',
             price: formatPriceInput(item.priceCents),
             stock: String(item.stock),
             measurements: (item.measurements ?? []).map((measurement) => ({
@@ -314,6 +319,7 @@ export default function ShopItemForm() {
       brandId: '',
       brand: draft.brand.trim(),
       category: draft.category.trim(),
+      size: draft.size.trim(),
       priceCents,
       currency: 'usd',
       stock: Number(draft.stock),
@@ -492,8 +498,23 @@ export default function ShopItemForm() {
                 </label>
               </div>
 
-              <label className={styles.field} htmlFor="shop-description">
-                Description
+                <label className={styles.field} htmlFor="shop-size">
+                  Size
+                  <input
+                    id="shop-size"
+                    type="text"
+                    value={draft.size}
+                    onChange={updateDraft('size')}
+                    placeholder="e.g. Large"
+                    maxLength={40}
+                  />
+                  <span className={styles.hint}>
+                    Free-form; leave blank when it does not apply.
+                  </span>
+                </label>
+
+                <label className={styles.field} htmlFor="shop-description">
+                  Description
                 <textarea
                   id="shop-description"
                   value={draft.description}

@@ -136,6 +136,7 @@ export default function OrderConfirmation() {
   const isPaid = order.status === 'paid';
   const isRefunded = order.status === 'refunded';
   const isRefundPending = order.status === 'refund_pending';
+  const isExpired = order.status === 'expired';
 
   return (
     <main className={styles.page}>
@@ -154,7 +155,9 @@ export default function OrderConfirmation() {
                 ? 'Order being refunded'
                 : isPaid
                   ? 'Thank you'
-                  : 'Order received'}
+                  : isExpired
+                    ? 'Checkout expired'
+                    : 'Order received'}
           </h1>
           <p className={styles.cardMeta}>
             {isRefunded
@@ -163,7 +166,9 @@ export default function OrderConfirmation() {
                 ? 'This order could not be fulfilled and is being refunded.'
                 : isPaid
                   ? 'Payment received. Your order is confirmed.'
-                  : 'Payment is still being confirmed. This page updates automatically.'}
+                  : isExpired
+                    ? 'This checkout expired before payment. Feel free to try again.'
+                    : 'Payment is still being confirmed. This page updates automatically.'}
           </p>
 
           <p className={styles.detailPrice}>

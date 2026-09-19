@@ -1,7 +1,7 @@
 import styles from "./HomePage.module.css";
 
 export default function HomePage() {
-  const resumeHref = `${process.env.PUBLIC_URL}/documents/curr_resume.pdf`;
+  const resumeHref = "/documents/curr_resume.pdf";
 
   return (
     <div className={styles.text}>

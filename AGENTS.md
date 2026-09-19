@@ -70,25 +70,25 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## Project Structure & Module Organization
 
-The React app lives in `ThomWeb/`; run app commands from that directory. Source code is under `ThomWeb/src/`. Routes are defined in `src/App.tsx`, entry wiring in `src/index.tsx`, shared hooks in `src/hooks.tsx`, pages in `src/Pages/`, reusable UI in `src/Components/`, auth context in `src/Auth/`, API clients in `src/api/`, and shared copy/constants in `src/Assets/`. Global theme tokens, font-face declarations, and base styles live in `src/index.css`; font files live in `src/Fonts/`; component-local styles use CSS Modules such as `App.module.css`. Static public assets such as documents belong in `ThomWeb/public/`. Deployment lives at the repo root: `wrangler.jsonc`, `worker/index.js`, and `package.json` serve `ThomWeb/build` as static assets and proxy `/api/*` to the matching `thom-server`/`thom-server-test` Worker. See `CLOUDFLARE.md`.
+The React app lives in `ThomWeb/`; run app commands from that directory. Source code is under `ThomWeb/src/`. Routes are defined in `src/App.tsx`, entry wiring in `src/index.tsx`, shared hooks in `src/hooks.tsx`, pages in `src/Pages/`, reusable UI in `src/Components/`, auth context in `src/Auth/`, API clients in `src/api/`, and shared copy/constants in `src/Assets/`. Global theme tokens, font-face declarations, and base styles live in `src/index.css`; font files live in `src/Fonts/`; component-local styles use CSS Modules such as `App.module.css`. Static public assets such as documents belong in `ThomWeb/public/`. Deployment lives at the repo root: `wrangler.jsonc`, `worker/index.js`, and `package.json` serve `ThomWeb/dist` as static assets and proxy `/api/*` to the matching `thom-server`/`thom-server-test` Worker. See `CLOUDFLARE.md`.
 
 ## Build, Test, and Development Commands
 
 Run app commands from `ThomWeb/`:
 
-- `npm start` runs the local CRA dev server; the API base defaults to `http://localhost:4000`.
-- `npm run build` creates a production build; the API base defaults to `/api`.
-- `npm run lint` runs ESLint over `src/**/*.{ts,tsx}`.
+- `npm start` runs the Vite dev server; the API base defaults to `http://localhost:4000`.
+- `npm run build` creates a production build in `ThomWeb/dist`; the API base defaults to `/api`.
+- `npm run lint` runs ESLint over `src/**/*.{ts,tsx}` (flat config in `eslint.config.mjs`).
 - `npm run typecheck` runs `tsc --noEmit`.
-- `npm test` starts the CRA/Jest test runner.
+- `npm test` starts the Vitest test runner (watch mode; use `npx vitest run` for CI).
 
-The API base URL lives in `ThomWeb/src/api/config.ts`. `REACT_APP_API_URL`
+The API base URL lives in `ThomWeb/src/api/config.ts`. `VITE_API_URL`
 overrides it; otherwise development uses `http://localhost:4000` and everything
 else uses `/api`. No `.env` file is required or committed.
 
 Run deploy commands from the repo root:
 
-- `npm run build` builds `ThomWeb/` into `ThomWeb/build`.
+- `npm run build` builds `ThomWeb/` into `ThomWeb/dist`.
 - `npx wrangler deploy` deploys the Worker and its static assets. See `CLOUDFLARE.md`.
 - `npx wrangler deploy -c wrangler.test.jsonc` deploys the test Worker (`thom-website-test`).
 
@@ -98,7 +98,8 @@ Use TypeScript and functional React components. Avoid `any`; type component prop
 
 ## Testing Guidelines
 
-Tests use CRA’s Jest setup through `react-scripts test`. Place tests near the code they cover and name them like `Component.test.tsx` or `client.test.ts`. Prioritize route smoke tests, API-client behavior, loading states, empty states, errors, and responsive desktop/mobile rendering for user-facing changes.
+Tests use Vitest with React Testing Library in a jsdom environment (`npm test`,
+setup in `src/setupTests.ts`). Place tests near the code they cover and name them like `Component.test.tsx` or `client.test.ts`. Prioritize route smoke tests, API-client behavior, loading states, empty states, errors, and responsive desktop/mobile rendering for user-facing changes.
 
 ## Commit & Pull Request Guidelines
 
@@ -106,7 +107,7 @@ Recent commits are short and descriptive, for example `homepage/header cleanup +
 
 ## Security & Configuration Tips
 
-Keep fetch and service-access logic in `src/api/`; hidden UI is not security. The only public build-time variable is `REACT_APP_API_URL`; it defaults to `/api` in production, which the Worker proxies to `thom-server` on the same origin so auth cookies stay first-party. Update `ThomWeb/.env.example`, `src/api/config.ts`, and `src/react-app-env.d.ts` when adding `REACT_APP_*` variables. `REACT_APP_*` values are embedded in the bundle and must never contain secrets.
+Keep fetch and service-access logic in `src/api/`; hidden UI is not security. The only public build-time variable is `VITE_API_URL`; it defaults to `/api` in production, which the Worker proxies to `thom-server` on the same origin so auth cookies stay first-party. Update `ThomWeb/.env.example`, `src/api/config.ts`, and `src/vite-env.d.ts` when adding `VITE_*` variables. `VITE_*` values are embedded in the bundle and must never contain secrets.
 
 Local `.env*` and `.dev.vars*` files (except the committed `.example` files) are gitignored and denied to the `read` tool via global OpenCode permissions. Do not work around that with `grep` or shell commands — a pattern match prints the value into the transcript. Read the `.example` files for the shape of the config instead.
 

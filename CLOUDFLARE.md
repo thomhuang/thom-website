@@ -3,17 +3,18 @@
 The React app itself is unchanged. Deployment is now Cloudflare Workers static
 assets with a small `/api` proxy:
 
-- `wrangler.jsonc` serves the CRA build from `ThomWeb/build` with SPA fallback
+- `wrangler.jsonc` serves the Vite build from `ThomWeb/dist` with SPA fallback
   (`not_found_handling: single-page-application`), so React Router routes like
   `/coffee/entry/:id` work on refresh.
 - `worker/index.js` handles `/api/*`, strips the prefix, and forwards to the
   `thom-server` Worker over a **service binding**. Because the browser only ever
   talks to the website origin, the auth cookie is first-party (avoids
   third-party-cookie blocking on `*.workers.dev`).
-- `ThomWeb/.env.production` sets `REACT_APP_API_URL=/api` for production builds.
+- Production builds default to `/api` (same-origin); `VITE_API_URL` can override
+  either environment's base URL.
 
 Local development is unchanged: `cd ThomWeb && npm start` uses `ThomWeb/.env.local`
-and talks to `http://localhost:4000` directly.
+(if present) and talks to `http://localhost:4000` directly.
 
 ## Environments
 
@@ -81,7 +82,7 @@ Workers Builds deploys production only. The test Worker is deployed manually wit
 
 ```sh
 cd ThomWeb
-npm start                 # http://localhost:3000, API at REACT_APP_API_URL
+npm start                 # http://localhost:3000, API at VITE_API_URL
 npm run typecheck
 npm run lint
 ```

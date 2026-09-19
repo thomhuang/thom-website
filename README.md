@@ -1,12 +1,12 @@
 # thom-website
 
-React app (Create React App) for the coffee journal, backed by
+React app (Vite + TypeScript) for the coffee journal, backed by
 [thom-server](https://github.com/thomhuang/thom-server).
 
 ## Deployment
 
 The site is deployed to Cloudflare as static Worker assets. A small Worker serves
-`ThomWeb/build` with SPA fallback and proxies `/api/*` to the `thom-server` Worker
+`ThomWeb/dist` with SPA fallback and proxies `/api/*` to the `thom-server` Worker
 over a service binding, so auth cookies stay first-party. Two environments deploy
 from this repository: production (`wrangler.jsonc` → `thom-website`, bound to
 `thom-server`) and test (`wrangler.test.jsonc` → `thom-website-test`, bound to
@@ -25,7 +25,7 @@ npm test
 ```
 
 `ThomWeb/.env.local` is not needed. The API base URL is defined in
-`ThomWeb/src/api/config.ts`: `REACT_APP_API_URL` overrides it, otherwise
+`ThomWeb/src/api/config.ts`: `VITE_API_URL` overrides it, otherwise
 development uses `http://localhost:4000` and production uses `/api` (same-origin,
 proxied by the Worker). `ThomWeb/.env.example` documents the override.
 
@@ -34,7 +34,7 @@ proxied by the Worker). `ThomWeb/.env.example` documents the override.
 From the repo root:
 
 ```sh
-npm run build    # builds ThomWeb/ into ThomWeb/build
+npm run build    # builds ThomWeb/ into ThomWeb/dist
 npx wrangler deploy                          # production
 npx wrangler deploy -c wrangler.test.jsonc   # test
 ```

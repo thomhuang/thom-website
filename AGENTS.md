@@ -76,6 +76,9 @@ state belongs in dedicated auth/context modules. Use the project's existing
 styling approach (e.g., CSS Modules and design tokens) instead of inventing new
 conventions. Match the surrounding files' casing, quotes, and structure.
 
+Keep comments to a minimum: write them only when they clarify something
+ambiguous or that is not clear from the code itself, not to restate it.
+
 ## Testing
 
 Write tests near the code they cover. Prioritize route smoke tests, API-client

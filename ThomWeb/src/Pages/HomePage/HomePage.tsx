@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+
+import { PAGES } from "../../Assets/constants";
 import styles from "./HomePage.module.css";
 
 export default function HomePage() {
@@ -17,6 +20,17 @@ export default function HomePage() {
             resume
           </a>
           .
+        </p>
+        <p>
+          Feel free to check out my{" "}
+          <Link className={styles.click} to={PAGES.Coffee}>
+            coffee log
+          </Link>{" "}
+          and my{" "}
+          <Link className={styles.click} to={PAGES.Shop}>
+            shop
+          </Link>
+          , where I'll be selling random things of mine.
         </p>
         <p>
           You can find my work on{" "}

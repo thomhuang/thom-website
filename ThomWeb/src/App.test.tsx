@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -37,6 +37,21 @@ describe('route smoke tests', () => {
     expect(
       await screen.findByText("Hi, I'm Thomas.")
     ).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        (_content, element) =>
+          Boolean(
+            element?.textContent?.includes('Feel free to check out my coffee log')
+          ),
+        { selector: 'p' }
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'coffee log' })
+    ).toHaveAttribute('href', '/coffee');
+    expect(
+      within(screen.getByRole('main')).getByRole('link', { name: 'shop' })
+    ).toHaveAttribute('href', '/shop');
   });
 
   test('coffee page renders its empty state', async () => {
@@ -68,7 +83,11 @@ describe('route smoke tests', () => {
     const user = userEvent.setup();
 
     renderAt('/');
-    await user.click(screen.getByRole('link', { name: 'shop' }));
+    await user.click(
+      within(screen.getByRole('navigation')).getByRole('link', {
+        name: 'shop',
+      })
+    );
 
     expect(await screen.findByText('Nothing listed yet.')).toBeInTheDocument();
   });

@@ -82,10 +82,12 @@ export type CoffeeEntryRequest = Omit<
 
 export type CoffeeEntryPatch = Partial<CoffeeEntryRequest>;
 
+// The list endpoint returns full entries, so the journal page does not need a
+// follow-up request per entry.
 export async function GetCoffeeEntriesAsync(
   signal?: AbortSignal
-): Promise<CoffeeEntrySummary[]> {
-  return apiRequest<CoffeeEntrySummary[]>({
+): Promise<CoffeeEntry[]> {
+  return apiRequest<CoffeeEntry[]>({
     method: 'GET',
     signal,
     url: '/coffee',

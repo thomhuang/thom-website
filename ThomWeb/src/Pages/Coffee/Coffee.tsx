@@ -7,7 +7,6 @@ import {
   CoffeeEntrySummary,
   DeleteCoffeeEntryAsync,
   GetCoffeeEntriesAsync,
-  GetCoffeeEntryByIdAsync,
   GetCoffeeGrindersAsync,
   GetCoffeeRoastersAsync,
 } from '../../api/Coffee/CoffeeRouter';
@@ -102,21 +101,6 @@ const getTastingNotes = (entry: CoffeeEntrySummary) =>
 const formatBrewMethod = (value: string) =>
   brewMethods.find((option) => option.value === value)?.label ?? value;
 
-const loadCoffeeEntryDetails = async (
-  entry: CoffeeEntrySummary,
-  signal: AbortSignal
-) => {
-  try {
-    return await GetCoffeeEntryByIdAsync(entry.id, signal);
-  } catch (error) {
-    if (signal.aborted) {
-      throw error;
-    }
-
-    return entry;
-  }
-};
-
 export default function Coffee() {
   const { isAdmin, isAuthLoading } = useAuth();
   const [brewLogs, setBrewLogs] = useState<CoffeeEntrySummary[]>([]);
@@ -138,21 +122,18 @@ export default function Coffee() {
       setJournalError('');
 
       try {
-        const entries = await GetCoffeeEntriesAsync(controller.signal);
-        const entriesWithDetails = await Promise.all(
-          entries.map((entry) =>
-            loadCoffeeEntryDetails(entry, controller.signal)
-          )
-        );
-        const roasters = await GetCoffeeRoastersAsync(controller.signal).catch(
-          () => [] as CoffeeRoaster[]
-        );
-        const grinders = await GetCoffeeGrindersAsync(controller.signal).catch(
-          () => [] as CoffeeGrinder[]
-        );
+        const [entries, roasters, grinders] = await Promise.all([
+          GetCoffeeEntriesAsync(controller.signal),
+          GetCoffeeRoastersAsync(controller.signal).catch(
+            () => [] as CoffeeRoaster[]
+          ),
+          GetCoffeeGrindersAsync(controller.signal).catch(
+            () => [] as CoffeeGrinder[]
+          ),
+        ]);
 
         if (isMounted) {
-          setBrewLogs(entriesWithDetails);
+          setBrewLogs(entries);
           setRoasterOptions(roasters);
           setGrinderOptions(grinders);
         }

@@ -68,10 +68,12 @@ export default function Shop() {
       setShopError('');
 
       try {
-        const loadedItems = await GetShopItemsAsync(controller.signal);
-        const loadedBrands = await GetShopBrandsAsync(controller.signal).catch(
-          (): ShopBrand[] => []
-        );
+        const [loadedItems, loadedBrands] = await Promise.all([
+          GetShopItemsAsync(controller.signal),
+          GetShopBrandsAsync(controller.signal).catch(
+            (): ShopBrand[] => []
+          ),
+        ]);
 
         if (isMounted) {
           setItems(loadedItems);

@@ -20,19 +20,24 @@ export interface ShopItemSummary {
   primaryImageUrl: string;
 }
 
+export interface ShopMeasurement {
+  id?: string;
+  label: string;
+  valueInches: number;
+}
+
 export interface ShopItem {
   id: string;
   title: string;
   description: string;
   brandId: string;
   brand: string;
+  category: string;
   priceCents: number;
   currency: string;
   stock: number;
   isPublished: boolean;
-  pitToPitInches?: number;
-  backLengthInches?: number;
-  shoulderInches?: number;
+  measurements: ShopMeasurement[];
   images: ShopImage[];
   createdAt?: string;
   updatedAt?: string;

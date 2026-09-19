@@ -21,6 +21,7 @@ import {
   MAX_SOURCE_IMAGE_BYTES,
   prepareImageForUpload,
 } from './imageUpload';
+import { SHOP_CATEGORIES, suggestionsForCategory } from './measurements';
 import styles from './Shop.module.css';
 
 const ALLOWED_IMAGE_TYPES = [
@@ -31,15 +32,19 @@ const ALLOWED_IMAGE_TYPES = [
   'image/gif',
 ];
 
+type MeasurementDraft = {
+  label: string;
+  value: string;
+};
+
 type ShopItemDraft = {
   title: string;
   description: string;
   brand: string;
+  category: string;
   price: string;
   stock: string;
-  pitToPit: string;
-  backLength: string;
-  shoulder: string;
+  measurements: MeasurementDraft[];
   isPublished: boolean;
 };
 
@@ -47,21 +52,18 @@ type DraftField =
   | 'title'
   | 'description'
   | 'brand'
+  | 'category'
   | 'price'
-  | 'stock'
-  | 'pitToPit'
-  | 'backLength'
-  | 'shoulder';
+  | 'stock';
 
 const createEmptyDraft = (): ShopItemDraft => ({
   title: '',
   description: '',
   brand: '',
+  category: '',
   price: '',
   stock: '1',
-  pitToPit: '',
-  backLength: '',
-  shoulder: '',
+  measurements: [],
   isPublished: false,
 });
 
@@ -70,56 +72,42 @@ const validateStock = (value: string) =>
 
 const MEASUREMENT_ERROR = 'Enter inches between 0 and 100';
 
-// Optional garment measurements, entered in inches. Blank means "not
-// provided" (stored as 0); invalid or out-of-range input returns null.
-const parseMeasurement = (value: string): number | null => {
+// Measurements are entered in inches. Blank input is not a value; invalid or
+// out-of-range input returns null.
+const parseMeasurementValue = (value: string): number | null => {
   const trimmed = value.trim();
 
-  if (!trimmed) {
-    return 0;
-  }
-  if (!/^\d+(\.\d+)?$/.test(trimmed)) {
+  if (!trimmed || !/^\d+(\.\d+)?$/.test(trimmed)) {
     return null;
   }
 
   const parsed = Number(trimmed);
 
-  return parsed >= 0 && parsed <= 100 ? parsed : null;
+  return parsed > 0 && parsed <= 100 ? parsed : null;
 };
 
-type MeasurementFieldProps = {
-  id: string;
-  label: string;
-  placeholder: string;
-  value: string;
-  error?: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-};
+// measurementRowError returns a message for a row that has been started but is
+// incomplete. A row with neither a label nor a value is an empty placeholder,
+// not an error, so a stray blank row never blocks saving.
+const measurementRowError = (row: MeasurementDraft): string | null => {
+  const label = row.label.trim();
+  const value = row.value.trim();
 
-function MeasurementField({
-  id,
-  label,
-  placeholder,
-  value,
-  error,
-  onChange,
-}: MeasurementFieldProps) {
-  return (
-    <label className={styles.field} htmlFor={id}>
-      {label}
-      <input
-        id={id}
-        className={error ? styles.invalid : undefined}
-        type="text"
-        inputMode="decimal"
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-      />
-      {error && <span className={styles.fieldError}>{error}</span>}
-    </label>
-  );
-}
+  if (!label && !value) {
+    return null;
+  }
+  if (!label) {
+    return 'Add a label';
+  }
+  if (!value) {
+    return 'Add a value';
+  }
+  if (parseMeasurementValue(value) === null) {
+    return MEASUREMENT_ERROR;
+  }
+
+  return null;
+};
 
 export default function ShopItemForm() {
   const { itemId } = useParams<{ itemId?: string }>();
@@ -143,17 +131,13 @@ export default function ShopItemForm() {
   const titleError = draft.title.trim() ? null : 'Title is required';
   const priceError =
     priceCents === null || priceCents < 1 ? 'Enter a price like 18.00' : null;
-  const pitToPit = parseMeasurement(draft.pitToPit);
-  const backLength = parseMeasurement(draft.backLength);
-  const shoulder = parseMeasurement(draft.shoulder);
   const fieldErrors = {
     title: titleError,
     price: priceError,
     stock: stockError,
-    pitToPit: pitToPit === null ? MEASUREMENT_ERROR : null,
-    backLength: backLength === null ? MEASUREMENT_ERROR : null,
-    shoulder: shoulder === null ? MEASUREMENT_ERROR : null,
   };
+  const measurementErrors = draft.measurements.map(measurementRowError);
+  const hasMeasurementError = measurementErrors.some(Boolean);
   const canShowForm =
     !isAuthLoading && isAdmin && !isItemLoading && !itemLoadFailed;
 
@@ -193,11 +177,13 @@ export default function ShopItemForm() {
             title: item.title,
             description: item.description,
             brand: item.brand || '',
+            category: item.category || '',
             price: formatPriceInput(item.priceCents),
             stock: String(item.stock),
-            pitToPit: item.pitToPitInches ? String(item.pitToPitInches) : '',
-            backLength: item.backLengthInches ? String(item.backLengthInches) : '',
-            shoulder: item.shoulderInches ? String(item.shoulderInches) : '',
+            measurements: (item.measurements ?? []).map((measurement) => ({
+              label: measurement.label,
+              value: String(measurement.valueInches),
+            })),
             isPublished: item.isPublished,
           });
           setImages(item.images);
@@ -261,27 +247,79 @@ export default function ShopItemForm() {
       }));
     };
 
+  const updateMeasurement =
+    (index: number, field: keyof MeasurementDraft) =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+
+      setDraft((currentDraft) => ({
+        ...currentDraft,
+        measurements: currentDraft.measurements.map((measurement, currentIndex) =>
+          currentIndex === index ? { ...measurement, [field]: value } : measurement
+        ),
+      }));
+    };
+
+  const addMeasurement = (label = '') => {
+    setDraft((currentDraft) => ({
+      ...currentDraft,
+      measurements: [...currentDraft.measurements, { label, value: '' }],
+    }));
+  };
+
+  const removeMeasurement = (index: number) => {
+    setDraft((currentDraft) => ({
+      ...currentDraft,
+      measurements: currentDraft.measurements.filter(
+        (_measurement, currentIndex) => currentIndex !== index
+      ),
+    }));
+  };
+
+  // Only suggest labels the listing does not already carry, so a chip never
+  // creates a duplicate row.
+  const suggestions = suggestionsForCategory(draft.category).filter(
+    (suggestion) =>
+      !draft.measurements.some(
+        (measurement) =>
+          measurement.label.trim().toLowerCase() === suggestion.toLowerCase()
+      )
+  );
+
   const saveItem = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (Object.values(fieldErrors).some(Boolean) || priceCents === null) {
+    if (
+      Object.values(fieldErrors).some(Boolean) ||
+      hasMeasurementError ||
+      priceCents === null
+    ) {
       return;
     }
 
     setFormError('');
     setIsSubmitting(true);
 
+    const measurements = draft.measurements
+      .map((row) => ({
+        label: row.label.trim(),
+        valueInches: parseMeasurementValue(row.value),
+      }))
+      .filter(
+        (measurement): measurement is { label: string; valueInches: number } =>
+          measurement.label !== '' && measurement.valueInches !== null
+      );
+
     const request = {
       title: draft.title.trim(),
       description: draft.description.trim(),
       brandId: '',
       brand: draft.brand.trim(),
+      category: draft.category.trim(),
       priceCents,
       currency: 'usd',
       stock: Number(draft.stock),
-      pitToPitInches: pitToPit ?? 0,
-      backLengthInches: backLength ?? 0,
-      shoulderInches: shoulder ?? 0,
+      measurements,
       isPublished: draft.isPublished,
     };
 
@@ -512,6 +550,26 @@ export default function ShopItemForm() {
                     ))}
                   </datalist>
                 </label>
+
+                <label className={styles.field} htmlFor="shop-category">
+                  Category
+                  <input
+                    id="shop-category"
+                    type="text"
+                    list="shop-category-options"
+                    value={draft.category}
+                    onChange={updateDraft('category')}
+                    placeholder="e.g. pants"
+                  />
+                  <datalist id="shop-category-options">
+                    {SHOP_CATEGORIES.map((category) => (
+                      <option value={category} key={category} />
+                    ))}
+                  </datalist>
+                  <span className={styles.hint}>
+                    Free-form; it only picks the suggested measurements.
+                  </span>
+                </label>
               </div>
 
               <label className={styles.field} htmlFor="shop-description">
@@ -547,37 +605,81 @@ export default function ShopItemForm() {
             <section className={styles.section} aria-labelledby="shop-measurements">
               <h2 id="shop-measurements">Measurements</h2>
               <p className={styles.hint}>
-                Optional. Enter inches (0–100) for clothing and leave blank
-                otherwise. The listing page converts to cm on request.
+                Optional. Values are inches; the listing page converts to cm on
+                request. Add any labels you like — the category above just
+                suggests common ones.
               </p>
 
-              <div className={styles.fieldGrid}>
-                <MeasurementField
-                  id="shop-pit-to-pit"
-                  label="Pit to pit"
-                  placeholder="e.g. 22.5"
-                  value={draft.pitToPit}
-                  error={fieldErrors.pitToPit ?? undefined}
-                  onChange={updateDraft('pitToPit')}
-                />
+              {suggestions.length > 0 && (
+                <div className={styles.suggestionRow}>
+                  <span className={styles.hint}>Quick add:</span>
+                  {suggestions.map((suggestion) => (
+                    <button
+                      type="button"
+                      className={styles.suggestionChip}
+                      key={suggestion}
+                      onClick={() => addMeasurement(suggestion)}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
 
-                <MeasurementField
-                  id="shop-back-length"
-                  label="Back length"
-                  placeholder="e.g. 28.0"
-                  value={draft.backLength}
-                  error={fieldErrors.backLength ?? undefined}
-                  onChange={updateDraft('backLength')}
-                />
+              {draft.measurements.length === 0 ? (
+                <p className={styles.hint}>No measurements on this listing.</p>
+              ) : (
+                <ul className={styles.measurementList}>
+                  {draft.measurements.map((measurement, index) => {
+                    const error = measurementErrors[index];
 
-                <MeasurementField
-                  id="shop-shoulder"
-                  label="Shoulder"
-                  placeholder="e.g. 18.5"
-                  value={draft.shoulder}
-                  error={fieldErrors.shoulder ?? undefined}
-                  onChange={updateDraft('shoulder')}
-                />
+                    return (
+                      <li className={styles.measurementRow} key={index}>
+                        <input
+                          className={styles.measurementLabel}
+                          type="text"
+                          placeholder="Label (e.g. Waist)"
+                          value={measurement.label}
+                          onChange={updateMeasurement(index, 'label')}
+                          maxLength={60}
+                          aria-label="Measurement label"
+                        />
+                        <input
+                          className={[
+                            styles.measurementValue,
+                            error ? styles.invalid : '',
+                          ].join(' ')}
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="Inches"
+                          value={measurement.value}
+                          onChange={updateMeasurement(index, 'value')}
+                          aria-label="Measurement value in inches"
+                        />
+                        <button
+                          type="button"
+                          className={styles.deleteButton}
+                          onClick={() => removeMeasurement(index)}
+                        >
+                          Remove
+                        </button>
+                        {error && (
+                          <span className={styles.fieldError}>{error}</span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              <div className={styles.adminActions}>
+                <button
+                  type="button"
+                  className={styles.textLink}
+                  onClick={() => addMeasurement()}
+                >
+                  Add measurement
+                </button>
               </div>
             </section>
 

@@ -360,6 +360,59 @@
   font-variant-numeric: tabular-nums;
 }
 
+.measurementList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.measurementRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.measurementRow .fieldError {
+  grid-column: 1 / -1;
+}
+
+.measurementLabel,
+.measurementValue {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.suggestionRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.suggestionChip {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.suggestionChip:hover {
+  border-color: var(--fg);
+}
+
 /* Admin form */
 
 .form {

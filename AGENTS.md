@@ -117,18 +117,19 @@ orders page are committed (current tip: `D:\Repos\BOARD.md`) and verified
 (`npm run typecheck`, `npm run lint`, `npm run build`). Live deploy state lives in
 `D:\Repos\BOARD.md`; this section only records durable gotchas.
 
-- **Garment measurements.** `GET /shop/items/{id}` returns `pitToPitInches`,
-  `backLengthInches`, and `shoulderInches` (numbers, in **inches**, `0` meaning
-  "not provided"). They are accepted on create and update. `GET /shop/items`
-  summaries do **not** include them. See the `thom-server` `AGENTS.md` for the
-  full field spec.
+- **Garment measurements are open-ended.** `GET /shop/items/{id}` returns
+  `category` (free-form string) and `measurements: [{ label, valueInches }]`
+  (inches, `0 < v ≤ 100`). Any label is allowed; absence is a missing row, not a
+  `0`. They are accepted on create and update; on PATCH an omitted `measurements`
+  preserves the stored set and an empty array clears it. `GET /shop/items`
+  summaries include neither. See the `thom-server` `AGENTS.md` for the full spec.
 
-  UI: the admin form (`ShopItemForm.tsx`) has optional inch inputs (0–100,
-  blank = not provided); the listing detail page (`ShopItem.tsx`) renders a
-  measurements table with an in/cm toggle. Conversion lives in
-  `formatMeasurement` (`format.ts`): `inches * 2.54`, one decimal. Rows with a
-  `0`/absent value are hidden. The chosen unit persists in `localStorage` under
-  `shop-measurement-unit`; default is inches.
+  UI: the admin form (`ShopItemForm.tsx`) has a repeatable label/value editor
+  with per-category quick-add chips from `measurements.ts` (`tops`/`pants`/
+  `outerwear`/`other`); the listing detail page (`ShopItem.tsx`) renders whatever
+  rows exist in a table with an in/cm toggle. Conversion lives in
+  `formatMeasurement` (`format.ts`): `inches * 2.54`, one decimal. The chosen
+  unit persists in `localStorage` under `shop-measurement-unit`; default inches.
 - **Two environments, one repo.** Production is `wrangler.jsonc` →
   `thom-website` (bound to `thom-server`); test is `wrangler.test.jsonc` →
   `thom-website-test` (bound to `thom-server-test`). See `CLOUDFLARE.md`.

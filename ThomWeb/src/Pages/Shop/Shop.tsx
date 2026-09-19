@@ -130,7 +130,7 @@ export default function Shop() {
     <main className={styles.page}>
       <section className={styles.intro} aria-labelledby="shop-title">
         <h1 id="shop-title">Shop</h1>
-        <p className={styles.deck}>Small batches, shipped from the workbench.</p>
+        <p className={styles.deck}>my things</p>
       </section>
 
       {!isAuthLoading && isAdmin && (

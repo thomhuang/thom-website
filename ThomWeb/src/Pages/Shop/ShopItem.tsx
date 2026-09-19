@@ -105,15 +105,7 @@ export default function ShopItem() {
   }
 
   const isSoldOut = item.stock < 1;
-
-  const measurements = [
-    { label: 'Pit to pit', inches: item.pitToPitInches },
-    { label: 'Back length', inches: item.backLengthInches },
-    { label: 'Shoulder', inches: item.shoulderInches },
-  ].filter(
-    (measurement): measurement is { label: string; inches: number } =>
-      Boolean(measurement.inches)
-  );
+  const measurements = item.measurements ?? [];
 
   const startCheckout = async () => {
     setIsCheckingOut(true);
@@ -229,10 +221,13 @@ export default function ShopItem() {
               <table className={styles.measurementsTable}>
                 <tbody>
                   {measurements.map((measurement) => (
-                    <tr key={measurement.label}>
+                    <tr key={measurement.id ?? measurement.label}>
                       <th scope="row">{measurement.label}</th>
                       <td>
-                        {formatMeasurement(measurement.inches, measurementUnit)}
+                        {formatMeasurement(
+                          measurement.valueInches,
+                          measurementUnit
+                        )}
                       </td>
                     </tr>
                   ))}

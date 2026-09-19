@@ -6,6 +6,12 @@ import { GetShopOrderAsync, PublicShopOrder } from '../../api/Shop/ShopRouter';
 import { formatPrice } from './format';
 import styles from './Shop.module.css';
 
+// While payment is still settling, poll for the webhook's result instead of
+// making the buyer guess when to refresh. Capped so a stuck order does not poll
+// forever.
+const POLL_INTERVAL_MS = 3000;
+const MAX_POLLS = 40;
+
 export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id') ?? '';
@@ -56,6 +62,53 @@ export default function OrderConfirmation() {
     };
   }, [sessionId]);
 
+  // The webhook can land after the Stripe redirect, so a pending order is polled
+  // until it settles. A failed poll keeps the last known order rather than
+  // blanking the page.
+  useEffect(() => {
+    if (!sessionId || order?.status !== 'pending') {
+      return;
+    }
+
+    let isMounted = true;
+    let attempts = 0;
+    let timer: number | undefined;
+
+    const poll = async () => {
+      attempts += 1;
+
+      try {
+        const latest = await GetShopOrderAsync(sessionId);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setOrder(latest);
+
+        if (latest.status !== 'pending') {
+          return;
+        }
+      } catch {
+        // Transient failure: keep the current order and try again.
+      }
+
+      if (isMounted && attempts < MAX_POLLS) {
+        timer = window.setTimeout(poll, POLL_INTERVAL_MS);
+      }
+    };
+
+    timer = window.setTimeout(poll, POLL_INTERVAL_MS);
+
+    return () => {
+      isMounted = false;
+
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+      }
+    };
+  }, [order?.status, sessionId]);
+
   if (isLoading) {
     return (
       <main className={styles.page}>
@@ -79,6 +132,7 @@ export default function OrderConfirmation() {
     );
   }
 
+  const isPending = order.status === 'pending';
   const isPaid = order.status === 'paid';
   const isRefunded = order.status === 'refunded';
   const isRefundPending = order.status === 'refund_pending';
@@ -109,7 +163,7 @@ export default function OrderConfirmation() {
                 ? 'This order could not be fulfilled and is being refunded.'
                 : isPaid
                   ? 'Payment received. Your order is confirmed.'
-                  : 'Payment is still being confirmed. Refresh in a moment.'}
+                  : 'Payment is still being confirmed. This page updates automatically.'}
           </p>
 
           <p className={styles.detailPrice}>
@@ -125,10 +179,14 @@ export default function OrderConfirmation() {
           </ul>
 
           {/* The confirmation endpoint returns no personal data, so the buyer's
-              email and shipping address are not shown here. */}
-          <p className={styles.cardMeta}>
-            A receipt was sent to the email you provided.
-          </p>
+              email and shipping address are not shown here. Point at the emailed
+              order link without claiming a delivery the best-effort send may not
+              have made; the email is only attempted once payment settles. */}
+          {!isPending && (
+            <p className={styles.cardMeta}>
+              Check your email for a private link to your full order details.
+            </p>
+          )}
         </div>
       </article>
     </main>

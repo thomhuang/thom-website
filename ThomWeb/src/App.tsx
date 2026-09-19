@@ -9,6 +9,7 @@ import Coffee from './Pages/Coffee/Coffee';
 import CoffeeEntry from './Pages/Coffee/CoffeeEntry';
 import ErrorPage from './Pages/ErrorPage/ErrorPage';
 import HomePage from './Pages/HomePage/HomePage';
+import Policies from './Pages/Policies/Policies';
 import OrderConfirmation from './Pages/Shop/OrderConfirmation';
 import OrderView from './Pages/Shop/OrderView';
 import Shop from './Pages/Shop/Shop';
@@ -35,6 +36,7 @@ const App = () => {
               <Route path={PAGES.ShopOrder} Component={OrderConfirmation} />
               <Route path={PAGES.OrderView} Component={OrderView} />
               <Route path={PAGES.ShopOrders} Component={ShopOrders} />
+              <Route path={PAGES.Policies} Component={Policies} />
               <Route path={`${PAGES.ShopItem}/:itemId`} Component={ShopItem} />
               <Route path={PAGES.ShopEntry} Component={ShopItemForm} />
               <Route

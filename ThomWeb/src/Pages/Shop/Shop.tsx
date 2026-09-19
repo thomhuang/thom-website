@@ -14,6 +14,13 @@ import { formatPrice, formatStock } from './format';
 import styles from './Shop.module.css';
 
 type SortOrder = 'newest' | 'oldest' | 'price-asc' | 'price-desc';
+type LayoutMode = 'grid' | 'list';
+type StockFilter = 'all' | 'in-stock' | 'out-of-stock';
+
+const layoutStorageKey = 'shop-layout';
+
+const getInitialLayout = (): LayoutMode =>
+  localStorage.getItem(layoutStorageKey) === 'list' ? 'list' : 'grid';
 
 // Listings arrive newest first. `id` is the insertion order, so ascending id is
 // oldest first; the price orders are plain numeric comparisons.
@@ -55,7 +62,9 @@ export default function Shop() {
   const [items, setItems] = useState<ShopItemSummary[]>([]);
   const [brands, setBrands] = useState<ShopBrand[]>([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [stockFilter, setStockFilter] = useState<StockFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+  const [layout, setLayout] = useState<LayoutMode>(getInitialLayout);
   const [isLoading, setIsLoading] = useState(true);
   const [shopError, setShopError] = useState('');
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
@@ -99,6 +108,10 @@ export default function Shop() {
     };
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem(layoutStorageKey, layout);
+  }, [layout]);
+
   const deleteItem = async (item: ShopItemSummary) => {
     const confirmed = window.confirm(`Delete ${item.title} from the shop?`);
 
@@ -122,9 +135,19 @@ export default function Shop() {
   };
 
   const visibleItems = sortItems(
-    selectedBrandId
-      ? items.filter((item) => item.brandId === selectedBrandId)
-      : items,
+    items.filter((item) => {
+      if (selectedBrandId && item.brandId !== selectedBrandId) {
+        return false;
+      }
+      if (stockFilter === 'in-stock' && item.stock < 1) {
+        return false;
+      }
+      if (stockFilter === 'out-of-stock' && item.stock >= 1) {
+        return false;
+      }
+
+      return true;
+    }),
     sortOrder
   );
 
@@ -168,6 +191,21 @@ export default function Shop() {
             </label>
           )}
 
+          <label className={styles.field} htmlFor="shop-stock-filter">
+            Availability
+            <select
+              id="shop-stock-filter"
+              value={stockFilter}
+              onChange={(event) =>
+                setStockFilter(event.target.value as StockFilter)
+              }
+            >
+              <option value="all">All items</option>
+              <option value="in-stock">In stock</option>
+              <option value="out-of-stock">Sold out</option>
+            </select>
+          </label>
+
           <label className={styles.field} htmlFor="shop-sort">
             Sort
             <select
@@ -181,13 +219,40 @@ export default function Shop() {
               <option value="price-desc">Price: high to low</option>
             </select>
           </label>
+
+          <div className={styles.layoutField}>
+            View
+            <div
+              className={styles.layoutToggle}
+              role="group"
+              aria-label="Listing layout"
+            >
+              {(['grid', 'list'] as LayoutMode[]).map((mode) => (
+                <button
+                  type="button"
+                  key={mode}
+                  className={[
+                    styles.layoutToggleButton,
+                    layout === mode ? styles.selectedLayout : '',
+                  ].join(' ')}
+                  onClick={() => setLayout(mode)}
+                  aria-pressed={layout === mode}
+                >
+                  {mode === 'grid' ? 'Grid' : 'List'}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
       {isLoading ? (
         <p className={styles.statusText}>Loading listings...</p>
       ) : visibleItems.length > 0 ? (
-        <section className={styles.grid} aria-label="Listings">
+        <section
+          className={layout === 'grid' ? styles.grid : styles.list}
+          aria-label="Listings"
+        >
           {visibleItems.map((item) => (
             <article className={styles.card} key={item.id}>
               <Link
@@ -198,17 +263,21 @@ export default function Shop() {
                   <CardImage src={item.primaryImageUrl} alt={item.title} />
                 </div>
                 <div className={styles.cardBody}>
-                  <h2 className={styles.cardTitle}>{item.title}</h2>
-                  {item.brand && (
-                    <p className={styles.cardMeta}>{item.brand}</p>
-                  )}
-                  <p className={styles.cardPrice}>
-                    {formatPrice(item.priceCents, item.currency)}
-                  </p>
-                  <p className={styles.cardMeta}>{formatStock(item.stock)}</p>
-                  {!item.isPublished && (
-                    <p className={styles.draftTag}>Draft</p>
-                  )}
+                  <div className={styles.cardInfo}>
+                    <h2 className={styles.cardTitle}>{item.title}</h2>
+                    {item.brand && (
+                      <p className={styles.cardMeta}>{item.brand}</p>
+                    )}
+                  </div>
+                  <div className={styles.cardPricing}>
+                    <p className={styles.cardPrice}>
+                      {formatPrice(item.priceCents, item.currency)}
+                    </p>
+                    <p className={styles.cardMeta}>{formatStock(item.stock)}</p>
+                    {!item.isPublished && (
+                      <p className={styles.draftTag}>Draft</p>
+                    )}
+                  </div>
                 </div>
               </Link>
 
@@ -237,7 +306,7 @@ export default function Shop() {
         <div className={styles.emptyState}>
           <p>
             {items.length > 0
-              ? 'No listings for this brand.'
+              ? 'No listings match these filters.'
               : 'Nothing listed yet.'}
           </p>
           <p>Published listings will show here.</p>

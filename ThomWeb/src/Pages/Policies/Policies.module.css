@@ -1,0 +1,54 @@
+.policies {
+    max-width: 100%;
+}
+
+.title {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+}
+
+.updated {
+    margin: 0 0 2rem;
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.section {
+    margin: 0 0 2rem;
+}
+
+.section:last-child {
+    margin-bottom: 0;
+}
+
+.sectionTitle {
+    margin: 0 0 0.75rem;
+    font-size: 1.125rem;
+}
+
+.section p {
+    margin: 0 0 0.75rem;
+}
+
+.section p:last-child {
+    margin-bottom: 0;
+}
+
+.list {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.list li {
+    margin-bottom: 0.75rem;
+}
+
+.list li:last-child {
+    margin-bottom: 0;
+}
+
+.link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}

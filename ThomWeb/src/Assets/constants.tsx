@@ -8,5 +8,6 @@ export enum PAGES {
     ShopOrder = '/shop/order',
     OrderView = '/shop/order/view',
     ShopOrders = '/shop/orders',
+    Policies = '/policies',
     Error = '/error'
 }

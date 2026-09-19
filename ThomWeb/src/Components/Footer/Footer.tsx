@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+
+import { PAGES } from '../../Assets/constants';
 import styles from './Footer.module.css';
 
 export default function Footer() {
@@ -27,6 +30,10 @@ export default function Footer() {
             >
                 email
             </a>
+            <span className={styles.sep}>&middot;</span>
+            <Link className={styles.link} to={PAGES.Policies}>
+                policies
+            </Link>
             <span className={styles.sep}>&middot;</span>
             <span className={styles.copyright}>&copy; Thomas Huang</span>
         </footer>

@@ -266,6 +266,17 @@ export default function ShopItem() {
             <p className={styles.errorNotice}>{checkoutError}</p>
           )}
 
+          <p className={styles.pickupNotice}>
+            Local pickup available —{' '}
+            <a
+              className={styles.textLink}
+              href="mailto:thomaskhuangg@gmail.com"
+            >
+              contact me
+            </a>{' '}
+            to arrange before buying.
+          </p>
+
           {!isAuthLoading && isAdmin && (
             <div className={styles.detailActions}>
               <Link

@@ -1,3 +1,11 @@
+export const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+  'image/gif',
+];
+
 // Photos arrive from a phone or camera several thousand pixels wide, which is
 // far more than a product page needs. Downscaling and re-encoding in the browser
 // keeps the bucket small and the storefront fast, and image bytes still never

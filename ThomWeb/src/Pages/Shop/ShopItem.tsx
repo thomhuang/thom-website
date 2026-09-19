@@ -5,6 +5,7 @@ import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import {
   GetShopItemByIdAsync,
+  ShopImage,
   ShopItem as ShopItemResponse,
   StartShopCheckoutAsync,
 } from '../../api/Shop/ShopRouter';
@@ -15,6 +16,7 @@ import {
   getPrimaryImage,
   MeasurementUnit,
 } from './format';
+import ShopImageManager from './ShopImageManager';
 import styles from './Shop.module.css';
 
 const measurementUnitStorageKey = 'shop-measurement-unit';
@@ -26,6 +28,7 @@ export default function ShopItem() {
   const { itemId } = useParams<{ itemId?: string }>();
   const { isAdmin, isAuthLoading } = useAuth();
   const [item, setItem] = useState<ShopItemResponse | null>(null);
+  const [images, setImages] = useState<ShopImage[]>([]);
   const [selectedImageUrl, setSelectedImageUrl] = useState('');
   const [failedImageUrl, setFailedImageUrl] = useState('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -59,6 +62,7 @@ export default function ShopItem() {
 
         if (isMounted) {
           setItem(loadedItem);
+          setImages(loadedItem.images);
           setSelectedImageUrl(getPrimaryImage(loadedItem.images));
         }
       } catch {
@@ -107,6 +111,16 @@ export default function ShopItem() {
   const isSoldOut = item.stock < 1;
   const measurements = item.measurements ?? [];
 
+  const handleImagesChange = (nextImages: ShopImage[]) => {
+    setImages(nextImages);
+    setSelectedImageUrl((currentUrl) =>
+      nextImages.some((image) => image.url === currentUrl)
+        ? currentUrl
+        : getPrimaryImage(nextImages)
+    );
+    setFailedImageUrl('');
+  };
+
   const startCheckout = async () => {
     setIsCheckingOut(true);
     setCheckoutError('');
@@ -149,9 +163,9 @@ export default function ShopItem() {
             )}
           </div>
 
-          {item.images.length > 1 && (
+          {images.length > 1 && (
             <div className={styles.thumbnails}>
-              {item.images.map((image) => (
+              {images.map((image) => (
                 <button
                   type="button"
                   className={[
@@ -264,6 +278,15 @@ export default function ShopItem() {
           )}
         </div>
       </article>
+
+      {!isAuthLoading && isAdmin && (
+        <ShopImageManager
+          itemId={item.id}
+          title={item.title}
+          images={images}
+          onImagesChange={handleImagesChange}
+        />
+      )}
     </main>
   );
 }

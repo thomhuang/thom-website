@@ -91,6 +91,24 @@ const measurementRowError = (row: MeasurementDraft): string | null => {
   return null;
 };
 
+// Serializing the draft lets saveItem tell a loaded listing from an edited one,
+// so opening a listing and saving it untouched sends no request. Text fields are
+// trimmed because the request trims them, so whitespace-only edits are no-ops.
+const serializeDraft = (draft: ShopItemDraft) =>
+  JSON.stringify({
+    ...draft,
+    title: draft.title.trim(),
+    description: draft.description.trim(),
+    brand: draft.brand.trim(),
+    category: draft.category.trim(),
+    price: draft.price.trim(),
+    stock: draft.stock.trim(),
+    measurements: draft.measurements.map((measurement) => ({
+      label: measurement.label.trim(),
+      value: measurement.value.trim(),
+    })),
+  });
+
 export default function ShopItemForm() {
   const { itemId } = useParams<{ itemId?: string }>();
   const navigate = useNavigate();
@@ -98,6 +116,7 @@ export default function ShopItemForm() {
   const isEditing = Boolean(itemId);
 
   const [draft, setDraft] = useState<ShopItemDraft>(createEmptyDraft);
+  const [savedDraftJson, setSavedDraftJson] = useState<string | null>(null);
   const [brandOptions, setBrandOptions] = useState<ShopBrand[]>([]);
   const [formError, setFormError] = useState('');
   const [isItemLoading, setIsItemLoading] = useState(isEditing);
@@ -122,6 +141,7 @@ export default function ShopItemForm() {
   useEffect(() => {
     if (!isEditing || !itemId) {
       setDraft(createEmptyDraft());
+      setSavedDraftJson(null);
       setFormError('');
       setItemLoadFailed(false);
       setIsItemLoading(false);
@@ -149,7 +169,7 @@ export default function ShopItemForm() {
         const item = await GetShopItemByIdAsync(itemId, controller.signal);
 
         if (isMounted) {
-          setDraft({
+          const loadedDraft: ShopItemDraft = {
             title: item.title,
             description: item.description,
             brand: item.brand || '',
@@ -161,7 +181,10 @@ export default function ShopItemForm() {
               value: String(measurement.valueInches),
             })),
             isPublished: item.isPublished,
-          });
+          };
+
+          setDraft(loadedDraft);
+          setSavedDraftJson(serializeDraft(loadedDraft));
         }
       } catch {
         if (!controller.signal.aborted && isMounted) {
@@ -300,7 +323,10 @@ export default function ShopItemForm() {
 
     try {
       if (isEditing && itemId) {
-        await UpdateShopItemAsync(itemId, request);
+        if (serializeDraft(draft) !== savedDraftJson) {
+          await UpdateShopItemAsync(itemId, request);
+        }
+
         navigate(`${PAGES.ShopItem}/${itemId}`);
         return;
       }

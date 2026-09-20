@@ -70,15 +70,65 @@
   color: var(--muted);
 }
 
+.logs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.filterToggle {
+  display: none;
+}
+
 .filterBar {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 
 .filterBar .field {
   min-width: 12rem;
+}
+
+@media (max-width: 640px) {
+  .filterToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  /* Collapse the filters into the toggle on small screens so they stop
+     eating the page. */
+  .filterBar {
+    display: none;
+  }
+
+  .filterBarOpen {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 0;
+    padding: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  .filterBar .field {
+    min-width: 0;
+  }
 }
 
 .entryGrid {

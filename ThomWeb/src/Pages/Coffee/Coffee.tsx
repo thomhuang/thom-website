@@ -114,6 +114,7 @@ export default function Coffee() {
   const [selectedGrinderId, setSelectedGrinderId] = useState('');
   const [selectedBrewMethod, setSelectedBrewMethod] = useState('');
   const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('C');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -211,6 +212,11 @@ export default function Coffee() {
     return true;
   });
 
+  const hasFilters =
+    roasterOptions.length > 0 ||
+    grinderOptions.length > 0 ||
+    brewMethodOptions.length > 0;
+
   return (
     <main className={styles.page}>
       <section className={styles.intro} aria-labelledby="coffee-title">
@@ -230,63 +236,81 @@ export default function Coffee() {
         <aside className={styles.errorNotice}>{journalError}</aside>
       )}
 
-      {(roasterOptions.length > 0 ||
-        grinderOptions.length > 0 ||
-        brewMethodOptions.length > 0) && (
-        <div className={styles.filterBar}>
-          {roasterOptions.length > 0 && (
-            <label className={styles.field} htmlFor="coffee-roaster-filter">
-              Roaster
-              <select
-                id="coffee-roaster-filter"
-                value={selectedRoasterId}
-                onChange={(event) => setSelectedRoasterId(event.target.value)}
-              >
-                <option value="">All roasters</option>
-                {roasterOptions.map((roaster) => (
-                  <option value={roaster.id} key={roaster.id}>
-                    {roaster.roaster}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+      <div className={styles.logs}>
+        {hasFilters && (
+          <div className={styles.filterGroup}>
+          <button
+            type="button"
+            className={styles.filterToggle}
+            aria-expanded={filtersOpen}
+            aria-controls="coffee-filters"
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            Filters
+            <span aria-hidden="true">{filtersOpen ? '−' : '+'}</span>
+          </button>
 
-          {grinderOptions.length > 0 && (
-            <label className={styles.field} htmlFor="coffee-grinder-filter">
-              Grinder
-              <select
-                id="coffee-grinder-filter"
-                value={selectedGrinderId}
-                onChange={(event) => setSelectedGrinderId(event.target.value)}
-              >
-                <option value="">All grinders</option>
-                {grinderOptions.map((grinder) => (
-                  <option value={grinder.id} key={grinder.id}>
-                    {grinder.grinder}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+          <div
+            id="coffee-filters"
+            className={[
+              styles.filterBar,
+              filtersOpen ? styles.filterBarOpen : '',
+            ].join(' ')}
+          >
+            {roasterOptions.length > 0 && (
+              <label className={styles.field} htmlFor="coffee-roaster-filter">
+                Roaster
+                <select
+                  id="coffee-roaster-filter"
+                  value={selectedRoasterId}
+                  onChange={(event) => setSelectedRoasterId(event.target.value)}
+                >
+                  <option value="">All roasters</option>
+                  {roasterOptions.map((roaster) => (
+                    <option value={roaster.id} key={roaster.id}>
+                      {roaster.roaster}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
 
-          {brewMethodOptions.length > 0 && (
-            <label className={styles.field} htmlFor="coffee-method-filter">
-              Brew method
-              <select
-                id="coffee-method-filter"
-                value={selectedBrewMethod}
-                onChange={(event) => setSelectedBrewMethod(event.target.value)}
-              >
-                <option value="">All methods</option>
-                {brewMethodOptions.map((method) => (
-                  <option value={method} key={method}>
-                    {formatBrewMethod(method)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+            {grinderOptions.length > 0 && (
+              <label className={styles.field} htmlFor="coffee-grinder-filter">
+                Grinder
+                <select
+                  id="coffee-grinder-filter"
+                  value={selectedGrinderId}
+                  onChange={(event) => setSelectedGrinderId(event.target.value)}
+                >
+                  <option value="">All grinders</option>
+                  {grinderOptions.map((grinder) => (
+                    <option value={grinder.id} key={grinder.id}>
+                      {grinder.grinder}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+
+            {brewMethodOptions.length > 0 && (
+              <label className={styles.field} htmlFor="coffee-method-filter">
+                Brew method
+                <select
+                  id="coffee-method-filter"
+                  value={selectedBrewMethod}
+                  onChange={(event) => setSelectedBrewMethod(event.target.value)}
+                >
+                  <option value="">All methods</option>
+                  {brewMethodOptions.map((method) => (
+                    <option value={method} key={method}>
+                      {formatBrewMethod(method)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
         </div>
       )}
 
@@ -412,6 +436,7 @@ export default function Coffee() {
           </div>
         )}
       </section>
+      </div>
     </main>
   );
 }

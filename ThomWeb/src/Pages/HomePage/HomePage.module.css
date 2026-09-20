@@ -1,14 +1,25 @@
+.layout {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .header {
   margin: 0 0 1.5rem;
   font-size: 1.25rem;
   font-weight: 600;
 }
 
-.text p {
+.body p {
   margin: 0 0 1.5rem;
 }
 
-.text p:last-child {
+.body p:last-child {
   margin-bottom: 0;
 }
 
@@ -16,4 +27,19 @@
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .layout {
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  /* The block is centered, but the figure sits 6.2 columns right of the
+     block's centre (its accessory hangs off to the left). Shift the block
+     left so the figure itself ends up horizontally centered. */
+  .layout > pre {
+    transform: translateX(-6.2ch);
+  }
 }

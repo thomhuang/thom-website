@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
+import AsciiFigure from '../../Components/AsciiFigure/AsciiFigure';
 import { useAuth } from '../../Auth/AuthContext';
 import {
   CoffeeEntrySummary,
@@ -214,6 +215,7 @@ export default function Coffee() {
     <main className={styles.page}>
       <section className={styles.intro} aria-labelledby="coffee-title">
         <h1 id="coffee-title">Coffee journal</h1>
+        <AsciiFigure variant="coffee" size="large" />
       </section>
 
       {!isAuthLoading && isAdmin && (

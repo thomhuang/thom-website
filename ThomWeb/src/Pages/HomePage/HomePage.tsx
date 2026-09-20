@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+import AsciiFigure from "../../Components/AsciiFigure/AsciiFigure";
 import { PAGES } from "../../Assets/constants";
 import styles from "./HomePage.module.css";
 
@@ -15,7 +16,9 @@ export default function HomePage() {
 
   return (
     <div className={styles.text}>
-        <p className={styles.header}>Hi, I'm Thomas.</p>
+      <p className={styles.header}>Hi, I'm Thomas.</p>
+      <div className={styles.layout}>
+        <div className={styles.body}>
         <p>
           {"I'm a backend software engineer at Homes.com. Here's my "}
           <a
@@ -64,6 +67,9 @@ export default function HomePage() {
           </a>
           .
         </p>
+        </div>
+        <AsciiFigure size="large" />
+      </div>
     </div>
   );
 }

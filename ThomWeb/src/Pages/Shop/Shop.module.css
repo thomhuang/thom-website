@@ -14,6 +14,20 @@
   font-size: 1.5rem;
 }
 
+.intro {
+  display: flex;
+  flex-direction: column;
+}
+
+.intro > pre {
+  /* The block is centered, but the figure sits 6.2 columns right of the
+     block's centre (its accessory hangs off to the left). Shift the block
+     left so the figure itself ends up horizontally centered. */
+  align-self: center;
+  margin-top: 1.5rem;
+  transform: translateX(-6.2ch);
+}
+
 .page h2 {
   font-size: 1.25rem;
 }

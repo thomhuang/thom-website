@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
+import AsciiFigure from '../../Components/AsciiFigure/AsciiFigure';
 import { useAuth } from '../../Auth/AuthContext';
 import {
   DeleteShopItemAsync,
@@ -156,6 +157,7 @@ export default function Shop() {
       <section className={styles.intro} aria-labelledby="shop-title">
         <h1 id="shop-title">Shop</h1>
         <p className={styles.deck}>my things</p>
+        <AsciiFigure variant="shop" size="large" />
       </section>
 
       {!isAuthLoading && isAdmin && (

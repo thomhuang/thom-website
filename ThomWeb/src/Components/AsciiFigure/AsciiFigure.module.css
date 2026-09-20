@@ -1,0 +1,14 @@
+.figure {
+  margin: 0;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+  font-size: clamp(0.46rem, 1.25vw, 0.62rem);
+  line-height: 1;
+  color: var(--fg);
+  cursor: default;
+  user-select: none;
+}
+
+.large {
+  font-size: clamp(0.56rem, 1.5vw, 0.78rem);
+}

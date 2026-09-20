@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
@@ -87,6 +87,17 @@ const getTodayDate = () => {
   return `${year}-${month}-${day}`;
 };
 
+export type CoffeePrefill = {
+  coffeeName: string;
+  origin: string;
+  coffeeVarietal: string;
+  processingMethod: string;
+  daysSinceRoast: string;
+  roastLevel: string;
+  roasterId: string;
+  roaster: string;
+};
+
 const createEmptyDraft = (): BrewLogDraft => ({
   date: getTodayDate(),
   coffeeName: '',
@@ -109,6 +120,20 @@ const createEmptyDraft = (): BrewLogDraft => ({
   roastLevel: '',
   notes: '',
   rating: 0,
+});
+
+const createDraftFromPrefill = (
+  prefill: CoffeePrefill,
+  roasterId: string
+): BrewLogDraft => ({
+  ...createEmptyDraft(),
+  coffeeName: prefill.coffeeName,
+  origin: prefill.origin,
+  coffeeVarietal: prefill.coffeeVarietal,
+  processingMethod: prefill.processingMethod,
+  daysSinceRoast: prefill.daysSinceRoast,
+  roastLevel: prefill.roastLevel,
+  roasterId,
 });
 
 const createDraftFromEntry = (
@@ -233,6 +258,9 @@ const validateDraft = (draft: BrewLogDraft): FieldErrors => {
 export default function CoffeeEntry() {
   const { entryId } = useParams<{ entryId?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefill = (location.state as { prefill?: CoffeePrefill } | null)
+    ?.prefill;
   const { isAdmin, isAuthLoading } = useAuth();
   const isEditing = Boolean(entryId);
   const [roasterOptions, setRoasterOptions] = useState<RoasterOption[]>([]);
@@ -367,8 +395,33 @@ export default function CoffeeEntry() {
 
   useEffect(() => {
     if (!isEditing || !entryId) {
-      setDraft(createEmptyDraft());
-      setRoasterSearch('');
+      if (prefill) {
+        let roasterId = '';
+
+        if (prefill.roaster.trim()) {
+          const roasterOption = {
+            ...createRoasterOption(prefill.roaster),
+            id:
+              prefill.roasterId ||
+              slugifyCoffeeValue(prefill.roaster) ||
+              createCustomId(),
+          };
+
+          roasterId = roasterOption.id;
+          setRoasterOptions((currentOptions) =>
+            mergeById(currentOptions, [roasterOption])
+          );
+          setRoasterSearch(formatRoasterLabel(roasterOption));
+        } else {
+          setRoasterSearch('');
+        }
+
+        setDraft(createDraftFromPrefill(prefill, roasterId));
+      } else {
+        setDraft(createEmptyDraft());
+        setRoasterSearch('');
+      }
+
       setGrinderSearch('');
       setFormError('');
       setEntryLoadFailed(false);
@@ -441,7 +494,7 @@ export default function CoffeeEntry() {
       isMounted = false;
       controller.abort();
     };
-  }, [entryId, isAdmin, isAuthLoading, isEditing]);
+  }, [entryId, isAdmin, isAuthLoading, isEditing, prefill]);
 
   const updateDraft =
     (field: BrewLogTextField) =>

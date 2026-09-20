@@ -131,8 +131,63 @@
   }
 }
 
-.entryGrid {
+.coffeeGroups {
   margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.coffeeGroup {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.groupDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.groupSummary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.groupSummary::-webkit-details-marker {
+  display: none;
+}
+
+.groupSummary::after {
+  content: '+';
+  color: var(--muted);
+  line-height: 1;
+}
+
+.groupDetails[open] .groupSummary::after {
+  content: '\2013';
+}
+
+.groupCount {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* Keep the coffee name at normal weight so the bolded roaster stands out. */
+.groupTitle {
+  font-weight: 400;
+}
+
+.groupRoaster {
+  font-weight: 600;
+}
+
+.entryGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
   gap: 1.5rem;
@@ -167,6 +222,11 @@
 
 .cardSummary::-webkit-details-marker {
   display: none;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1rem;
 }
 
 .cardSummary::after {

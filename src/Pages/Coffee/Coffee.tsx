@@ -16,6 +16,7 @@ import type {
   CoffeeRoaster,
 } from '../../api/Coffee/CoffeeRouter';
 import { brewMethods } from './CoffeeEntry';
+import type { CoffeePrefill } from './CoffeeEntry';
 import { formatTemperature } from './format';
 import type { TemperatureUnit } from './format';
 import styles from './Coffee.module.css';
@@ -101,6 +102,54 @@ const getTastingNotes = (entry: CoffeeEntrySummary) =>
 
 const formatBrewMethod = (value: string) =>
   brewMethods.find((option) => option.value === value)?.label ?? value;
+
+type CoffeeGroup = {
+  key: string;
+  coffeeName: string;
+  entries: CoffeeEntrySummary[];
+};
+
+// Entries are grouped by name, preserving the order the API returned them in.
+const groupEntriesByCoffee = (
+  entries: CoffeeEntrySummary[]
+): CoffeeGroup[] => {
+  const groups = new Map<string, CoffeeGroup>();
+
+  entries.forEach((entry) => {
+    const key = entry.coffeeName.trim().toLowerCase();
+    const existing = groups.get(key);
+
+    if (existing) {
+      existing.entries.push(entry);
+      return;
+    }
+
+    groups.set(key, {
+      key,
+      coffeeName: entry.coffeeName,
+      entries: [entry],
+    });
+  });
+
+  return Array.from(groups.values());
+};
+
+// A new brew for an existing coffee carries the bean details forward; the brew
+// specifics (date, method, grinder, dose, etc.) stay blank.
+const getGroupPrefill = (group: CoffeeGroup): CoffeePrefill => {
+  const entry = group.entries[0];
+
+  return {
+    coffeeName: entry.coffeeName,
+    origin: entry.origin,
+    coffeeVarietal: entry.coffeeVarietal,
+    processingMethod: entry.processingMethod,
+    daysSinceRoast: String(entry.daysSinceRoast ?? ''),
+    roastLevel: entry.roastLevel ?? '',
+    roasterId: entry.roasterId ?? '',
+    roaster: entry.roaster,
+  };
+};
 
 export default function Coffee() {
   const { isAdmin, isAuthLoading } = useAuth();
@@ -344,84 +393,153 @@ export default function Coffee() {
         {isLoading ? (
           <p className={styles.statusText}>Loading brew entries...</p>
         ) : visibleLogs.length > 0 ? (
-          <div className={styles.entryGrid}>
-            {visibleLogs.map((entry) => {
-              const coffeeMetadata = formatCoffeeMetadata(entry);
-              const statGroups = getEntryStatGroups(entry, temperatureUnit);
-              const tastingNotes = getTastingNotes(entry);
+          <div className={styles.coffeeGroups}>
+            {groupEntriesByCoffee(visibleLogs).map((group) => {
+              const roasters = Array.from(
+                new Set(
+                  group.entries.map((entry) => entry.roaster).filter(Boolean)
+                )
+              );
+              const coffeeMetadata = Array.from(
+                new Set(
+                  group.entries.map(formatCoffeeMetadata).filter(Boolean)
+                )
+              );
+              const groupMeta = coffeeMetadata.join(' · ');
+              const brewCount = `${group.entries.length} ${
+                group.entries.length === 1 ? 'brew' : 'brews'
+              }`;
 
               return (
-                <article className={styles.card} key={entry.id}>
-                  <details className={styles.cardDetails}>
-                    <summary className={styles.cardSummary}>
-                      <h3>{entry.coffeeName}</h3>
-                      <span className={styles.entryDate}>{entry.date}</span>
-                    </summary>
-                    {coffeeMetadata && (
-                      <p className={styles.entryMeta}>
-                        {[entry.roaster, coffeeMetadata].filter(Boolean).join(' · ')}
-                      </p>
-                    )}
-                    <p
-                      className={styles.ratingRow}
-                      aria-label={`Rated ${entry.rating} out of 5`}
-                    >
-                      <span className={styles.stars} aria-hidden="true">
-                        {formatRatingStars(entry.rating)}
-                      </span>
-                      <span className={styles.ratingValue}>{entry.rating}/5</span>
-                    </p>
-
-                    {!isAuthLoading && isAdmin && (
-                      <div className={styles.entryActions}>
+                <section className={styles.coffeeGroup} key={group.key}>
+                  <details className={styles.groupDetails} open>
+                    <summary className={styles.groupSummary}>
+                      <h3 className={styles.groupTitle}>
+                        {roasters.length > 0 && (
+                          <>
+                            <strong className={styles.groupRoaster}>
+                              {roasters.join(', ')}
+                            </strong>
+                            {' : '}
+                          </>
+                        )}
+                        {group.coffeeName}
+                      </h3>
+                      {!isAuthLoading && isAdmin && (
                         <Link
                           className={styles.textLink}
-                          to={`${PAGES.CoffeeEntry}/${entry.id}`}
+                          to={PAGES.CoffeeEntry}
+                          state={{ prefill: getGroupPrefill(group) }}
+                          onClick={(event) => event.stopPropagation()}
+                          aria-label={`New brew for ${group.coffeeName}`}
                         >
-                          Edit
+                          + New brew
                         </Link>
-                        <button
-                          type="button"
-                          className={styles.deleteButton}
-                          onClick={() => deleteEntry(entry)}
-                          disabled={deletingEntryId === entry.id}
-                        >
-                          {deletingEntryId === entry.id ? 'Deleting' : 'Delete'}
-                        </button>
-                      </div>
+                      )}
+                      <span className={styles.groupCount}>{brewCount}</span>
+                    </summary>
+                    {groupMeta && (
+                      <p className={styles.entryMeta}>{groupMeta}</p>
                     )}
+                    <div className={styles.entryGrid}>
+                      {group.entries.map((entry) => {
+                        const statGroups = getEntryStatGroups(
+                          entry,
+                          temperatureUnit
+                        );
+                        const tastingNotes = getTastingNotes(entry);
 
-                    {statGroups.map((group) => (
-                      <div className={styles.statGroup} key={group.title}>
-                        <h4 className={styles.statGroupTitle}>{group.title}</h4>
-                        <dl className={styles.statList}>
-                          {group.stats.map((stat) => (
-                            <div className={styles.statRow} key={stat.label}>
-                              <dt>{stat.label}</dt>
-                              <dd>{stat.value}</dd>
-                            </div>
-                          ))}
-                        </dl>
-                      </div>
-                    ))}
+                        return (
+                          <article className={styles.card} key={entry.id}>
+                            <details className={styles.cardDetails}>
+                              <summary className={styles.cardSummary}>
+                                <h4 className={styles.cardTitle}>
+                                  {formatBrewMethod(entry.brewMethod) ||
+                                    entry.date}
+                                </h4>
+                                <span className={styles.entryDate}>
+                                  {entry.date}
+                                </span>
+                              </summary>
+                              <p
+                                className={styles.ratingRow}
+                                aria-label={`Rated ${entry.rating} out of 5`}
+                              >
+                                <span className={styles.stars} aria-hidden="true">
+                                  {formatRatingStars(entry.rating)}
+                                </span>
+                                <span className={styles.ratingValue}>
+                                  {entry.rating}/5
+                                </span>
+                              </p>
 
-                    {(tastingNotes || entry.pourNotes) && (
-                      <div className={styles.entryText}>
-                        {tastingNotes && (
-                          <p className={styles.entryNotes}>{tastingNotes}</p>
-                        )}
-                        {entry.pourNotes && (
-                          <p className={styles.entryNotes}>
-                            <span className={styles.entryNoteLabel}>
-                              Pour notes
-                            </span>
-                            {entry.pourNotes}
-                          </p>
-                        )}
-                      </div>
-                    )}
+                              {!isAuthLoading && isAdmin && (
+                                <div className={styles.entryActions}>
+                                  <Link
+                                    className={styles.textLink}
+                                    to={`${PAGES.CoffeeEntry}/${entry.id}`}
+                                  >
+                                    Edit
+                                  </Link>
+                                  <button
+                                    type="button"
+                                    className={styles.deleteButton}
+                                    onClick={() => deleteEntry(entry)}
+                                    disabled={deletingEntryId === entry.id}
+                                  >
+                                    {deletingEntryId === entry.id
+                                      ? 'Deleting'
+                                      : 'Delete'}
+                                  </button>
+                                </div>
+                              )}
+
+                              {statGroups.map((statGroup) => (
+                                <div
+                                  className={styles.statGroup}
+                                  key={statGroup.title}
+                                >
+                                  <h4 className={styles.statGroupTitle}>
+                                    {statGroup.title}
+                                  </h4>
+                                  <dl className={styles.statList}>
+                                    {statGroup.stats.map((stat) => (
+                                      <div
+                                        className={styles.statRow}
+                                        key={stat.label}
+                                      >
+                                        <dt>{stat.label}</dt>
+                                        <dd>{stat.value}</dd>
+                                      </div>
+                                    ))}
+                                  </dl>
+                                </div>
+                              ))}
+
+                              {(tastingNotes || entry.pourNotes) && (
+                                <div className={styles.entryText}>
+                                  {tastingNotes && (
+                                    <p className={styles.entryNotes}>
+                                      {tastingNotes}
+                                    </p>
+                                  )}
+                                  {entry.pourNotes && (
+                                    <p className={styles.entryNotes}>
+                                      <span className={styles.entryNoteLabel}>
+                                        Pour notes
+                                      </span>
+                                      {entry.pourNotes}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </details>
+                          </article>
+                        );
+                      })}
+                    </div>
                   </details>
-                </article>
+                </section>
               );
             })}
           </div>

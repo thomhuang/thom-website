@@ -30,7 +30,7 @@ export default function Policies() {
         </h2>
         <p>
           I ship to US addresses only. Shipping is a flat $10 per order. Orders
-          ship within 3–5 business days via USPS. Sales tax, where applicable, is
+          ship within 3–7 business days via USPS. Sales tax, where applicable, is
           calculated at checkout.
         </p>
         <p>

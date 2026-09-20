@@ -38,7 +38,6 @@ type BrewLogDraft = {
   grinderId: string;
   grindSetting: string;
   dose: string;
-  yieldAmount: string;
   waterTemperature: string;
   brewTime: string;
   bloomTime: string;
@@ -62,14 +61,6 @@ export const brewMethods: SelectOption[] = [
   { value: 'v60', label: 'V60' },
   { value: 'turbo-shot', label: 'Turbo Shot' },
   { value: 'orea-z1', label: 'Orea Z1' },
-];
-
-const ratios: SelectOption[] = [
-  { value: '1:15', label: '1:15' },
-  { value: '1:16', label: '1:16' },
-  { value: '1:16.67', label: '1:16.67' },
-  { value: '1:17', label: '1:17' },
-  { value: '1:18', label: '1:18' },
 ];
 
 const roastLevels: SelectOption[] = [
@@ -111,7 +102,6 @@ const createEmptyDraft = (): BrewLogDraft => ({
   grinderId: '',
   grindSetting: '',
   dose: '',
-  yieldAmount: '',
   waterTemperature: '',
   brewTime: '',
   bloomTime: '',
@@ -149,11 +139,10 @@ const createDraftFromEntry = (
   daysSinceRoast: String(entry.daysSinceRoast),
   roasterId,
   brewMethod: entry.brewMethod,
-  ratio: entry.ratio,
+  ratio: getRatioValue(entry.ratio),
   grinderId,
   grindSetting: String(entry.grindSetting),
   dose: String(entry.dose),
-  yieldAmount: String(entry.yieldAmount),
   waterTemperature: String(entry.waterTemperature),
   brewTime: entry.brewTime,
   bloomTime: entry.bloomTime,
@@ -165,6 +154,31 @@ const createDraftFromEntry = (
 });
 
 const formatRoasterLabel = (roaster: RoasterOption) => roaster.roaster;
+
+// Ratio is displayed as a fixed "1:" prefix plus an editable float, but stored
+// as a single string (e.g. "1:16.67").
+const RATIO_PREFIX = '1:';
+
+const getRatioValue = (ratio: string) =>
+  ratio.startsWith(RATIO_PREFIX) ? ratio.slice(RATIO_PREFIX.length) : ratio;
+
+// Yield is derived from dose and ratio, so it is never edited directly. Blank
+// or non-numeric inputs leave it blank; otherwise it rounds to whole grams.
+const getYieldAmount = (dose: string, ratio: string): string => {
+  const parsedDose = Number(dose.trim());
+  const parsedRatio = Number(ratio.trim());
+
+  if (
+    !dose.trim() ||
+    !ratio.trim() ||
+    Number.isNaN(parsedDose) ||
+    Number.isNaN(parsedRatio)
+  ) {
+    return '';
+  }
+
+  return String(Math.round(parsedDose * parsedRatio));
+};
 
 const slugifyCoffeeValue = (value: string) =>
   value
@@ -210,31 +224,36 @@ const createRequestFromDraft = (
   roaster: RoasterOption,
   grinder: GrinderOption,
   temperatureUnit: TemperatureUnit
-): CoffeeEntryRequest => ({
-  ...draft,
-  roaster: roaster.roaster,
-  grinder: grinder.grinder,
-  grindSetting: draft.grindSetting ? Number(draft.grindSetting) : undefined,
-  daysSinceRoast: draft.daysSinceRoast ? Number(draft.daysSinceRoast) : undefined,
-  dose: draft.dose ? Number(draft.dose) : undefined,
-  yieldAmount: draft.yieldAmount ? Number(draft.yieldAmount) : undefined,
-  waterTemperature: draft.waterTemperature
-    ? Math.round(toCelsius(Number(draft.waterTemperature), temperatureUnit))
-    : undefined,
-  bloomWater: draft.bloomWater ? Number(draft.bloomWater) : undefined,
-});
+): CoffeeEntryRequest => {
+  const yieldAmount = getYieldAmount(draft.dose, draft.ratio);
+
+  return {
+    ...draft,
+    roaster: roaster.roaster,
+    grinder: grinder.grinder,
+    ratio: `${RATIO_PREFIX}${draft.ratio.trim()}`,
+    grindSetting: draft.grindSetting ? Number(draft.grindSetting) : undefined,
+    daysSinceRoast: draft.daysSinceRoast ? Number(draft.daysSinceRoast) : undefined,
+    dose: draft.dose ? Number(draft.dose) : undefined,
+    yieldAmount: yieldAmount ? Number(yieldAmount) : undefined,
+    waterTemperature: draft.waterTemperature
+      ? Math.round(toCelsius(Number(draft.waterTemperature), temperatureUnit))
+      : undefined,
+    bloomWater: draft.bloomWater ? Number(draft.bloomWater) : undefined,
+  };
+};
 
 const validateDraft = (draft: BrewLogDraft): FieldErrors => {
   const errors: FieldErrors = {};
 
+  if (draft.ratio && !/^\d+(\.\d+)?$/.test(draft.ratio.trim())) {
+    errors.ratio = 'Enter a number';
+  }
   if (draft.grindSetting && !/^\d+(\.\d+)?$/.test(String(draft.grindSetting).trim())) {
     errors.grindSetting = 'Enter a number';
   }
   if (draft.dose && !/^\d+$/.test(String(draft.dose).trim())) {
     errors.dose = 'Enter a whole number';
-  }
-  if (draft.yieldAmount && !/^\d+$/.test(String(draft.yieldAmount).trim())) {
-    errors.yieldAmount = 'Enter a whole number';
   }
   if (
     draft.waterTemperature &&
@@ -273,6 +292,10 @@ export default function CoffeeEntry() {
   const [newGrinder, setNewGrinder] = useState('');
   const [formError, setFormError] = useState('');
   const fieldErrors = useMemo(() => validateDraft(draft), [draft]);
+  const yieldAmount = useMemo(
+    () => getYieldAmount(draft.dose, draft.ratio),
+    [draft.dose, draft.ratio]
+  );
   const [entryLoadFailed, setEntryLoadFailed] = useState(false);
   const [isEntryLoading, setIsEntryLoading] = useState(isEditing);
   const [isRoasterLoading, setIsRoasterLoading] = useState(false);
@@ -932,7 +955,28 @@ export default function CoffeeEntry() {
               <h2 id="brew-setup">Brew setup</h2>
 
               <div className={styles.fieldGrid}>
-                {renderSelect('ratio', 'Ratio', 'ratio', ratios, true)}
+                <label className={styles.field} htmlFor="ratio">
+                  <span className={styles.labelRow}>
+                    Ratio
+                    <span className={styles.required}>Required</span>
+                  </span>
+                  <span className={styles.ratioInput}>
+                    <span aria-hidden="true">{RATIO_PREFIX}</span>
+                    <input
+                      id="ratio"
+                      className={fieldErrors.ratio ? styles.invalid : undefined}
+                      type="text"
+                      inputMode="decimal"
+                      pattern="\d+(\.\d+)?"
+                      title="Enter a number"
+                      value={draft.ratio}
+                      onChange={updateDraft('ratio')}
+                      placeholder="16.67"
+                      required
+                    />
+                  </span>
+                  {fieldErrors.ratio && <span className={styles.fieldError}>{fieldErrors.ratio}</span>}
+                </label>
 
                 <label className={styles.field} htmlFor="grind-setting">
                   <span className={styles.labelRow}>
@@ -974,15 +1018,12 @@ export default function CoffeeEntry() {
                   Yield (g)
                   <input
                     id="yield-amount"
-                    className={fieldErrors.yieldAmount ? styles.invalid : undefined}
                     type="text"
-                    inputMode="numeric"
-                    pattern="\d+"
-                    value={draft.yieldAmount}
-                    onChange={updateDraft('yieldAmount')}
+                    value={yieldAmount}
                     placeholder="320"
+                    readOnly
+                    aria-readonly="true"
                   />
-                  {fieldErrors.yieldAmount && <span className={styles.fieldError}>{fieldErrors.yieldAmount}</span>}
                 </label>
 
                 <label className={styles.field} htmlFor="water-temp">

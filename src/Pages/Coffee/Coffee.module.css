@@ -423,6 +423,17 @@
   resize: vertical;
 }
 
+.ratioInput {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ratioInput input {
+  flex: 1;
+  min-width: 0;
+}
+
 .invalid {
   border-color: #b42318;
 }

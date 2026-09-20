@@ -3,31 +3,11 @@ import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
-import {
-  GetShopOrdersAsync,
-  ShopOrder,
-  ShopOrderStatus,
-} from '../../api/Shop/ShopRouter';
-import { formatDateTime, formatPrice } from './format';
-import ShippingAddress from './ShippingAddress';
+import { GetShopOrdersAsync, ShopOrder } from '../../api/Shop/ShopRouter';
+import ShopOrderCard from './ShopOrderCard';
 import styles from './Shop.module.css';
 
 const ORDERS_PAGE_SIZE = 20;
-
-function statusClass(status: ShopOrderStatus) {
-  switch (status) {
-    case 'paid':
-      return styles.statusPaid;
-    case 'refunded':
-      return styles.statusRefunded;
-    case 'refund_pending':
-      return styles.statusRefundPending;
-    case 'expired':
-      return styles.statusExpired;
-    default:
-      return styles.statusPending;
-  }
-}
 
 export default function ShopOrders() {
   const { isAdmin, isAuthLoading } = useAuth();
@@ -145,52 +125,7 @@ export default function ShopOrders() {
       {!isAuthLoading && isAdmin && !isLoading && orders.length > 0 && (
         <section className={styles.orderList} aria-label="Orders">
           {orders.map((order) => (
-            <article className={styles.orderCard} key={order.id}>
-              <header className={styles.orderHeader}>
-                <div>
-                  <h2 className={styles.orderTitle}>Order #{order.id}</h2>
-                  <p className={styles.cardMeta}>
-                    {formatDateTime(order.createdAt)}
-                  </p>
-                </div>
-                <div className={styles.orderHeaderMeta}>
-                  <span className={statusClass(order.status)}>
-                    {order.status.replace('_', ' ')}
-                  </span>
-                  <p className={styles.orderTotal}>
-                    {formatPrice(order.amountTotalCents, order.currency)}
-                  </p>
-                </div>
-              </header>
-
-              {(order.customerName || order.customerEmail) && (
-                <p className={styles.cardMeta}>
-                  {[order.customerName, order.customerEmail]
-                    .filter(Boolean)
-                    .join(' | ')}
-                </p>
-              )}
-
-              <ShippingAddress order={order} />
-
-              <ul className={styles.orderLines}>
-                {(order.lines ?? []).map((line) => (
-                  <li className={styles.orderLine} key={line.id}>
-                    <span>
-                      {line.quantity} x {line.title}
-                    </span>
-                    <span>
-                      {formatPrice(
-                        line.unitPriceCents * line.quantity,
-                        order.currency
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <p className={styles.orderSession}>{order.stripeSessionId}</p>
-            </article>
+            <ShopOrderCard key={order.id} order={order} />
           ))}
         </section>
       )}

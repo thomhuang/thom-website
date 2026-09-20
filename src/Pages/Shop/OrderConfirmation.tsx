@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { PAGES } from '../../Assets/constants';
 import { GetShopOrderAsync, PublicShopOrder } from '../../api/Shop/ShopRouter';
 import { formatPrice } from './format';
+import { getOrderStatusCopy } from './orderStatus';
 import styles from './Shop.module.css';
 
 // While payment is still settling, poll for the webhook's result instead of
@@ -133,10 +134,7 @@ export default function OrderConfirmation() {
   }
 
   const isPending = order.status === 'pending';
-  const isPaid = order.status === 'paid';
-  const isRefunded = order.status === 'refunded';
-  const isRefundPending = order.status === 'refund_pending';
-  const isExpired = order.status === 'expired';
+  const { title, message } = getOrderStatusCopy(order.status);
 
   return (
     <main className={styles.page}>
@@ -148,28 +146,8 @@ export default function OrderConfirmation() {
 
       <article className={styles.detail}>
         <div className={styles.detailBody}>
-          <h1 className={styles.detailTitle}>
-            {isRefunded
-              ? 'Order refunded'
-              : isRefundPending
-                ? 'Order being refunded'
-                : isPaid
-                  ? 'Thank you'
-                  : isExpired
-                    ? 'Checkout expired'
-                    : 'Order received'}
-          </h1>
-          <p className={styles.cardMeta}>
-            {isRefunded
-              ? 'This order could not be fulfilled and has been refunded.'
-              : isRefundPending
-                ? 'This order could not be fulfilled and is being refunded.'
-                : isPaid
-                  ? 'Payment received. Your order is confirmed.'
-                  : isExpired
-                    ? 'This checkout expired before payment. Feel free to try again.'
-                    : 'Payment is still being confirmed. This page updates automatically.'}
-          </p>
+          <h1 className={styles.detailTitle}>{title}</h1>
+          <p className={styles.cardMeta}>{message}</p>
 
           <p className={styles.detailPrice}>
             {formatPrice(order.amountTotalCents, order.currency)}

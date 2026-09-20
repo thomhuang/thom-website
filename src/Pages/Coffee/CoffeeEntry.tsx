@@ -1,279 +1,37 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import {
   CreateCoffeeEntryAsync,
-  CreateCoffeeGrinderAsync,
-  CreateCoffeeRoasterAsync,
-  GetCoffeeEntryByIdAsync,
-  GetCoffeeGrindersAsync,
-  GetCoffeeRoastersAsync,
   UpdateCoffeeEntryAsync,
 } from '../../api/Coffee/CoffeeRouter';
+import CoffeeEntryBrewSection from './CoffeeEntryBrewSection';
+import CoffeeEntryDetailsSection from './CoffeeEntryDetailsSection';
+import CoffeeEntryNotesSection from './CoffeeEntryNotesSection';
+import {
+  createEmptyDraft,
+  createRequestFromDraft,
+  getYieldAmount,
+  validateDraft,
+} from './coffeeEntryDraft';
 import type {
-  CoffeeEntry as CoffeeEntryResponse,
-  CoffeeEntryRequest,
-  CoffeeGrinder,
-  CoffeeRoaster,
-} from '../../api/Coffee/CoffeeRouter';
-import styles from './Coffee.module.css';
+  BrewLogDraft,
+  CoffeePrefill,
+  UpdateDraft,
+} from './coffeeEntryDraft';
 import { fromCelsius, roundToTenth, toCelsius } from './format';
 import type { TemperatureUnit } from './format';
-
-type RoasterOption = CoffeeRoaster;
-type GrinderOption = CoffeeGrinder;
-
-type BrewLogDraft = {
-  date: string;
-  coffeeName: string;
-  origin: string;
-  coffeeVarietal: string;
-  processingMethod: string;
-  daysSinceRoast: string;
-  roasterId: string;
-  brewMethod: string;
-  ratio: string;
-  grinderId: string;
-  grindSetting: string;
-  dose: string;
-  waterTemperature: string;
-  brewTime: string;
-  bloomTime: string;
-  bloomWater: string;
-  pourNotes: string;
-  roastLevel: string;
-  notes: string;
-  rating: number;
-};
-
-type BrewLogTextField = Exclude<keyof BrewLogDraft, 'rating'>;
-
-type FieldErrors = Partial<Record<BrewLogTextField, string>>;
-
-type SelectOption = {
-  value: string;
-  label: string;
-};
-
-export const brewMethods: SelectOption[] = [
-  { value: 'v60', label: 'V60' },
-  { value: 'turbo-shot', label: 'Turbo Shot' },
-  { value: 'orea-z1', label: 'Orea Z1' },
-  { value: 'gabi-master-a', label: 'Gabi Dripper' },
-];
-
-const roastLevels: SelectOption[] = [
-  { value: 'ultralight', label: 'Ultralight' },
-  { value: 'light', label: 'Light' },
-  { value: 'light-medium', label: 'Light-medium' },
-];
-
-const getTodayDate = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
-};
-
-export type CoffeePrefill = {
-  coffeeName: string;
-  origin: string;
-  coffeeVarietal: string;
-  processingMethod: string;
-  daysSinceRoast: string;
-  roastLevel: string;
-  roasterId: string;
-  roaster: string;
-};
-
-const createEmptyDraft = (): BrewLogDraft => ({
-  date: getTodayDate(),
-  coffeeName: '',
-  origin: '',
-  coffeeVarietal: '',
-  processingMethod: '',
-  daysSinceRoast: '',
-  roasterId: '',
-  brewMethod: '',
-  ratio: '',
-  grinderId: '',
-  grindSetting: '',
-  dose: '',
-  waterTemperature: '',
-  brewTime: '',
-  bloomTime: '',
-  bloomWater: '',
-  pourNotes: '',
-  roastLevel: '',
-  notes: '',
-  rating: 0,
-});
-
-const createDraftFromPrefill = (
-  prefill: CoffeePrefill,
-  roasterId: string
-): BrewLogDraft => ({
-  ...createEmptyDraft(),
-  coffeeName: prefill.coffeeName,
-  origin: prefill.origin,
-  coffeeVarietal: prefill.coffeeVarietal,
-  processingMethod: prefill.processingMethod,
-  daysSinceRoast: prefill.daysSinceRoast,
-  roastLevel: prefill.roastLevel,
-  roasterId,
-});
-
-const createDraftFromEntry = (
-  entry: CoffeeEntryResponse,
-  roasterId: string,
-  grinderId: string
-): BrewLogDraft => ({
-  date: entry.date,
-  coffeeName: entry.coffeeName,
-  origin: entry.origin || '',
-  coffeeVarietal: entry.coffeeVarietal || '',
-  processingMethod: entry.processingMethod || '',
-  daysSinceRoast: String(entry.daysSinceRoast),
-  roasterId,
-  brewMethod: entry.brewMethod,
-  ratio: getRatioValue(entry.ratio),
-  grinderId,
-  grindSetting: String(entry.grindSetting),
-  dose: String(entry.dose),
-  waterTemperature: String(entry.waterTemperature),
-  brewTime: entry.brewTime,
-  bloomTime: entry.bloomTime,
-  bloomWater: String(entry.bloomWater),
-  pourNotes: entry.pourNotes,
-  roastLevel: entry.roastLevel,
-  notes: entry.notes || entry.tastingNotes,
-  rating: entry.rating,
-});
-
-const formatRoasterLabel = (roaster: RoasterOption) => roaster.roaster;
-
-// Ratio is displayed as a fixed "1:" prefix plus an editable float, but stored
-// as a single string (e.g. "1:16.67").
-const RATIO_PREFIX = '1:';
-
-const getRatioValue = (ratio: string) =>
-  ratio.startsWith(RATIO_PREFIX) ? ratio.slice(RATIO_PREFIX.length) : ratio;
-
-// Yield is derived from dose and ratio, so it is never edited directly. Blank
-// or non-numeric inputs leave it blank; otherwise it rounds to whole grams.
-const getYieldAmount = (dose: string, ratio: string): string => {
-  const parsedDose = Number(dose.trim());
-  const parsedRatio = Number(ratio.trim());
-
-  if (
-    !dose.trim() ||
-    !ratio.trim() ||
-    Number.isNaN(parsedDose) ||
-    Number.isNaN(parsedRatio)
-  ) {
-    return '';
-  }
-
-  return String(Math.round(parsedDose * parsedRatio));
-};
-
-const slugifyCoffeeValue = (value: string) =>
-  value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
-const createCustomId = () => `custom-${Date.now()}`;
-
-const createRoasterOption = (roaster: string): RoasterOption => ({
-  id: slugifyCoffeeValue(roaster) || createCustomId(),
-  roaster,
-});
-
-const createGrinderOption = (grinder: string): GrinderOption => ({
-  id: slugifyCoffeeValue(grinder) || createCustomId(),
-  grinder,
-});
-
-// Merge fetched and locally-added options, keeping the first occurrence of an id.
-const mergeById = <T extends { id: string }>(
-  primaryOptions: T[],
-  secondaryOptions: T[] = []
-): T[] => {
-  const optionsById = new Map<string, T>();
-
-  [...primaryOptions, ...secondaryOptions].forEach((option) => {
-    if (!optionsById.has(option.id)) {
-      optionsById.set(option.id, option);
-    }
-  });
-
-  return Array.from(optionsById.values());
-};
-
-const formatGrinderLabel = (grinder: GrinderOption) => grinder.grinder;
-
-// Water temperature is stored as whole degrees Celsius. The form can display it
-// in Fahrenheit, so convert and round back to the server's integer on save.
-const createRequestFromDraft = (
-  draft: BrewLogDraft,
-  roaster: RoasterOption,
-  grinder: GrinderOption,
-  temperatureUnit: TemperatureUnit
-): CoffeeEntryRequest => {
-  const yieldAmount = getYieldAmount(draft.dose, draft.ratio);
-
-  return {
-    ...draft,
-    roaster: roaster.roaster,
-    grinder: grinder.grinder,
-    ratio: `${RATIO_PREFIX}${draft.ratio.trim()}`,
-    grindSetting: draft.grindSetting ? Number(draft.grindSetting) : undefined,
-    daysSinceRoast: draft.daysSinceRoast ? Number(draft.daysSinceRoast) : undefined,
-    dose: draft.dose ? Number(draft.dose) : undefined,
-    yieldAmount: yieldAmount ? Number(yieldAmount) : undefined,
-    waterTemperature: draft.waterTemperature
-      ? Math.round(toCelsius(Number(draft.waterTemperature), temperatureUnit))
-      : undefined,
-    bloomWater: draft.bloomWater ? Number(draft.bloomWater) : undefined,
-  };
-};
-
-const validateDraft = (draft: BrewLogDraft): FieldErrors => {
-  const errors: FieldErrors = {};
-
-  if (draft.ratio && !/^\d+(\.\d+)?$/.test(draft.ratio.trim())) {
-    errors.ratio = 'Enter a number';
-  }
-  if (draft.grindSetting && !/^\d+(\.\d+)?$/.test(String(draft.grindSetting).trim())) {
-    errors.grindSetting = 'Enter a number';
-  }
-  if (draft.dose && !/^\d+$/.test(String(draft.dose).trim())) {
-    errors.dose = 'Enter a whole number';
-  }
-  if (
-    draft.waterTemperature &&
-    !/^\d+(\.\d+)?$/.test(String(draft.waterTemperature).trim())
-  ) {
-    errors.waterTemperature = 'Enter a number';
-  }
-  if (draft.brewTime && !/^\d{1,2}:[0-5]\d$/.test(String(draft.brewTime).trim())) {
-    errors.brewTime = 'Enter a time (e.g. 3:20)';
-  }
-  if (draft.bloomTime && !/^\d{1,2}:[0-5]\d$/.test(String(draft.bloomTime).trim())) {
-    errors.bloomTime = 'Enter a time (e.g. 0:45)';
-  }
-  if (draft.bloomWater && !/^\d+$/.test(String(draft.bloomWater).trim())) {
-    errors.bloomWater = 'Enter a whole number';
-  }
-
-  return errors;
-};
+import {
+  loadGrinderOptions,
+  loadRoasterOptions,
+  saveGrinderOption,
+  saveRoasterOption,
+  useCoffeeLookup,
+} from './useCoffeeLookup';
+import { useCoffeeEntryLoader } from './useCoffeeEntryLoader';
+import styles from './Coffee.module.css';
 
 export default function CoffeeEntry() {
   const { entryId } = useParams<{ entryId?: string }>();
@@ -283,248 +41,64 @@ export default function CoffeeEntry() {
     ?.prefill;
   const { isAdmin, isAuthLoading } = useAuth();
   const isEditing = Boolean(entryId);
-  const [roasterOptions, setRoasterOptions] = useState<RoasterOption[]>([]);
-  const [grinderOptions, setGrinderOptions] = useState<GrinderOption[]>([]);
+
   const [draft, setDraft] = useState<BrewLogDraft>(createEmptyDraft);
   const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('C');
-  const [roasterSearch, setRoasterSearch] = useState('');
-  const [grinderSearch, setGrinderSearch] = useState('');
-  const [newRoaster, setNewRoaster] = useState('');
-  const [newGrinder, setNewGrinder] = useState('');
   const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const roaster = useCoffeeLookup({
+    loadOptions: loadRoasterOptions,
+    saveOption: saveRoasterOption,
+    enabled: !isAuthLoading && isAdmin,
+    selectedId: draft.roasterId,
+    loadErrorMessage: 'Roasters could not be loaded.',
+    saveErrorMessage: 'Roaster could not be saved.',
+    onSelect: (roasterId) =>
+      setDraft((currentDraft) => ({ ...currentDraft, roasterId })),
+    onError: setFormError,
+  });
+
+  const grinder = useCoffeeLookup({
+    loadOptions: loadGrinderOptions,
+    saveOption: saveGrinderOption,
+    enabled: !isAuthLoading && isAdmin,
+    selectedId: draft.grinderId,
+    loadErrorMessage: 'Grinders could not be loaded.',
+    saveErrorMessage: 'Grinder could not be saved.',
+    onSelect: (grinderId) =>
+      setDraft((currentDraft) => ({ ...currentDraft, grinderId })),
+    onError: setFormError,
+  });
+
+  const { isEntryLoading, entryLoadFailed } = useCoffeeEntryLoader({
+    entryId,
+    isEditing,
+    isAdmin,
+    isAuthLoading,
+    prefill,
+    roaster,
+    grinder,
+    setDraft,
+    setFormError,
+  });
+
+  const selectedRoaster = roaster.selectedOption;
+  const selectedGrinder = grinder.selectedOption;
   const fieldErrors = useMemo(() => validateDraft(draft), [draft]);
   const yieldAmount = useMemo(
     () => getYieldAmount(draft.dose, draft.ratio),
     [draft.dose, draft.ratio]
   );
-  const [entryLoadFailed, setEntryLoadFailed] = useState(false);
-  const [isEntryLoading, setIsEntryLoading] = useState(isEditing);
-  const [isRoasterLoading, setIsRoasterLoading] = useState(false);
-  const [isRoasterSubmitting, setIsRoasterSubmitting] = useState(false);
-  const [isGrinderLoading, setIsGrinderLoading] = useState(false);
-  const [isGrinderSubmitting, setIsGrinderSubmitting] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const isFormLoading = isEntryLoading || isRoasterLoading || isGrinderLoading;
+  const isFormLoading = isEntryLoading || roaster.isLoading || grinder.isLoading;
   const canShowEntryFailure =
     !isAuthLoading && isAdmin && !isFormLoading && entryLoadFailed;
   const canShowForm =
     !isAuthLoading && isAdmin && !isFormLoading && !entryLoadFailed;
 
-  const selectedRoaster = roasterOptions.find(
-    (roaster) => roaster.id === draft.roasterId
-  );
-  const selectedGrinder = grinderOptions.find(
-    (grinder) => grinder.id === draft.grinderId
-  );
-  const filteredRoasterOptions = useMemo(() => {
-    const normalizedSearch = roasterSearch.trim().toLowerCase();
-
-    if (!normalizedSearch) {
-      return roasterOptions;
-    }
-
-    return roasterOptions.filter((roaster) =>
-      formatRoasterLabel(roaster).toLowerCase().includes(normalizedSearch)
-    );
-  }, [roasterOptions, roasterSearch]);
-  const filteredGrinderOptions = useMemo(() => {
-    const normalizedSearch = grinderSearch.trim().toLowerCase();
-
-    if (!normalizedSearch) {
-      return grinderOptions;
-    }
-
-    return grinderOptions.filter((grinder) =>
-      formatGrinderLabel(grinder).toLowerCase().includes(normalizedSearch)
-    );
-  }, [grinderOptions, grinderSearch]);
-
-  useEffect(() => {
-    if (isAuthLoading || !isAdmin) {
-      setIsRoasterLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadRoasters = async () => {
-      setIsRoasterLoading(true);
-
-      try {
-        const roasters = await GetCoffeeRoastersAsync(controller.signal);
-
-        if (isMounted) {
-          setRoasterOptions((currentOptions) =>
-            mergeById(roasters, currentOptions)
-          );
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setFormError('Roasters could not be loaded.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsRoasterLoading(false);
-        }
-      }
-    };
-
-    loadRoasters();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [isAdmin, isAuthLoading]);
-
-  useEffect(() => {
-    if (isAuthLoading || !isAdmin) {
-      setIsGrinderLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadGrinders = async () => {
-      setIsGrinderLoading(true);
-
-      try {
-        const grinders = await GetCoffeeGrindersAsync(controller.signal);
-
-        if (isMounted) {
-          setGrinderOptions((currentOptions) =>
-            mergeById(grinders, currentOptions)
-          );
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setFormError('Grinders could not be loaded.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsGrinderLoading(false);
-        }
-      }
-    };
-
-    loadGrinders();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [isAdmin, isAuthLoading]);
-
-  useEffect(() => {
-    if (!isEditing || !entryId) {
-      if (prefill) {
-        let roasterId = '';
-
-        if (prefill.roaster.trim()) {
-          const roasterOption = {
-            ...createRoasterOption(prefill.roaster),
-            id:
-              prefill.roasterId ||
-              slugifyCoffeeValue(prefill.roaster) ||
-              createCustomId(),
-          };
-
-          roasterId = roasterOption.id;
-          setRoasterOptions((currentOptions) =>
-            mergeById(currentOptions, [roasterOption])
-          );
-          setRoasterSearch(formatRoasterLabel(roasterOption));
-        } else {
-          setRoasterSearch('');
-        }
-
-        setDraft(createDraftFromPrefill(prefill, roasterId));
-      } else {
-        setDraft(createEmptyDraft());
-        setRoasterSearch('');
-      }
-
-      setGrinderSearch('');
-      setFormError('');
-      setEntryLoadFailed(false);
-      setIsEntryLoading(false);
-      return;
-    }
-
-    if (isAuthLoading) {
-      return;
-    }
-
-    if (!isAdmin) {
-      setIsEntryLoading(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadEntry = async () => {
-      setIsEntryLoading(true);
-      setFormError('');
-      setEntryLoadFailed(false);
-
-      try {
-        const entry = await GetCoffeeEntryByIdAsync(entryId, controller.signal);
-        const roasterOption = {
-          ...createRoasterOption(entry.roaster),
-          id:
-            entry.roasterId ||
-            slugifyCoffeeValue(entry.roaster) ||
-            `custom-${Date.now()}`,
-        };
-        const grinderOption = {
-          ...createGrinderOption(entry.grinder),
-          id:
-            entry.grinderId ||
-            slugifyCoffeeValue(entry.grinder) ||
-            `custom-${Date.now()}`,
-        };
-
-        if (isMounted) {
-          setRoasterOptions((currentOptions) =>
-            mergeById(currentOptions, [roasterOption])
-          );
-          setGrinderOptions((currentOptions) =>
-            mergeById(currentOptions, [grinderOption])
-          );
-          setDraft(
-            createDraftFromEntry(entry, roasterOption.id, grinderOption.id)
-          );
-          setRoasterSearch(formatRoasterLabel(roasterOption));
-          setGrinderSearch(formatGrinderLabel(grinderOption));
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setEntryLoadFailed(true);
-          setFormError('Coffee entry could not be loaded.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsEntryLoading(false);
-        }
-      }
-    };
-
-    loadEntry();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [entryId, isAdmin, isAuthLoading, isEditing, prefill]);
-
-  const updateDraft =
-    (field: BrewLogTextField) =>
-    (
-      event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-    ) => {
+  const updateDraft: UpdateDraft =
+    (field) =>
+    (event) => {
       setDraft((currentDraft) => ({
         ...currentDraft,
         [field]: event.target.value,
@@ -557,126 +131,8 @@ export default function CoffeeEntry() {
     setTemperatureUnit(nextUnit);
   };
 
-  const updateRoasterSearch = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextSearch = event.target.value;
-
-    setRoasterSearch(nextSearch);
-
-    if (
-      selectedRoaster &&
-      nextSearch !== formatRoasterLabel(selectedRoaster)
-    ) {
-      setDraft((currentDraft) => ({
-        ...currentDraft,
-        roasterId: '',
-      }));
-    }
-  };
-
-  const selectRoaster = (roaster: RoasterOption) => {
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      roasterId: roaster.id,
-    }));
-    setRoasterSearch(formatRoasterLabel(roaster));
-  };
-
-  const addRoaster = async () => {
-    const trimmedRoaster = newRoaster.trim();
-
-    if (!trimmedRoaster) {
-      return;
-    }
-
-    const existingRoaster = roasterOptions.find(
-      (roaster) => roaster.roaster.toLowerCase() === trimmedRoaster.toLowerCase()
-    );
-
-    if (existingRoaster) {
-      selectRoaster(existingRoaster);
-      setNewRoaster('');
-      return;
-    }
-
-    const roaster = createRoasterOption(trimmedRoaster);
-
-    setFormError('');
-    setIsRoasterSubmitting(true);
-
-    try {
-      const savedRoaster = await CreateCoffeeRoasterAsync(roaster);
-
-      setRoasterOptions((currentOptions) =>
-        mergeById(currentOptions, [savedRoaster])
-      );
-      selectRoaster(savedRoaster);
-      setNewRoaster('');
-    } catch {
-      setFormError('Roaster could not be saved.');
-    } finally {
-      setIsRoasterSubmitting(false);
-    }
-  };
-
-  const updateGrinderSearch = (event: ChangeEvent<HTMLInputElement>) => {
-    const nextSearch = event.target.value;
-
-    setGrinderSearch(nextSearch);
-
-    if (
-      selectedGrinder &&
-      nextSearch !== formatGrinderLabel(selectedGrinder)
-    ) {
-      setDraft((currentDraft) => ({
-        ...currentDraft,
-        grinderId: '',
-      }));
-    }
-  };
-
-  const selectGrinder = (grinder: GrinderOption) => {
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      grinderId: grinder.id,
-    }));
-    setGrinderSearch(formatGrinderLabel(grinder));
-  };
-
-  const addGrinder = async () => {
-    const trimmedGrinder = newGrinder.trim();
-
-    if (!trimmedGrinder) {
-      return;
-    }
-
-    const existingGrinder = grinderOptions.find(
-      (grinder) => grinder.grinder.toLowerCase() === trimmedGrinder.toLowerCase()
-    );
-
-    if (existingGrinder) {
-      selectGrinder(existingGrinder);
-      setNewGrinder('');
-      return;
-    }
-
-    const grinder = createGrinderOption(trimmedGrinder);
-
-    setFormError('');
-    setIsGrinderSubmitting(true);
-
-    try {
-      const savedGrinder = await CreateCoffeeGrinderAsync(grinder);
-
-      setGrinderOptions((currentOptions) =>
-        mergeById(currentOptions, [savedGrinder])
-      );
-      selectGrinder(savedGrinder);
-      setNewGrinder('');
-    } catch {
-      setFormError('Grinder could not be saved.');
-    } finally {
-      setIsGrinderSubmitting(false);
-    }
+  const changeRating = (rating: number) => {
+    setDraft((currentDraft) => ({ ...currentDraft, rating }));
   };
 
   const saveEntry = async (event: FormEvent<HTMLFormElement>) => {
@@ -725,34 +181,6 @@ export default function CoffeeEntry() {
     }
   };
 
-  const renderSelect = (
-    id: string,
-    label: string,
-    field: BrewLogTextField,
-    options: SelectOption[],
-    isRequired = false
-  ) => (
-    <label className={styles.field} htmlFor={id}>
-      <span className={styles.labelRow}>
-        {label}
-        {isRequired && <span className={styles.required}>Required</span>}
-      </span>
-      <select
-        id={id}
-        value={draft[field]}
-        onChange={updateDraft(field)}
-        required={isRequired}
-      >
-        <option value="">Select</option>
-        {options.map((option) => (
-          <option value={option.value} key={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-
   return (
     <main className={styles.page}>
       <section className={styles.intro} aria-labelledby="coffee-entry-title">
@@ -799,449 +227,26 @@ export default function CoffeeEntry() {
           )}
 
           <form className={styles.form} onSubmit={saveEntry}>
-            <section className={styles.section} aria-labelledby="coffee-details">
-              <h2 id="coffee-details">Coffee details</h2>
-
-              <div className={styles.fieldGrid}>
-                <label className={styles.field} htmlFor="brew-date">
-                  <span className={styles.labelRow}>
-                    Date
-                    <span className={styles.required}>Required</span>
-                  </span>
-                  <input
-                    id="brew-date"
-                    type="date"
-                    value={draft.date}
-                    onChange={updateDraft('date')}
-                    required
-                  />
-                </label>
-
-                {renderSelect(
-                  'brew-method',
-                  'Brew method',
-                  'brewMethod',
-                  brewMethods,
-                  true
-                )}
-
-                <label className={styles.field} htmlFor="coffee-name">
-                  <span className={styles.labelRow}>
-                    Coffee
-                    <span className={styles.required}>Required</span>
-                  </span>
-                  <input
-                    id="coffee-name"
-                    type="text"
-                    value={draft.coffeeName}
-                    onChange={updateDraft('coffeeName')}
-                    required
-                  />
-                </label>
-
-                <label className={styles.field} htmlFor="coffee-origin">
-                  Origin
-                  <input
-                    id="coffee-origin"
-                    type="text"
-                    value={draft.origin}
-                    onChange={updateDraft('origin')}
-                    placeholder="Mbeya, Tanzania"
-                  />
-                </label>
-
-                <label className={styles.field} htmlFor="coffee-varietal">
-                  Coffee varietal
-                  <input
-                    id="coffee-varietal"
-                    type="text"
-                    value={draft.coffeeVarietal}
-                    onChange={updateDraft('coffeeVarietal')}
-                    placeholder="Bourbon"
-                  />
-                </label>
-
-                <label className={styles.field} htmlFor="processing-method">
-                  Processing method
-                  <input
-                    id="processing-method"
-                    type="text"
-                    value={draft.processingMethod}
-                    onChange={updateDraft('processingMethod')}
-                    placeholder="Washed"
-                  />
-                </label>
-
-                <label className={styles.field} htmlFor="days-since-roast">
-                  Days since roast
-                  <input
-                    id="days-since-roast"
-                    type="number"
-                    min="0"
-                    inputMode="numeric"
-                    value={draft.daysSinceRoast}
-                    onChange={updateDraft('daysSinceRoast')}
-                    placeholder="12"
-                  />
-                </label>
-              </div>
-
-              <div
-                className={styles.roasterPicker}
-                role="group"
-                aria-labelledby="roaster-picker-label"
-              >
-                <div className={styles.labelRow} id="roaster-picker-label">
-                  Roaster
-                  <span className={styles.required}>Required</span>
-                </div>
-                <input
-                  type="search"
-                  value={roasterSearch}
-                  onChange={updateRoasterSearch}
-                  placeholder="Search roaster"
-                  aria-label="Search roaster"
-                />
-                {selectedRoaster && (
-                  <p className={styles.selectedRoaster}>
-                    Selected: {formatRoasterLabel(selectedRoaster)}
-                  </p>
-                )}
-                <div className={styles.roasterResults}>
-                  {filteredRoasterOptions.map((roaster) => (
-                    <button
-                      type="button"
-                      className={[
-                        styles.roasterOption,
-                        draft.roasterId === roaster.id ? styles.selectedOption : '',
-                      ].join(' ')}
-                      key={roaster.id}
-                      onClick={() => selectRoaster(roaster)}
-                      aria-pressed={draft.roasterId === roaster.id}
-                    >
-                      <span>{roaster.roaster}</span>
-                    </button>
-                  ))}
-                  {filteredRoasterOptions.length === 0 && (
-                    <p className={styles.emptyResults}>No matching roasters yet.</p>
-                  )}
-                </div>
-
-                <div className={styles.inlineAdd}>
-                  <p className={styles.inlineTitle}>Add roaster</p>
-                  <div className={styles.inlineFields}>
-                    <label className={styles.field} htmlFor="new-roaster">
-                      Roaster
-                      <input
-                        id="new-roaster"
-                        type="text"
-                        value={newRoaster}
-                        onChange={(event) => setNewRoaster(event.target.value)}
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className={styles.addButton}
-                      onClick={addRoaster}
-                      disabled={!newRoaster.trim() || isRoasterSubmitting}
-                    >
-                      {isRoasterSubmitting ? 'Saving' : 'Add'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className={styles.section} aria-labelledby="brew-setup">
-              <h2 id="brew-setup">Brew setup</h2>
-
-              <div className={styles.fieldGrid}>
-                <label className={styles.field} htmlFor="ratio">
-                  <span className={styles.labelRow}>
-                    Ratio
-                    <span className={styles.required}>Required</span>
-                  </span>
-                  <span className={styles.ratioInput}>
-                    <span aria-hidden="true">{RATIO_PREFIX}</span>
-                    <input
-                      id="ratio"
-                      className={fieldErrors.ratio ? styles.invalid : undefined}
-                      type="text"
-                      inputMode="decimal"
-                      pattern="\d+(\.\d+)?"
-                      title="Enter a number"
-                      value={draft.ratio}
-                      onChange={updateDraft('ratio')}
-                      placeholder="16.67"
-                      required
-                    />
-                  </span>
-                  {fieldErrors.ratio && <span className={styles.fieldError}>{fieldErrors.ratio}</span>}
-                </label>
-
-                <label className={styles.field} htmlFor="grind-setting">
-                  <span className={styles.labelRow}>
-                    Grind setting
-                    <span className={styles.required}>Required</span>
-                  </span>
-                  <input
-                    id="grind-setting"
-                    className={fieldErrors.grindSetting ? styles.invalid : undefined}
-                    type="text"
-                    inputMode="decimal"
-                    pattern="\d+(\.\d+)?"
-                    title="Enter a number"
-                    value={draft.grindSetting}
-                    onChange={updateDraft('grindSetting')}
-                    required
-                  />
-                  {fieldErrors.grindSetting && <span className={styles.fieldError}>{fieldErrors.grindSetting}</span>}
-                </label>
-
-                {renderSelect('roast-level', 'Roast level', 'roastLevel', roastLevels)}
-
-                <label className={styles.field} htmlFor="dose">
-                  Dose (g)
-                  <input
-                    id="dose"
-                    className={fieldErrors.dose ? styles.invalid : undefined}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="\d+"
-                    value={draft.dose}
-                    onChange={updateDraft('dose')}
-                    placeholder="20"
-                  />
-                  {fieldErrors.dose && <span className={styles.fieldError}>{fieldErrors.dose}</span>}
-                </label>
-
-                <label className={styles.field} htmlFor="yield-amount">
-                  Yield (g)
-                  <input
-                    id="yield-amount"
-                    type="text"
-                    value={yieldAmount}
-                    placeholder="320"
-                    readOnly
-                    aria-readonly="true"
-                  />
-                </label>
-
-                <label className={styles.field} htmlFor="water-temp">
-                  <span className={styles.labelRow}>
-                    Water temperature
-                    <span
-                      className={styles.unitToggle}
-                      role="group"
-                      aria-label="Temperature units"
-                    >
-                      {(['C', 'F'] as TemperatureUnit[]).map((unit) => (
-                        <button
-                          type="button"
-                          key={unit}
-                          className={[
-                            styles.unitToggleButton,
-                            temperatureUnit === unit ? styles.selectedUnit : '',
-                          ].join(' ')}
-                          onClick={() => changeTemperatureUnit(unit)}
-                          aria-pressed={temperatureUnit === unit}
-                        >
-                          °{unit}
-                        </button>
-                      ))}
-                    </span>
-                  </span>
-                  <input
-                    id="water-temp"
-                    className={fieldErrors.waterTemperature ? styles.invalid : undefined}
-                    type="text"
-                    inputMode="decimal"
-                    pattern="\d+(\.\d+)?"
-                    title="Enter a number"
-                    value={draft.waterTemperature}
-                    onChange={updateDraft('waterTemperature')}
-                    placeholder={temperatureUnit === 'C' ? '93' : '199'}
-                  />
-                  {fieldErrors.waterTemperature && <span className={styles.fieldError}>{fieldErrors.waterTemperature}</span>}
-                </label>
-
-                <label className={styles.field} htmlFor="brew-time">
-                  Brew time
-                  <input
-                    id="brew-time"
-                    className={fieldErrors.brewTime ? styles.invalid : undefined}
-                    type="text"
-                    value={draft.brewTime}
-                    onChange={updateDraft('brewTime')}
-                    placeholder="3:20"
-                    pattern="\d{1,2}:[0-5]\d"
-                    title="Enter a time like 3:20"
-                  />
-                  {fieldErrors.brewTime && <span className={styles.fieldError}>{fieldErrors.brewTime}</span>}
-                </label>
-              </div>
-
-              <div
-                className={styles.roasterPicker}
-                role="group"
-                aria-labelledby="grinder-picker-label"
-              >
-                <div className={styles.labelRow} id="grinder-picker-label">
-                  Grinder
-                  <span className={styles.required}>Required</span>
-                </div>
-                <input
-                  type="search"
-                  value={grinderSearch}
-                  onChange={updateGrinderSearch}
-                  placeholder="Search grinder"
-                  aria-label="Search grinder"
-                />
-                {selectedGrinder && (
-                  <p className={styles.selectedRoaster}>
-                    Selected: {formatGrinderLabel(selectedGrinder)}
-                  </p>
-                )}
-                <div className={styles.roasterResults}>
-                  {filteredGrinderOptions.map((grinder) => (
-                    <button
-                      type="button"
-                      className={[
-                        styles.roasterOption,
-                        draft.grinderId === grinder.id
-                          ? styles.selectedOption
-                          : '',
-                      ].join(' ')}
-                      key={grinder.id}
-                      onClick={() => selectGrinder(grinder)}
-                      aria-pressed={draft.grinderId === grinder.id}
-                    >
-                      <span>{grinder.grinder}</span>
-                    </button>
-                  ))}
-                  {filteredGrinderOptions.length === 0 && (
-                    <p className={styles.emptyResults}>
-                      No matching grinders yet.
-                    </p>
-                  )}
-                </div>
-
-                <div className={styles.inlineAdd}>
-                  <p className={styles.inlineTitle}>Add grinder</p>
-                  <div className={styles.inlineFields}>
-                    <label className={styles.field} htmlFor="new-grinder">
-                      Grinder
-                      <input
-                        id="new-grinder"
-                        type="text"
-                        value={newGrinder}
-                        onChange={(event) => setNewGrinder(event.target.value)}
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className={styles.addButton}
-                      onClick={addGrinder}
-                      disabled={!newGrinder.trim() || isGrinderSubmitting}
-                    >
-                      {isGrinderSubmitting ? 'Saving' : 'Add'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className={styles.section} aria-labelledby="brew-flow">
-              <h2 id="brew-flow">Bloom and pours</h2>
-
-              <div className={styles.fieldGrid}>
-                <label className={styles.field} htmlFor="bloom-time">
-                  Bloom time
-                  <input
-                    id="bloom-time"
-                    className={fieldErrors.bloomTime ? styles.invalid : undefined}
-                    type="text"
-                    value={draft.bloomTime}
-                    onChange={updateDraft('bloomTime')}
-                    placeholder="0:45"
-                    pattern="\d{1,2}:[0-5]\d"
-                    title="Enter a time like 0:45"
-                  />
-                  {fieldErrors.bloomTime && <span className={styles.fieldError}>{fieldErrors.bloomTime}</span>}
-                </label>
-
-                <label className={styles.field} htmlFor="bloom-water">
-                  Bloom water (g)
-                  <input
-                    id="bloom-water"
-                    className={fieldErrors.bloomWater ? styles.invalid : undefined}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="\d+"
-                    value={draft.bloomWater}
-                    onChange={updateDraft('bloomWater')}
-                    placeholder="50"
-                  />
-                  {fieldErrors.bloomWater && <span className={styles.fieldError}>{fieldErrors.bloomWater}</span>}
-                </label>
-              </div>
-
-              <label className={styles.field} htmlFor="pour-notes">
-                Pour notes
-                <textarea
-                  id="pour-notes"
-                  value={draft.pourNotes}
-                  onChange={updateDraft('pourNotes')}
-                  rows={4}
-                />
-              </label>
-            </section>
-
-            <section className={styles.section} aria-labelledby="tasting-notes">
-              <h2 id="tasting-notes">Tasting notes</h2>
-
-              <label className={styles.field} htmlFor="notes">
-                <span className={styles.labelRow}>
-                  Notes
-                  <span className={styles.required}>Required</span>
-                </span>
-                <textarea
-                  id="notes"
-                  value={draft.notes}
-                  onChange={updateDraft('notes')}
-                  rows={6}
-                  required
-                />
-              </label>
-
-              <div className={styles.ratingField}>
-                <span>Rating</span>
-                <div className={styles.ratingButtons}>
-                  {[1, 2, 3, 4, 5].map((ratingValue) => (
-                    <button
-                      type="button"
-                      className={[
-                        styles.starButton,
-                        draft.rating >= ratingValue ? styles.activeStar : '',
-                      ].join(' ')}
-                      onClick={() =>
-                        setDraft((currentDraft) => ({
-                          ...currentDraft,
-                          rating: ratingValue,
-                        }))
-                      }
-                      aria-label={`${ratingValue} star rating`}
-                      aria-pressed={draft.rating === ratingValue}
-                      key={ratingValue}
-                    >
-                      <span aria-hidden="true">
-                        {draft.rating >= ratingValue ? '\u2605' : '\u2606'}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </section>
+            <CoffeeEntryDetailsSection
+              draft={draft}
+              updateDraft={updateDraft}
+              roaster={roaster}
+            />
+            <CoffeeEntryBrewSection
+              draft={draft}
+              fieldErrors={fieldErrors}
+              yieldAmount={yieldAmount}
+              temperatureUnit={temperatureUnit}
+              updateDraft={updateDraft}
+              changeTemperatureUnit={changeTemperatureUnit}
+              grinder={grinder}
+            />
+            <CoffeeEntryNotesSection
+              draft={draft}
+              fieldErrors={fieldErrors}
+              updateDraft={updateDraft}
+              changeRating={changeRating}
+            />
 
             <div className={styles.actions}>
               <Link className={styles.textLink} to={PAGES.Coffee}>

@@ -11,7 +11,7 @@ import {
   UpdateCoffeeEntryAsync,
 } from '../../api/Coffee/CoffeeRouter';
 import type { CoffeeEntry as CoffeeEntryResponse } from '../../api/Coffee/CoffeeRouter';
-import type { CoffeePrefill } from './CoffeeEntry';
+import type { CoffeePrefill } from './coffeeEntryDraft';
 import CoffeeEntry from './CoffeeEntry';
 
 vi.mock('../../api/Coffee/CoffeeRouter', () => ({

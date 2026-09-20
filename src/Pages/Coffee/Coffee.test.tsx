@@ -68,7 +68,7 @@ beforeEach(() => {
 });
 
 describe('Coffee journal', () => {
-  test('groups brews by coffee name and shows the bolded roaster : name', async () => {
+  test('groups brews by roaster, then by coffee name', async () => {
     mockedGetEntries.mockResolvedValue([
       makeEntry({
         id: '1',
@@ -86,6 +86,13 @@ describe('Coffee journal', () => {
       }),
       makeEntry({
         id: '3',
+        coffeeName: 'Kenya AA',
+        roaster: 'Onyx',
+        brewMethod: 'v60',
+        date: '2025-12-30',
+      }),
+      makeEntry({
+        id: '4',
         coffeeName: 'Colombia Huila',
         roaster: 'Passenger',
         brewMethod: 'v60',
@@ -95,21 +102,47 @@ describe('Coffee journal', () => {
 
     renderCoffee();
 
-    const headings = await screen.findAllByRole('heading', { level: 3 });
-    expect(headings.map((heading) => heading.textContent)).toEqual([
-      'Onyx : Ethiopia Guji',
-      'Passenger : Colombia Huila',
+    const roasters = await screen.findAllByRole('heading', { level: 3 });
+    expect(roasters.map((heading) => heading.textContent)).toEqual([
+      'Onyx',
+      'Passenger',
     ]);
-    expect(within(headings[0]).getByText('Onyx').tagName).toBe('STRONG');
 
-    expect(screen.getByText('2 brews')).toBeInTheDocument();
-    expect(screen.getByText('1 brew')).toBeInTheDocument();
+    const coffees = screen.getAllByRole('heading', { level: 4 });
+    expect(coffees.map((heading) => heading.textContent)).toEqual([
+      'Ethiopia Guji',
+      'Kenya AA',
+      'Colombia Huila',
+    ]);
 
-    const ethiopiaGroup = headings[0].closest('section');
-    expect(ethiopiaGroup).not.toBeNull();
+    expect(screen.getByText('2 coffees · 3 brews')).toBeInTheDocument();
+    expect(screen.getByText('1 coffee · 1 brew')).toBeInTheDocument();
+
+    const onyxGroup = roasters[0].closest('section');
+    expect(onyxGroup).not.toBeNull();
     expect(
-      within(ethiopiaGroup as HTMLElement).getAllByRole('article')
-    ).toHaveLength(2);
+      within(onyxGroup as HTMLElement).getAllByRole('article')
+    ).toHaveLength(3);
+  });
+
+  test('roaster and coffee sections start collapsed', async () => {
+    mockedGetEntries.mockResolvedValue([
+      makeEntry({ id: '1', coffeeName: 'Ethiopia Guji', roaster: 'Onyx' }),
+    ]);
+
+    renderCoffee();
+
+    const roaster = await screen.findByRole('heading', {
+      level: 3,
+      name: 'Onyx',
+    });
+    const coffee = screen.getByRole('heading', {
+      level: 4,
+      name: 'Ethiopia Guji',
+    });
+
+    expect(roaster.closest('details')).not.toHaveAttribute('open');
+    expect(coffee.closest('details')).not.toHaveAttribute('open');
   });
 
   test('groups coffee names case-insensitively', async () => {
@@ -121,7 +154,7 @@ describe('Coffee journal', () => {
     renderCoffee();
 
     expect(await screen.findByText('2 brews')).toBeInTheDocument();
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(1);
+    expect(screen.getAllByRole('heading', { level: 4 })).toHaveLength(1);
   });
 
   test('admins get a prefill link on each coffee group', async () => {
@@ -145,7 +178,7 @@ describe('Coffee journal', () => {
 
     renderCoffee();
 
-    await screen.findByRole('heading', { level: 3, name: 'Onyx : Ethiopia Guji' });
+    await screen.findByRole('heading', { level: 3, name: 'Onyx' });
     expect(
       screen.queryByRole('link', { name: 'New brew for Ethiopia Guji' })
     ).not.toBeInTheDocument();

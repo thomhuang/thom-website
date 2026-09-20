@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
-import AsciiFigure from '../../Components/AsciiFigure/AsciiFigure';
 import { useAuth } from '../../Auth/AuthContext';
 import {
   DeleteShopItemAsync,
@@ -11,52 +10,17 @@ import {
   ShopBrand,
   ShopItemSummary,
 } from '../../api/Shop/ShopRouter';
-import { formatPrice, formatStock } from './format';
+import AsciiFigure from '../../Components/AsciiFigure/AsciiFigure';
+import ShopCard from './ShopCard';
+import ShopFilterBar from './ShopFilterBar';
+import {
+  filterItems,
+  getInitialLayout,
+  layoutStorageKey,
+  sortItems,
+} from './shopFilters';
+import type { LayoutMode, SortOrder, StockFilter } from './shopFilters';
 import styles from './Shop.module.css';
-
-type SortOrder = 'newest' | 'oldest' | 'price-asc' | 'price-desc';
-type LayoutMode = 'grid' | 'list';
-type StockFilter = 'all' | 'in-stock' | 'out-of-stock';
-
-const layoutStorageKey = 'shop-layout';
-
-const getInitialLayout = (): LayoutMode =>
-  localStorage.getItem(layoutStorageKey) === 'list' ? 'list' : 'grid';
-
-// Listings arrive newest first. `id` is the insertion order, so ascending id is
-// oldest first; the price orders are plain numeric comparisons.
-const sortItems = (items: ShopItemSummary[], sortOrder: SortOrder) => {
-  const sortedItems = [...items];
-
-  switch (sortOrder) {
-    case 'oldest':
-      return sortedItems.sort((a, b) => Number(a.id) - Number(b.id));
-    case 'price-asc':
-      return sortedItems.sort((a, b) => a.priceCents - b.priceCents);
-    case 'price-desc':
-      return sortedItems.sort((a, b) => b.priceCents - a.priceCents);
-    default:
-      return sortedItems;
-  }
-};
-
-function CardImage({ src, alt }: { src: string; alt: string }) {
-  const [hasError, setHasError] = useState(false);
-
-  if (!src || hasError) {
-    return <span className={styles.cardPlaceholder}>No image</span>;
-  }
-
-  return (
-    <img
-      className={styles.cardImage}
-      src={src}
-      alt={alt}
-      loading="lazy"
-      onError={() => setHasError(true)}
-    />
-  );
-}
 
 export default function Shop() {
   const { isAdmin, isAuthLoading } = useAuth();
@@ -136,21 +100,10 @@ export default function Shop() {
   };
 
   const visibleItems = sortItems(
-    items.filter((item) => {
-      if (selectedBrandId && item.brandId !== selectedBrandId) {
-        return false;
-      }
-      if (stockFilter === 'in-stock' && item.stock < 1) {
-        return false;
-      }
-      if (stockFilter === 'out-of-stock' && item.stock >= 1) {
-        return false;
-      }
-
-      return true;
-    }),
+    filterItems(items, { selectedBrandId, stockFilter }),
     sortOrder
   );
+  const canManage = !isAuthLoading && isAdmin;
 
   return (
     <main className={styles.page}>
@@ -160,7 +113,7 @@ export default function Shop() {
         <AsciiFigure variant="shop" size="large" />
       </section>
 
-      {!isAuthLoading && isAdmin && (
+      {canManage && (
         <div className={styles.adminActions}>
           <Link className={styles.textLink} to={PAGES.ShopEntry}>
             New listing
@@ -174,78 +127,17 @@ export default function Shop() {
       {shopError && <aside className={styles.errorNotice}>{shopError}</aside>}
 
       {!isLoading && (brands.length > 0 || items.length > 0) && (
-        <div className={styles.filterBar}>
-          {brands.length > 0 && (
-            <label className={styles.field} htmlFor="shop-brand-filter">
-              Brand
-              <select
-                id="shop-brand-filter"
-                value={selectedBrandId}
-                onChange={(event) => setSelectedBrandId(event.target.value)}
-              >
-                <option value="">All brands</option>
-                {brands.map((brand) => (
-                  <option value={brand.id} key={brand.id}>
-                    {brand.brand}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-
-          <label className={styles.field} htmlFor="shop-stock-filter">
-            Availability
-            <select
-              id="shop-stock-filter"
-              value={stockFilter}
-              onChange={(event) =>
-                setStockFilter(event.target.value as StockFilter)
-              }
-            >
-              <option value="all">All items</option>
-              <option value="in-stock">In stock</option>
-              <option value="out-of-stock">Sold out</option>
-            </select>
-          </label>
-
-          <label className={styles.field} htmlFor="shop-sort">
-            Sort
-            <select
-              id="shop-sort"
-              value={sortOrder}
-              onChange={(event) => setSortOrder(event.target.value as SortOrder)}
-            >
-              <option value="newest">Newest</option>
-              <option value="oldest">Oldest</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
-            </select>
-          </label>
-
-          <div className={styles.layoutField}>
-            View
-            <div
-              className={styles.layoutToggle}
-              role="group"
-              aria-label="Listing layout"
-            >
-              {(['grid', 'list'] as LayoutMode[]).map((mode) => (
-                <button
-                  type="button"
-                  key={mode}
-                  className={[
-                    styles.layoutToggleButton,
-                    layout === mode ? styles.selectedLayout : '',
-                  ].join(' ')}
-                  onClick={() => setLayout(mode)}
-                  aria-pressed={layout === mode}
-                >
-                  {mode === 'grid' ? 'Grid' : 'List'}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <ShopFilterBar
+          brands={brands}
+          selectedBrandId={selectedBrandId}
+          stockFilter={stockFilter}
+          sortOrder={sortOrder}
+          layout={layout}
+          onBrandChange={setSelectedBrandId}
+          onStockFilterChange={setStockFilter}
+          onSortOrderChange={setSortOrder}
+          onLayoutChange={setLayout}
+        />
       )}
 
       {isLoading ? (
@@ -256,52 +148,13 @@ export default function Shop() {
           aria-label="Listings"
         >
           {visibleItems.map((item) => (
-            <article className={styles.card} key={item.id}>
-              <Link
-                className={styles.cardLink}
-                to={`${PAGES.ShopItem}/${item.id}`}
-              >
-                <div className={styles.cardMedia}>
-                  <CardImage src={item.primaryImageUrl} alt={item.title} />
-                </div>
-                <div className={styles.cardBody}>
-                  <div className={styles.cardInfo}>
-                    <h2 className={styles.cardTitle}>{item.title}</h2>
-                    {item.brand && (
-                      <p className={styles.cardMeta}>{item.brand}</p>
-                    )}
-                  </div>
-                  <div className={styles.cardPricing}>
-                    <p className={styles.cardPrice}>
-                      {formatPrice(item.priceCents, item.currency)}
-                    </p>
-                    <p className={styles.cardMeta}>{formatStock(item.stock)}</p>
-                    {!item.isPublished && (
-                      <p className={styles.draftTag}>Draft</p>
-                    )}
-                  </div>
-                </div>
-              </Link>
-
-              {!isAuthLoading && isAdmin && (
-                <div className={styles.cardActions}>
-                  <Link
-                    className={styles.textLink}
-                    to={`${PAGES.ShopEntry}/${item.id}`}
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    type="button"
-                    className={styles.deleteButton}
-                    onClick={() => deleteItem(item)}
-                    disabled={deletingItemId === item.id}
-                  >
-                    {deletingItemId === item.id ? 'Deleting' : 'Delete'}
-                  </button>
-                </div>
-              )}
-            </article>
+            <ShopCard
+              key={item.id}
+              item={item}
+              canManage={canManage}
+              isDeleting={deletingItemId === item.id}
+              onDelete={deleteItem}
+            />
           ))}
         </section>
       ) : (

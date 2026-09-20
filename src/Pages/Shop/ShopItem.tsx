@@ -9,20 +9,11 @@ import {
   ShopItem as ShopItemResponse,
   StartShopCheckoutAsync,
 } from '../../api/Shop/ShopRouter';
-import {
-  formatMeasurement,
-  formatPrice,
-  formatStock,
-  getPrimaryImage,
-  MeasurementUnit,
-} from './format';
+import { formatPrice, formatStock, getPrimaryImage } from './format';
 import ShopImageManager from './ShopImageManager';
+import ShopItemGallery from './ShopItemGallery';
+import ShopItemMeasurementsTable from './ShopItemMeasurementsTable';
 import styles from './Shop.module.css';
-
-const measurementUnitStorageKey = 'shop-measurement-unit';
-
-const getInitialMeasurementUnit = (): MeasurementUnit =>
-  localStorage.getItem(measurementUnitStorageKey) === 'cm' ? 'cm' : 'in';
 
 export default function ShopItem() {
   const { itemId } = useParams<{ itemId?: string }>();
@@ -35,13 +26,6 @@ export default function ShopItem() {
   const [checkoutError, setCheckoutError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [itemError, setItemError] = useState('');
-  const [measurementUnit, setMeasurementUnit] = useState<MeasurementUnit>(
-    getInitialMeasurementUnit
-  );
-
-  useEffect(() => {
-    localStorage.setItem(measurementUnitStorageKey, measurementUnit);
-  }, [measurementUnit]);
 
   useEffect(() => {
     if (!itemId) {
@@ -149,40 +133,14 @@ export default function ShopItem() {
       </div>
 
       <article className={styles.detail}>
-        <div className={styles.gallery}>
-          <div className={styles.galleryMain}>
-            {selectedImageUrl && selectedImageUrl !== failedImageUrl ? (
-              <img
-                className={styles.galleryImage}
-                src={selectedImageUrl}
-                alt={item.title}
-                onError={() => setFailedImageUrl(selectedImageUrl)}
-              />
-            ) : (
-              <span className={styles.cardPlaceholder}>No image</span>
-            )}
-          </div>
-
-          {images.length > 1 && (
-            <div className={styles.thumbnails}>
-              {images.map((image) => (
-                <button
-                  type="button"
-                  className={[
-                    styles.thumbnail,
-                    image.url === selectedImageUrl ? styles.selectedThumbnail : '',
-                  ].join(' ')}
-                  key={image.id}
-                  onClick={() => setSelectedImageUrl(image.url)}
-                  aria-pressed={image.url === selectedImageUrl}
-                  aria-label={image.altText || item.title}
-                >
-                  <img src={image.url} alt="" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <ShopItemGallery
+          images={images}
+          title={item.title}
+          selectedImageUrl={selectedImageUrl}
+          failedImageUrl={failedImageUrl}
+          onSelectImage={setSelectedImageUrl}
+          onImageError={setFailedImageUrl}
+        />
 
         <div className={styles.detailBody}>
           <h1 className={styles.detailTitle}>{item.title}</h1>
@@ -200,55 +158,7 @@ export default function ShopItem() {
           )}
 
           {measurements.length > 0 && (
-            <section
-              className={styles.measurements}
-              aria-labelledby="shop-measurements-title"
-            >
-              <div className={styles.measurementsHeader}>
-                <h2
-                  id="shop-measurements-title"
-                  className={styles.measurementsTitle}
-                >
-                  Measurements
-                </h2>
-                <div
-                  className={styles.unitToggle}
-                  role="group"
-                  aria-label="Measurement units"
-                >
-                  {(['in', 'cm'] as MeasurementUnit[]).map((unit) => (
-                    <button
-                      type="button"
-                      key={unit}
-                      className={[
-                        styles.unitToggleButton,
-                        measurementUnit === unit ? styles.selectedUnit : '',
-                      ].join(' ')}
-                      onClick={() => setMeasurementUnit(unit)}
-                      aria-pressed={measurementUnit === unit}
-                    >
-                      {unit}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <table className={styles.measurementsTable}>
-                <tbody>
-                  {measurements.map((measurement) => (
-                    <tr key={measurement.id ?? measurement.label}>
-                      <th scope="row">{measurement.label}</th>
-                      <td>
-                        {formatMeasurement(
-                          measurement.valueInches,
-                          measurementUnit
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </section>
+            <ShopItemMeasurementsTable measurements={measurements} />
           )}
 
           <button

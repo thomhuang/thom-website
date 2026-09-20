@@ -4,21 +4,9 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { PAGES } from '../../Assets/constants';
 import { GetShopOrderByTokenAsync, ShopOrder } from '../../api/Shop/ShopRouter';
 import { formatDateTime, formatPrice } from './format';
+import { formatOrderStatus, getOrderStatusClass } from './orderStatus';
 import ShippingAddress from './ShippingAddress';
 import styles from './Shop.module.css';
-
-function statusClass(status: ShopOrder['status']) {
-  switch (status) {
-    case 'paid':
-      return styles.statusPaid;
-    case 'refunded':
-      return styles.statusRefunded;
-    case 'refund_pending':
-      return styles.statusRefundPending;
-    default:
-      return styles.statusPending;
-  }
-}
 
 // The emailed magic-link destination. The token is the credential, so unlike the
 // Stripe-return confirmation page this view may show the buyer's own email and
@@ -111,8 +99,8 @@ export default function OrderView() {
             <p className={styles.cardMeta}>{formatDateTime(order.createdAt)}</p>
           </div>
           <div className={styles.orderHeaderMeta}>
-            <span className={statusClass(order.status)}>
-              {order.status.replace('_', ' ')}
+            <span className={getOrderStatusClass(order.status)}>
+              {formatOrderStatus(order.status)}
             </span>
             <p className={styles.orderTotal}>
               {formatPrice(order.amountTotalCents, order.currency)}

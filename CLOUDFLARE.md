@@ -3,7 +3,7 @@
 The React app itself is unchanged. Deployment is now Cloudflare Workers static
 assets with a small `/api` proxy:
 
-- `wrangler.jsonc` serves the Vite build from `ThomWeb/dist` with SPA fallback
+- `wrangler.jsonc` serves the Vite build from `dist` with SPA fallback
   (`not_found_handling: single-page-application`), so React Router routes like
   `/coffee/entry/:id` work on refresh.
 - `worker/index.js` handles `/api/*`, strips the prefix, and forwards to the
@@ -13,8 +13,8 @@ assets with a small `/api` proxy:
 - Production builds default to `/api` (same-origin); `VITE_API_URL` can override
   either environment's base URL.
 
-Local development is unchanged: `cd ThomWeb && npm start` uses `ThomWeb/.env.local`
-(if present) and talks to `http://localhost:4000` directly.
+Local development: `npm start` uses `.env.local` (if present) and talks to
+`http://localhost:4000` directly.
 
 ## Environments
 
@@ -35,7 +35,7 @@ proxied placeholder record and a zone Redirect Rule that 301s it to
 Listing images are served from `https://img.thomhuang.com`, the R2 custom domain
 for the `listing-images` bucket. The server composes image URLs from its
 `R2_PUBLIC_BASE_URL` var at read time, so changing that host updates every
-listing without a data migration. The website CSP (`ThomWeb/public/_headers`)
+listing without a data migration. The website CSP (`public/_headers`)
 must keep that host in `img-src`.
 
 ## Prerequisites
@@ -52,7 +52,7 @@ Locally:
 
 ```sh
 npm install
-npm run build     # builds ThomWeb
+npm run build     # builds the app into dist/
 npx wrangler deploy                          # production
 npx wrangler deploy -c wrangler.test.jsonc   # test (thom-website-test)
 ```
@@ -83,7 +83,6 @@ deployed manually with `-c wrangler.test.jsonc`.
 ## Local development
 
 ```sh
-cd ThomWeb
 npm start                 # http://localhost:3000, API at VITE_API_URL
 npm run typecheck
 npm run lint

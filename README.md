@@ -5,27 +5,26 @@ React app (Vite + TypeScript) for the coffee journal, backed by
 
 ## Project structure
 
-The React app lives in `ThomWeb/`; run app commands from that directory. Source
-code is under `ThomWeb/src/`. Routes are defined in `src/App.tsx`, entry wiring
-in `src/index.tsx`, shared hooks in `src/hooks.tsx`, pages in `src/Pages/`,
-reusable UI in `src/Components/`, auth context in `src/Auth/`, API clients in
-`src/api/`, and shared copy/constants in `src/Assets/`. Global theme tokens,
-font-face declarations, and base styles live in `src/index.css`; font files live
-in `src/Fonts/`; component-local styles use CSS Modules such as
-`App.module.css`. Static public assets such as documents belong in
-`ThomWeb/public/`.
+This is a single npm project at the repo root. The React app source is under
+`src/`: routes in `src/App.tsx`, entry wiring in `src/index.tsx`, shared hooks
+in `src/hooks.tsx`, pages in `src/Pages/`, reusable UI in `src/Components/`,
+auth context in `src/Auth/`, API clients in `src/api/`, and shared
+copy/constants in `src/Assets/`. Global theme tokens, font-face declarations,
+and base styles live in `src/index.css`; font files live in `src/Fonts/`;
+component-local styles use CSS Modules such as `App.module.css`. Static public
+assets such as documents belong in `public/`.
 
-Build and test config live in `ThomWeb/`: `vite.config.ts` (build + Vitest),
-`eslint.config.mjs` (flat config), `tsconfig.json`, `index.html` (entry point),
-and tests colocated with the code they cover.
+App build and test config live at the root: `vite.config.ts` (build + Vitest),
+`eslint.config.mjs` (flat config), `tsconfig.json`, and `index.html` (entry
+point). Tests are colocated with the code they cover.
 
-Deployment lives at the repo root: `wrangler.jsonc`, `worker/index.js`, and
-`package.json` serve `ThomWeb/dist` as static assets and proxy `/api/*` to the
+Deployment config also lives at the root: `wrangler.jsonc`, `worker/index.js`,
+and `package.json` serve `dist` as static assets and proxy `/api/*` to the
 matching `thom-server`/`thom-server-test` Worker. See `CLOUDFLARE.md`.
 
 ## Local development
 
-Run app commands from `ThomWeb/`:
+Run commands from the repo root:
 
 ```sh
 npm install
@@ -35,10 +34,10 @@ npm run lint     # ESLint, flat config in eslint.config.mjs
 npm test         # Vitest watch mode; npx vitest run for CI
 ```
 
-`ThomWeb/.env.local` is not needed. The API base URL is defined in
-`ThomWeb/src/api/config.ts`: `VITE_API_URL` overrides it, otherwise
-development uses `http://localhost:4000` and production uses `/api` (same-origin,
-proxied by the Worker). `ThomWeb/.env.example` documents the override.
+`.env.local` is not needed. The API base URL is defined in
+`src/api/config.ts`: `VITE_API_URL` overrides it, otherwise development uses
+`http://localhost:4000` and production uses `/api` (same-origin, proxied by the
+Worker). `.env.example` documents the override.
 
 ## Testing
 
@@ -53,7 +52,7 @@ and responsive desktop/mobile rendering for user-facing changes.
 From the repo root:
 
 ```sh
-npm run build    # builds ThomWeb/ into ThomWeb/dist
+npm run build    # builds the app into dist/
 npx wrangler deploy                          # production
 npx wrangler deploy -c wrangler.test.jsonc   # test
 ```
@@ -63,7 +62,7 @@ npx wrangler deploy -c wrangler.test.jsonc   # test
 Keep fetch and service-access logic in `src/api/`; hidden UI is not security.
 The only public build-time variable is `VITE_API_URL`; it defaults to `/api` in
 production, which the Worker proxies to `thom-server` on the same origin so auth
-cookies stay first-party. Update `ThomWeb/.env.example`, `src/api/config.ts`,
+cookies stay first-party. Update `.env.example`, `src/api/config.ts`,
 and `src/vite-env.d.ts` when adding `VITE_*` variables. `VITE_*` values are
 embedded in the bundle and must never contain secrets.
 
@@ -87,7 +86,7 @@ are gitignored. Read the `.example` files for the shape of the config instead.
   `shop-measurement-unit`; default inches.
 - **CSP must allow the image and upload hosts.** Listing images are served from
   `https://img.thomhuang.com` (the R2 custom domain for `listing-images`), so it
-  must stay in `img-src` in `ThomWeb/public/_headers`; `img-src` also keeps
+  must stay in `img-src` in `public/_headers`; `img-src` also keeps
   `https://*.r2.dev`. Uploads PUT to the R2 S3 host, so that origin must stay in
   `connect-src`. If the R2 account or public domain changes, update both or
   images/uploads break in the browser.

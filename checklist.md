@@ -11,7 +11,7 @@ Remaining work. Tick items off as they land; add new ones as they come up.
 
 ## Code cleanup (from the audit)
 
-- [x] Remove unused exports `categoryLabel` and `CATEGORY_LABELS` in `ThomWeb/src/Pages/Shop/measurements.ts`
+- [x] Remove unused exports `categoryLabel` and `CATEGORY_LABELS` in `src/Pages/Shop/measurements.ts`
 
 ## Shop admin (server parity)
 
@@ -21,7 +21,7 @@ Remaining work. Tick items off as they land; add new ones as they come up.
 
 ## Local env
 
-- [ ] If `ThomWeb/.env.local` sets `REACT_APP_API_URL`, rename it to `VITE_API_URL` (Vite ignores the old prefix)
+- [ ] If `.env.local` sets `REACT_APP_API_URL`, rename it to `VITE_API_URL` (Vite ignores the old prefix)
 
 ## Process
 

@@ -1,5 +1,8 @@
 node_modules/
 .wrangler/
+/dist
+/build
+/coverage
 .env*
 !.env.example
 .dev.vars*

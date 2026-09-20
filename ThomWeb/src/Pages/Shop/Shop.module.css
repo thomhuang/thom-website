@@ -20,12 +20,20 @@
 }
 
 .intro > pre {
-  /* The block is centered, but the figure sits 6.2 columns right of the
+  /* The block is centered, but the figure sits 9.5 columns right of the
      block's centre (its accessory hangs off to the left). Shift the block
      left so the figure itself ends up horizontally centered. */
   align-self: center;
   margin-top: 1.5rem;
-  transform: translateX(-6.2ch);
+  transform: translateX(-9.5ch);
+}
+
+/* The wide accessory makes the sprite overflow very small screens, so pull it
+   back toward centre there. */
+@media (max-width: 560px) {
+  .intro > pre {
+    transform: translateX(-5ch);
+  }
 }
 
 .page h2 {

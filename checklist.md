@@ -2,11 +2,11 @@
 
 Remaining work. Tick items off as they land; add new ones as they come up.
 
-## Deploy (the Vite build is not live yet)
+## Deploy
 
-- [ ] Deploy production: `npx wrangler deploy`
-- [ ] Deploy test: `npx wrangler deploy -c wrangler.test.jsonc`
-- [ ] Verify hard refreshes on deep routes (`/coffee`, `/shop`, `/shop/item/:id`, `/policies`) — SPA fallback
+- [x] Deploy production: `npx wrangler deploy`
+- [x] Deploy test: `npx wrangler deploy -c wrangler.test.jsonc`
+- [x] Verify hard refreshes on deep routes (`/coffee`, `/shop`, `/shop/item/:id`, `/policies`) — SPA fallback
 - [ ] Verify listing images load from `img.thomhuang.com` and admin uploads work under the deployed CSP
 
 ## Code cleanup (from the audit)

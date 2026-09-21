@@ -59,15 +59,10 @@ describe('Cart', () => {
     expect(screen.getByText('Subtotal (2) $40.00')).toBeInTheDocument();
   });
 
-  test('changes quantity and removes a line', async () => {
+  test('removes a line', async () => {
     const user = userEvent.setup();
     seedCart();
     renderCart();
-
-    await user.click(
-      screen.getByRole('button', { name: 'Increase quantity of Alpha Jacket' })
-    );
-    expect(screen.getByText('Subtotal (3) $60.00')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Remove' }));
     expect(screen.getByText('Your cart is empty.')).toBeInTheDocument();

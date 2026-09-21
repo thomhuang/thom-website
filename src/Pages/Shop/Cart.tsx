@@ -8,7 +8,7 @@ import { formatPrice } from './format';
 import styles from './Shop.module.css';
 
 export default function Cart() {
-  const { lines, count, subtotalCents, setQuantity, remove, clear } = useCart();
+  const { lines, count, subtotalCents, remove, clear } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
 
@@ -81,27 +81,6 @@ export default function Cart() {
               <p className={styles.cardMeta}>
                 {formatPrice(line.priceCents, line.currency)} each
               </p>
-            </div>
-            <div className={styles.quantity}>
-              <button
-                type="button"
-                className={styles.quantityButton}
-                onClick={() => setQuantity(line.itemId, line.quantity - 1)}
-                disabled={line.quantity <= 1}
-                aria-label={`Decrease quantity of ${line.title}`}
-              >
-                −
-              </button>
-              <span className={styles.quantityValue}>{line.quantity}</span>
-              <button
-                type="button"
-                className={styles.quantityButton}
-                onClick={() => setQuantity(line.itemId, line.quantity + 1)}
-                disabled={line.quantity >= line.stock}
-                aria-label={`Increase quantity of ${line.title}`}
-              >
-                +
-              </button>
             </div>
             <p className={styles.cartLineTotal}>
               {formatPrice(line.priceCents * line.quantity, line.currency)}

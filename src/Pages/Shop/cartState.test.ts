@@ -8,7 +8,6 @@ import {
   cartSubtotalCents,
   loadCart,
   removeCartLine,
-  setCartLineQuantity,
 } from './cartState';
 
 const makeLine = (overrides: Partial<CartLine> = {}): CartLine => ({
@@ -34,16 +33,6 @@ describe('addCartLine', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].quantity).toBe(5);
-  });
-});
-
-describe('setCartLineQuantity', () => {
-  test('updates a quantity clamped to the stock', () => {
-    const line = makeLine({ stock: 3, quantity: 1 });
-
-    expect(setCartLineQuantity([line], '1', 2)[0].quantity).toBe(2);
-    expect(setCartLineQuantity([line], '1', 99)[0].quantity).toBe(3);
-    expect(setCartLineQuantity([line], '1', 0)[0].quantity).toBe(1);
   });
 });
 

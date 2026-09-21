@@ -604,34 +604,6 @@
   flex: 1 1 10rem;
 }
 
-.quantity {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.quantityButton {
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-}
-
-.quantityButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.quantityValue {
-  min-width: 1.5rem;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
 .cartLineTotal {
   margin: 0;
   font-variant-numeric: tabular-nums;

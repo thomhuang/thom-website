@@ -67,18 +67,6 @@ export function addCartLine(lines: CartLine[], line: CartLine): CartLine[] {
   );
 }
 
-export function setCartLineQuantity(
-  lines: CartLine[],
-  itemId: string,
-  quantity: number
-): CartLine[] {
-  return lines.map((line) =>
-    line.itemId === itemId
-      ? { ...line, quantity: clampQuantity(quantity, line.stock) }
-      : line
-  );
-}
-
 export function removeCartLine(lines: CartLine[], itemId: string): CartLine[] {
   return lines.filter((line) => line.itemId !== itemId);
 }

@@ -16,7 +16,6 @@ import {
   loadCart,
   removeCartLine,
   saveCart,
-  setCartLineQuantity,
 } from './cartState';
 
 type CartContextValue = {
@@ -24,7 +23,6 @@ type CartContextValue = {
   count: number;
   subtotalCents: number;
   add: (line: CartLine) => void;
-  setQuantity: (itemId: string, quantity: number) => void;
   remove: (itemId: string) => void;
   clear: () => void;
 };
@@ -46,10 +44,6 @@ export function CartProvider({ children }: CartProviderProps) {
     setLines((current) => addCartLine(current, line));
   }, []);
 
-  const setQuantity = useCallback((itemId: string, quantity: number) => {
-    setLines((current) => setCartLineQuantity(current, itemId, quantity));
-  }, []);
-
   const remove = useCallback((itemId: string) => {
     setLines((current) => removeCartLine(current, itemId));
   }, []);
@@ -64,11 +58,10 @@ export function CartProvider({ children }: CartProviderProps) {
       count: cartCount(lines),
       subtotalCents: cartSubtotalCents(lines),
       add,
-      setQuantity,
       remove,
       clear,
     }),
-    [lines, add, setQuantity, remove, clear]
+    [lines, add, remove, clear]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -7,7 +7,7 @@ export type StockFilter = 'all' | 'in-stock' | 'out-of-stock';
 export const layoutStorageKey = 'shop-layout';
 
 export const getInitialLayout = (): LayoutMode =>
-  localStorage.getItem(layoutStorageKey) === 'list' ? 'list' : 'grid';
+  localStorage.getItem(layoutStorageKey) === 'grid' ? 'grid' : 'list';
 
 // Listings arrive newest first. `id` is the insertion order, so ascending id is
 // oldest first; the price orders are plain numeric comparisons.

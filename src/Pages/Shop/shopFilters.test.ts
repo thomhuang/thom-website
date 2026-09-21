@@ -81,12 +81,12 @@ describe('getInitialLayout', () => {
     localStorage.clear();
   });
 
-  test('defaults to grid', () => {
-    expect(getInitialLayout()).toBe('grid');
+  test('defaults to list', () => {
+    expect(getInitialLayout()).toBe('list');
   });
 
-  test('reads a stored list preference', () => {
-    localStorage.setItem(layoutStorageKey, 'list');
-    expect(getInitialLayout()).toBe('list');
+  test('reads a stored grid preference', () => {
+    localStorage.setItem(layoutStorageKey, 'grid');
+    expect(getInitialLayout()).toBe('grid');
   });
 });

@@ -143,8 +143,12 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
   gap: 1.5rem;
+  /* Break out of the centered reading column and use ~60% of the viewport,
+     centered, so wide screens get a comfortable gutter. */
+  width: 60vw;
+  margin-left: calc(50% - 30vw);
 }
 
 .list {

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import type { ShopItemSummary } from '../../api/Shop/ShopRouter';
-import { formatPrice, formatStock } from './format';
+import { formatPrice } from './format';
 import styles from './Shop.module.css';
 
 type ShopCardProps = {
@@ -56,7 +56,7 @@ export default function ShopCard({
             <p className={styles.cardPrice}>
               {formatPrice(item.priceCents, item.currency)}
             </p>
-            <p className={styles.cardMeta}>{formatStock(item.stock)}</p>
+            {item.stock < 1 && <p className={styles.cardMeta}>Sold out</p>}
             {!item.isPublished && <p className={styles.draftTag}>Draft</p>}
           </div>
         </div>

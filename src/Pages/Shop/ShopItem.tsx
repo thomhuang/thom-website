@@ -9,7 +9,7 @@ import {
   ShopItem as ShopItemResponse,
   StartShopCheckoutAsync,
 } from '../../api/Shop/ShopRouter';
-import { formatPrice, formatStock, getPrimaryImage } from './format';
+import { formatPrice, getPrimaryImage } from './format';
 import { useCart } from './CartContext';
 import ShopImageManager from './ShopImageManager';
 import ShopItemGallery from './ShopItemGallery';
@@ -167,7 +167,7 @@ export default function ShopItem() {
           <p className={styles.detailPrice}>
             {formatPrice(item.priceCents, item.currency)}
           </p>
-          <p className={styles.cardMeta}>{formatStock(item.stock)}</p>
+          {isSoldOut && <p className={styles.cardMeta}>Sold out</p>}
 
           {!item.isPublished && <p className={styles.draftTag}>Draft</p>}
 
@@ -186,7 +186,7 @@ export default function ShopItem() {
             disabled={isSoldOut || isCheckingOut}
           >
             {isSoldOut
-              ? formatStock(item.stock)
+              ? 'Sold out'
               : isCheckingOut
               ? 'Redirecting...'
               : 'Buy now'}

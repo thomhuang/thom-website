@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import {
   formatDateTime,
   formatMeasurement,
-  formatStock,
   getPrimaryImage,
   parsePriceToCents,
 } from './format';
@@ -40,17 +39,6 @@ describe('formatMeasurement', () => {
 
   test('converts inches to centimeters', () => {
     expect(formatMeasurement(34, 'cm')).toBe('86.4 cm');
-  });
-});
-
-describe('formatStock', () => {
-  test('labels zero stock as sold out', () => {
-    expect(formatStock(0)).toBe('Sold out');
-  });
-
-  test('labels single and plural stock', () => {
-    expect(formatStock(1)).toBe('1 available');
-    expect(formatStock(3)).toBe('3 available');
   });
 });
 

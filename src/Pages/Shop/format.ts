@@ -42,9 +42,6 @@ export const formatDateTime = (value: string): string => {
 export const getPrimaryImage = (images: ShopImage[]) =>
   images.length > 0 ? images[0].url : '';
 
-export const formatStock = (stock: number) =>
-  stock < 1 ? 'Sold out' : stock === 1 ? '1 available' : `${stock} available`;
-
 export type MeasurementUnit = 'in' | 'cm';
 
 // Measurements are stored in inches. Display converts to cm on request,

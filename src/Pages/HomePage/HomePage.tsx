@@ -4,15 +4,14 @@ import AsciiFigure from "../../Components/AsciiFigure/AsciiFigure";
 import { PAGES } from "../../Assets/constants";
 import styles from "./HomePage.module.css";
 
-const documents = import.meta.glob("/public/documents/*", {
-  eager: true,
-  query: "?url",
-  import: "default",
-});
+// Public assets are served from the root, so we only need the glob's keys to
+// discover the newest document and link to it directly. Importing them would
+// make Vite try to process files that already live in `public/`.
+const documents = import.meta.glob("/public/documents/*");
 
 export default function HomePage() {
-  const files = Object.values(documents).sort();
-  const resumeHref = (files[files.length - 1] ?? "").replace("/public", "");
+  const files = Object.keys(documents).sort();
+  const resumeHref = (files[files.length - 1] ?? "").replace("/public/", "/");
 
   return (
     <div className={styles.text}>

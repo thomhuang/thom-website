@@ -57,6 +57,30 @@ describe('sortItems', () => {
       '1',
     ]);
   });
+
+  test('random order is stable per seed and keeps every item', () => {
+    const items = Array.from({ length: 20 }, (_, index) =>
+      makeItem({ id: String(index + 1) })
+    );
+
+    const first = sortItems(items, 'random', 0.42).map((i) => i.id);
+    const second = sortItems(items, 'random', 0.42).map((i) => i.id);
+
+    expect(first).toEqual(second);
+    expect([...first].sort()).toEqual(items.map((i) => i.id).sort());
+  });
+
+  test('random order varies with the seed without mutating the input', () => {
+    const items = Array.from({ length: 20 }, (_, index) =>
+      makeItem({ id: String(index + 1) })
+    );
+    const original = items.map((i) => i.id);
+
+    expect(sortItems(items, 'random', 0.1).map((i) => i.id)).not.toEqual(
+      sortItems(items, 'random', 0.9).map((i) => i.id)
+    );
+    expect(items.map((i) => i.id)).toEqual(original);
+  });
 });
 
 describe('filterItems', () => {

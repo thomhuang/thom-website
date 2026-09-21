@@ -28,7 +28,8 @@ export default function Shop() {
   const [brands, setBrands] = useState<ShopBrand[]>([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [stockFilter, setStockFilter] = useState<StockFilter>('all');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('random');
+  const [randomSeed] = useState(() => Math.random());
   const [layout, setLayout] = useState<LayoutMode>(getInitialLayout);
   const [isLoading, setIsLoading] = useState(true);
   const [shopError, setShopError] = useState('');
@@ -101,7 +102,8 @@ export default function Shop() {
 
   const visibleItems = sortItems(
     filterItems(items, { selectedBrandId, stockFilter }),
-    sortOrder
+    sortOrder,
+    randomSeed
   );
   const canManage = !isAuthLoading && isAdmin;
 

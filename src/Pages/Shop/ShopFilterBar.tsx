@@ -67,6 +67,7 @@ export default function ShopFilterBar({
           value={sortOrder}
           onChange={(event) => onSortOrderChange(event.target.value as SortOrder)}
         >
+          <option value="random">Random</option>
           <option value="newest">Newest</option>
           <option value="oldest">Oldest</option>
           <option value="price-asc">Price: low to high</option>

@@ -109,6 +109,15 @@ describe('Shop', () => {
     expect(screen.queryByText('Beta Tee')).not.toBeInTheDocument();
   });
 
+  test('defaults to a random sort', async () => {
+    mockedGetItems.mockResolvedValue([ALPHA, BETA]);
+
+    renderShop();
+
+    expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Sort/)).toHaveValue('random');
+  });
+
   test('sorts by price ascending', async () => {
     const user = userEvent.setup();
     mockedGetItems.mockResolvedValue([ALPHA, BETA]);

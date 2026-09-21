@@ -1,11 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { act } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { StartShopCheckoutAsync } from '../../api/Shop/ShopRouter';
 import Cart from './Cart';
 import { CartProvider } from './CartContext';
+import { cartStorageKey } from './cartState';
 
 vi.mock('../../api/Shop/ShopRouter', () => ({
   StartShopCheckoutAsync: vi.fn(),
@@ -54,6 +56,18 @@ describe('Cart', () => {
   test('renders lines with the subtotal', () => {
     seedCart();
     renderCart();
+
+    expect(screen.getByText('Alpha Jacket')).toBeInTheDocument();
+    expect(screen.getByText('Subtotal (2) $40.00')).toBeInTheDocument();
+  });
+
+  test('applies cart changes made in another tab', () => {
+    renderCart();
+
+    act(() => {
+      seedCart();
+      window.dispatchEvent(new StorageEvent('storage', { key: cartStorageKey }));
+    });
 
     expect(screen.getByText('Alpha Jacket')).toBeInTheDocument();
     expect(screen.getByText('Subtotal (2) $40.00')).toBeInTheDocument();

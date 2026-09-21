@@ -12,6 +12,7 @@ import {
   addCartLine,
   CartLine,
   cartCount,
+  cartStorageKey,
   cartSubtotalCents,
   loadCart,
   removeCartLine,
@@ -39,6 +40,16 @@ export function CartProvider({ children }: CartProviderProps) {
   useEffect(() => {
     saveCart(lines);
   }, [lines]);
+
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === cartStorageKey) {
+        setLines(loadCart());
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const add = useCallback((line: CartLine) => {
     setLines((current) => addCartLine(current, line));

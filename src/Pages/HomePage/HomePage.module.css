@@ -35,11 +35,4 @@
     align-items: center;
     gap: 1.25rem;
   }
-
-  /* The block is centered, but the figure sits 6.2 columns right of the
-     block's centre (its accessory hangs off to the left). Shift the block
-     left so the figure itself ends up horizontally centered. */
-  .layout > pre {
-    transform: translateX(-6.2ch);
-  }
 }

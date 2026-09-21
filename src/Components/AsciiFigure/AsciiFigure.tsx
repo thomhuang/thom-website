@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { IDLE, IDLE_SEQUENCES, type AsciiVariant } from "./frames";
+import { FRAME_DELAYS, IDLE, IDLE_SEQUENCES, type AsciiVariant } from "./frames";
 import styles from "./AsciiFigure.module.css";
 
 type Props = {
@@ -8,17 +8,15 @@ type Props = {
   size?: "default" | "large";
 };
 
-const DEFAULT_DELAY_MS = 250;
-
 export default function AsciiFigure({ variant = "home", size = "default" }: Props) {
   const [hovered, setHovered] = useState(false);
   const [frame, setFrame] = useState(0);
   const [motionEnabled, setMotionEnabled] = useState(false);
 
-  // The sprite is alive by default: its accessory floats around while it
-  // tracks and blinks. Hovering freezes it in place.
+  // The sprite is alive by default: the home figure flaps its arms while the
+  // others idle. Hovering freezes it in place.
   const sequence = IDLE_SEQUENCES[variant];
-  const delay = DEFAULT_DELAY_MS;
+  const delay = FRAME_DELAYS[variant];
 
   useEffect(() => {
     if (hovered) {

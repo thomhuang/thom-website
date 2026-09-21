@@ -185,6 +185,24 @@ export async function DeleteShopItemAsync(id: string): Promise<void> {
   });
 }
 
+export interface ShopItemsPublicationResult {
+  updated: number;
+}
+
+// Publishes or unpublishes several listings in one request. The server ignores
+// ids that no longer exist, so a stale selection does not fail the batch.
+export async function UpdateShopItemsPublicationAsync(
+  ids: string[],
+  isPublished: boolean
+): Promise<ShopItemsPublicationResult> {
+  return apiRequest<ShopItemsPublicationResult>({
+    method: 'PATCH',
+    url: '/shop/items',
+    data: { ids: ids.map(Number), isPublished },
+    withCredentials: true,
+  });
+}
+
 export async function GetShopBrandsAsync(
   signal?: AbortSignal
 ): Promise<ShopBrand[]> {

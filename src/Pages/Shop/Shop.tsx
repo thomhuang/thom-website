@@ -9,6 +9,7 @@ import {
   GetShopItemsAsync,
   ShopBrand,
   ShopItemSummary,
+  UpdateShopItemsPublicationAsync,
 } from '../../api/Shop/ShopRouter';
 import AsciiFigure from '../../Components/AsciiFigure/AsciiFigure';
 import ShopCard from './ShopCard';
@@ -31,9 +32,12 @@ export default function Shop() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('random');
   const [randomSeed] = useState(() => Math.random());
   const [layout, setLayout] = useState<LayoutMode>(getInitialLayout);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [shopError, setShopError] = useState('');
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isPublicationUpdating, setIsPublicationUpdating] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -93,10 +97,54 @@ export default function Shop() {
       setItems((currentItems) =>
         currentItems.filter((currentItem) => currentItem.id !== item.id)
       );
+      setSelectedIds((currentIds) => {
+        const nextIds = new Set(currentIds);
+        nextIds.delete(item.id);
+        return nextIds;
+      });
     } catch {
       setShopError('Listing could not be deleted.');
     } finally {
       setDeletingItemId(null);
+    }
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      if (nextIds.has(id)) {
+        nextIds.delete(id);
+      } else {
+        nextIds.add(id);
+      }
+      return nextIds;
+    });
+  };
+
+  const setSelectedPublished = async (isPublished: boolean) => {
+    if (selectedIds.size === 0) {
+      return;
+    }
+
+    setShopError('');
+    setIsPublicationUpdating(true);
+
+    try {
+      await UpdateShopItemsPublicationAsync([...selectedIds], isPublished);
+      setItems((currentItems) =>
+        currentItems.map((item) =>
+          selectedIds.has(item.id) ? { ...item, isPublished } : item
+        )
+      );
+      setSelectedIds(new Set());
+    } catch {
+      setShopError(
+        isPublished
+          ? 'Selected listings could not be published.'
+          : 'Selected listings could not be unpublished.'
+      );
+    } finally {
+      setIsPublicationUpdating(false);
     }
   };
 
@@ -126,15 +174,39 @@ export default function Shop() {
         </div>
       )}
 
+      {canManage && items.length > 0 && (
+        <div className={styles.bulkActions}>
+          <p className={styles.statusText}>{selectedIds.size} selected</p>
+          <button
+            type="button"
+            className={styles.saveButton}
+            disabled={selectedIds.size === 0 || isPublicationUpdating}
+            onClick={() => setSelectedPublished(true)}
+          >
+            Publish selected
+          </button>
+          <button
+            type="button"
+            className={styles.saveButton}
+            disabled={selectedIds.size === 0 || isPublicationUpdating}
+            onClick={() => setSelectedPublished(false)}
+          >
+            Unpublish selected
+          </button>
+        </div>
+      )}
+
       {shopError && <aside className={styles.errorNotice}>{shopError}</aside>}
 
       {!isLoading && (brands.length > 0 || items.length > 0) && (
         <ShopFilterBar
+          isOpen={filtersOpen}
           brands={brands}
           selectedBrandId={selectedBrandId}
           stockFilter={stockFilter}
           sortOrder={sortOrder}
           layout={layout}
+          onToggle={() => setFiltersOpen((open) => !open)}
           onBrandChange={setSelectedBrandId}
           onStockFilterChange={setStockFilter}
           onSortOrderChange={setSortOrder}
@@ -155,7 +227,9 @@ export default function Shop() {
               item={item}
               canManage={canManage}
               isDeleting={deletingItemId === item.id}
+              isSelected={selectedIds.has(item.id)}
               onDelete={deleteItem}
+              onToggleSelected={toggleSelected}
             />
           ))}
         </section>

@@ -4,6 +4,7 @@ import { apiRequest } from '../client';
 import {
   GetShopOrderByTokenAsync,
   GetShopOrdersAsync,
+  UpdateShopItemsPublicationAsync,
   UploadShopImageAsync,
 } from './ShopRouter';
 
@@ -52,6 +53,23 @@ describe('GetShopOrderByTokenAsync', () => {
       expect.objectContaining({
         method: 'GET',
         url: '/shop/orders/view/a%2Fb%3Fc',
+      })
+    );
+  });
+});
+
+describe('UpdateShopItemsPublicationAsync', () => {
+  test('sends numeric ids and the published flag in one PATCH', async () => {
+    mockedApiRequest.mockResolvedValue({ updated: 2 });
+
+    await UpdateShopItemsPublicationAsync(['1', '2'], false);
+
+    expect(mockedApiRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'PATCH',
+        url: '/shop/items',
+        data: { ids: [1, 2], isPublished: false },
+        withCredentials: true,
       })
     );
   });

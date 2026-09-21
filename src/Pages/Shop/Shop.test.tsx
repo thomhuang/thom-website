@@ -7,6 +7,7 @@ import {
   GetShopBrandsAsync,
   GetShopItemsAsync,
   ShopItemSummary,
+  UpdateShopItemsPublicationAsync,
 } from '../../api/Shop/ShopRouter';
 import Shop from './Shop';
 
@@ -14,14 +15,18 @@ vi.mock('../../api/Shop/ShopRouter', () => ({
   GetShopItemsAsync: vi.fn(),
   GetShopBrandsAsync: vi.fn(),
   DeleteShopItemAsync: vi.fn(),
+  UpdateShopItemsPublicationAsync: vi.fn(),
 }));
 
+const authState = vi.hoisted(() => ({ isAdmin: false, isAuthLoading: false }));
+
 vi.mock('../../Auth/AuthContext', () => ({
-  useAuth: () => ({ isAdmin: false, isAuthLoading: false }),
+  useAuth: () => authState,
 }));
 
 const mockedGetItems = vi.mocked(GetShopItemsAsync);
 const mockedGetBrands = vi.mocked(GetShopBrandsAsync);
+const mockedUpdatePublication = vi.mocked(UpdateShopItemsPublicationAsync);
 
 const ALPHA: ShopItemSummary = {
   id: '1',
@@ -47,13 +52,28 @@ const BETA: ShopItemSummary = {
   primaryImageUrl: '',
 };
 
+const DRAFT: ShopItemSummary = {
+  id: '3',
+  title: 'Gamma Draft',
+  brandId: '',
+  brand: '',
+  priceCents: 1500,
+  currency: 'usd',
+  stock: 1,
+  isPublished: false,
+  primaryImageUrl: '',
+};
+
 const renderShop = () => render(<Shop />, { wrapper: MemoryRouter });
 
 beforeEach(() => {
   localStorage.clear();
+  authState.isAdmin = false;
+  authState.isAuthLoading = false;
   mockedGetItems.mockReset();
   mockedGetBrands.mockReset();
   mockedGetBrands.mockResolvedValue([]);
+  mockedUpdatePublication.mockReset();
 });
 
 describe('Shop', () => {
@@ -152,5 +172,86 @@ describe('Shop', () => {
       'aria-pressed',
       'true'
     );
+  });
+
+  test('toggles the filter panel', async () => {
+    const user = userEvent.setup();
+    mockedGetItems.mockResolvedValue([ALPHA]);
+
+    renderShop();
+
+    expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
+
+    const toggle = screen.getByRole('button', { name: 'Filters' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('hides the batch controls from non-admins', async () => {
+    mockedGetItems.mockResolvedValue([ALPHA]);
+
+    renderShop();
+
+    expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Publish selected' })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Select Alpha Jacket')).not.toBeInTheDocument();
+  });
+
+  test('lets an admin publish a selected draft', async () => {
+    const user = userEvent.setup();
+    authState.isAdmin = true;
+    mockedGetItems.mockResolvedValue([ALPHA, DRAFT]);
+    mockedUpdatePublication.mockResolvedValue({ updated: 1 });
+
+    renderShop();
+
+    expect(await screen.findByText('Gamma Draft')).toBeInTheDocument();
+    expect(screen.getByText('Draft')).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText('Select Gamma Draft'));
+    await user.click(screen.getByRole('button', { name: 'Publish selected' }));
+
+    expect(mockedUpdatePublication).toHaveBeenCalledWith(['3'], true);
+    expect(screen.queryByText('Draft')).not.toBeInTheDocument();
+  });
+
+  test('lets an admin unpublish a selected batch', async () => {
+    const user = userEvent.setup();
+    authState.isAdmin = true;
+    mockedGetItems.mockResolvedValue([ALPHA, BETA]);
+    mockedUpdatePublication.mockResolvedValue({ updated: 2 });
+
+    renderShop();
+
+    expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText('Select Alpha Jacket'));
+    await user.click(screen.getByLabelText('Select Beta Tee'));
+    await user.click(screen.getByRole('button', { name: 'Unpublish selected' }));
+
+    expect(mockedUpdatePublication).toHaveBeenCalledWith(['1', '2'], false);
+    expect(screen.getAllByText('Draft')).toHaveLength(2);
+  });
+
+  test('shows an error when a batch publish fails', async () => {
+    const user = userEvent.setup();
+    authState.isAdmin = true;
+    mockedGetItems.mockResolvedValue([ALPHA]);
+    mockedUpdatePublication.mockRejectedValue(new Error('boom'));
+
+    renderShop();
+
+    expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText('Select Alpha Jacket'));
+    await user.click(screen.getByRole('button', { name: 'Publish selected' }));
+
+    expect(
+      await screen.findByText('Selected listings could not be published.')
+    ).toBeInTheDocument();
   });
 });

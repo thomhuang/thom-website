@@ -10,7 +10,9 @@ type ShopCardProps = {
   item: ShopItemSummary;
   canManage: boolean;
   isDeleting: boolean;
+  isSelected: boolean;
   onDelete: (item: ShopItemSummary) => void;
+  onToggleSelected: (id: string) => void;
 };
 
 function CardImage({ src, alt }: { src: string; alt: string }) {
@@ -35,7 +37,9 @@ export default function ShopCard({
   item,
   canManage,
   isDeleting,
+  isSelected,
   onDelete,
+  onToggleSelected,
 }: ShopCardProps) {
   return (
     <article className={styles.card}>
@@ -60,6 +64,15 @@ export default function ShopCard({
 
       {canManage && (
         <div className={styles.cardActions}>
+          <label className={styles.selectControl}>
+            <input
+              type="checkbox"
+              aria-label={`Select ${item.title}`}
+              checked={isSelected}
+              onChange={() => onToggleSelected(item.id)}
+            />
+            Select
+          </label>
           <Link
             className={styles.textLink}
             to={`${PAGES.ShopEntry}/${item.id}`}

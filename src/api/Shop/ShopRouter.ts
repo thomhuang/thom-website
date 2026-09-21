@@ -132,6 +132,17 @@ export interface ShopCheckoutSession {
   url: string;
 }
 
+// The body of a 409 from /shop/checkout. ReservedUntil is set only while a
+// pending reservation holds the item, so the storefront can say when it frees
+// up instead of calling it sold out.
+export interface ShopCheckoutConflict {
+  error: string;
+  itemId: string;
+  title: string;
+  available: number;
+  reservedUntil?: number;
+}
+
 export async function GetShopItemsAsync(
   signal?: AbortSignal
 ): Promise<ShopItemSummary[]> {
@@ -311,6 +322,22 @@ export async function GetShopOrdersAsync(options: {
     method: 'GET',
     signal: options.signal,
     url: query ? `/shop/orders?${query}` : '/shop/orders',
+    withCredentials: true,
+  });
+}
+
+export interface ShopReleaseHoldResult {
+  released: boolean;
+}
+
+// Frees the stock an abandoned checkout is holding. Admin-only; the server
+// expires the Stripe session first so the release cannot be paid afterwards.
+export async function ReleaseShopOrderHoldAsync(
+  sessionId: string
+): Promise<ShopReleaseHoldResult> {
+  return apiRequest<ShopReleaseHoldResult>({
+    method: 'POST',
+    url: `/shop/orders/${sessionId}/release`,
     withCredentials: true,
   });
 }

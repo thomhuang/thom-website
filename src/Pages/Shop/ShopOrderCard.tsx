@@ -4,7 +4,13 @@ import { formatOrderStatus, getOrderStatusClass } from './orderStatus';
 import ShippingAddress from './ShippingAddress';
 import styles from './Shop.module.css';
 
-export default function ShopOrderCard({ order }: { order: ShopOrder }) {
+export default function ShopOrderCard({
+  order,
+  onRelease,
+}: {
+  order: ShopOrder;
+  onRelease?: (order: ShopOrder) => void;
+}) {
   return (
     <article className={styles.orderCard}>
       <header className={styles.orderHeader}>
@@ -46,6 +52,16 @@ export default function ShopOrderCard({ order }: { order: ShopOrder }) {
       </ul>
 
       <p className={styles.orderSession}>{order.stripeSessionId}</p>
+
+      {order.status === 'pending' && onRelease && (
+        <button
+          type="button"
+          className={styles.deleteButton}
+          onClick={() => onRelease(order)}
+        >
+          Release hold
+        </button>
+      )}
     </article>
   );
 }

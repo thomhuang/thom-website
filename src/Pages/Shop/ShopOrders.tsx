@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
-import { GetShopOrdersAsync, ShopOrder } from '../../api/Shop/ShopRouter';
+import {
+  GetShopOrdersAsync,
+  ReleaseShopOrderHoldAsync,
+  ShopOrder,
+} from '../../api/Shop/ShopRouter';
 import ShopOrderCard from './ShopOrderCard';
 import styles from './Shop.module.css';
 
@@ -83,6 +87,23 @@ export default function ShopOrders() {
     }
   };
 
+  const releaseHold = async (order: ShopOrder) => {
+    setOrdersError('');
+
+    try {
+      await ReleaseShopOrderHoldAsync(order.stripeSessionId);
+      setOrders((current) =>
+        current.map((existing) =>
+          existing.id === order.id
+            ? { ...existing, status: 'expired' as const }
+            : existing
+        )
+      );
+    } catch {
+      setOrdersError('The hold could not be released.');
+    }
+  };
+
   return (
     <main className={styles.page}>
       <section className={styles.intro} aria-labelledby="shop-orders-title">
@@ -125,7 +146,7 @@ export default function ShopOrders() {
       {!isAuthLoading && isAdmin && !isLoading && orders.length > 0 && (
         <section className={styles.orderList} aria-label="Orders">
           {orders.map((order) => (
-            <ShopOrderCard key={order.id} order={order} />
+            <ShopOrderCard key={order.id} order={order} onRelease={releaseHold} />
           ))}
         </section>
       )}

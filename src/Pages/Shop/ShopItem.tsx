@@ -11,6 +11,7 @@ import {
 } from '../../api/Shop/ShopRouter';
 import { formatPrice, getPrimaryImage } from './format';
 import { useCart } from './CartContext';
+import { checkoutErrorMessage } from './checkoutError';
 import ShopImageManager from './ShopImageManager';
 import ShopItemGallery from './ShopItemGallery';
 import ShopItemMeasurementsTable from './ShopItemMeasurementsTable';
@@ -123,8 +124,8 @@ export default function ShopItem() {
         throw new Error('unexpected checkout URL');
       }
       window.location.assign(checkout.href);
-    } catch {
-      setCheckoutError('Checkout could not be started.');
+    } catch (error) {
+      setCheckoutError(checkoutErrorMessage(error));
       setIsCheckingOut(false);
     }
   };

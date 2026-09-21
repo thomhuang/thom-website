@@ -86,4 +86,27 @@ describe('Cart', () => {
       await screen.findByText('Checkout could not be started.')
     ).toBeInTheDocument();
   });
+
+  test('names the sold-out item from a 409', async () => {
+    const user = userEvent.setup();
+    seedCart();
+    mockedCheckout.mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 409,
+        data: {
+          error: 'insufficient_stock',
+          itemId: '1',
+          title: 'Alpha Jacket',
+          available: 0,
+        },
+      },
+    });
+
+    renderCart();
+
+    await user.click(screen.getByRole('button', { name: 'Checkout' }));
+
+    expect(await screen.findByText('Alpha Jacket is sold out.')).toBeInTheDocument();
+  });
 });

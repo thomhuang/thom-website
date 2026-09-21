@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { PAGES } from '../../Assets/constants';
 import { StartShopCheckoutAsync } from '../../api/Shop/ShopRouter';
 import { useCart } from './CartContext';
+import { checkoutErrorMessage } from './checkoutError';
 import { formatPrice } from './format';
 import styles from './Shop.module.css';
 
@@ -27,8 +28,8 @@ export default function Cart() {
         throw new Error('unexpected checkout URL');
       }
       window.location.assign(checkout.href);
-    } catch {
-      setCheckoutError('Checkout could not be started.');
+    } catch (error) {
+      setCheckoutError(checkoutErrorMessage(error));
       setIsCheckingOut(false);
     }
   };

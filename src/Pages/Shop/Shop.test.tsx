@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
@@ -153,7 +153,7 @@ describe('Shop', () => {
     renderShop();
 
     expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Sort/)).toHaveValue('random');
+    expect(screen.getByRole('button', { name: 'Random' })).toBeInTheDocument();
   });
 
   test('sorts by price ascending', async () => {
@@ -164,15 +164,73 @@ describe('Shop', () => {
 
     expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
 
-    await user.selectOptions(
-      screen.getByLabelText(/Sort/),
-      'price-asc'
+    await user.click(screen.getByRole('button', { name: 'Random' }));
+    await user.click(
+      screen.getByRole('menuitemradio', { name: 'Price: low to high' })
     );
 
     const titles = screen
       .getAllByRole('heading', { level: 2 })
       .map((heading) => heading.textContent);
     expect(titles).toEqual(['Beta Tee', 'Alpha Jacket']);
+  });
+
+  test('paginates listings two rows at a time', async () => {
+    const user = userEvent.setup();
+    localStorage.setItem('shop-layout', 'list');
+    mockedGetItems.mockResolvedValue([ALPHA, BETA, DRAFT]);
+
+    renderShop();
+
+    expect(await screen.findAllByRole('heading', { level: 2 })).toHaveLength(2);
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(1);
+    expect(screen.getByRole('button', { name: '2' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+  });
+
+  test('sizes grid pages from the measured column count', async () => {
+    const user = userEvent.setup();
+    const originalGetComputedStyle = window.getComputedStyle.bind(window);
+    const spy = vi
+      .spyOn(window, 'getComputedStyle')
+      .mockImplementation((element) => {
+        if (
+          element instanceof HTMLElement &&
+          element.getAttribute('aria-label') === 'Listings'
+        ) {
+          return {
+            gridTemplateColumns: '200px 200px 200px 200px',
+          } as CSSStyleDeclaration;
+        }
+        return originalGetComputedStyle(element);
+      });
+
+    try {
+      mockedGetItems.mockResolvedValue(
+        Array.from({ length: 9 }, (_, index) => ({
+          ...ALPHA,
+          id: String(index + 1),
+          title: `Item ${index + 1}`,
+        }))
+      );
+
+      renderShop();
+
+      await waitFor(() =>
+        expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(8)
+      );
+
+      await user.click(screen.getByRole('button', { name: 'Next' }));
+
+      expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(1);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   test('persists the list layout choice', async () => {
@@ -190,21 +248,6 @@ describe('Shop', () => {
       'aria-pressed',
       'true'
     );
-  });
-
-  test('toggles the filter panel', async () => {
-    const user = userEvent.setup();
-    mockedGetItems.mockResolvedValue([ALPHA]);
-
-    renderShop();
-
-    expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
-
-    const toggle = screen.getByRole('button', { name: 'Filters' });
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-
-    await user.click(toggle);
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
   });
 
   test('hides the batch controls from non-admins', async () => {

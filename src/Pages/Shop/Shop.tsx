@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
@@ -14,6 +14,7 @@ import {
 import AsciiFigure from '../../Components/AsciiFigure/AsciiFigure';
 import ShopCard from './ShopCard';
 import ShopFilterBar from './ShopFilterBar';
+import ShopPager from './ShopPager';
 import {
   filterItems,
   getCategories,
@@ -22,7 +23,21 @@ import {
   sortItems,
 } from './shopFilters';
 import type { LayoutMode, SortOrder, StockFilter } from './shopFilters';
+import { getPageSize, getTotalPages } from './shopPagination';
 import styles from './Shop.module.css';
+
+// The grid's `repeat(auto-fill, ...)` resolves to a concrete track list, so the
+// number of columns it currently fits is the number of computed tracks. When CSS
+// is unavailable (jsdom) or unresolved, report zero and fall back to one column.
+const countGridColumns = (grid: HTMLElement): number => {
+  const columns = getComputedStyle(grid).gridTemplateColumns;
+
+  if (!columns || columns === 'none' || columns.includes('repeat(')) {
+    return 0;
+  }
+
+  return columns.split(/\s+/).filter(Boolean).length;
+};
 
 export default function Shop() {
   const { isAdmin, isAuthLoading } = useAuth();
@@ -34,12 +49,14 @@ export default function Shop() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('random');
   const [randomSeed] = useState(() => Math.random());
   const [layout, setLayout] = useState<LayoutMode>(getInitialLayout);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [shopError, setShopError] = useState('');
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isPublicationUpdating, setIsPublicationUpdating] = useState(false);
+  const [page, setPage] = useState(1);
+  const [gridColumns, setGridColumns] = useState(1);
+  const gridRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -157,6 +174,53 @@ export default function Shop() {
   );
   const categories = getCategories(items);
   const canManage = !isAuthLoading && isAdmin;
+  const pageSize = getPageSize(layout, gridColumns);
+  const totalPages = getTotalPages(visibleItems.length, pageSize);
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = visibleItems.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // A new result set starts back at the first page.
+  useEffect(() => {
+    setPage(1);
+  }, [selectedBrandId, selectedCategory, stockFilter, sortOrder]);
+
+  // Keep the page in range when the page size shrinks (layout switch or resize).
+  useEffect(() => {
+    setPage((current) => Math.min(current, totalPages));
+  }, [totalPages]);
+
+  // Size a grid page from the columns the responsive grid currently fits.
+  useLayoutEffect(() => {
+    if (layout !== 'grid') {
+      return;
+    }
+
+    const grid = gridRef.current;
+    if (!grid) {
+      return;
+    }
+
+    const measure = () => {
+      const columns = countGridColumns(grid);
+      if (columns > 0) {
+        setGridColumns(columns);
+      }
+    };
+
+    measure();
+
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(grid);
+
+    return () => observer.disconnect();
+  }, [layout, visibleItems.length, isLoading]);
 
   return (
     <main className={styles.page}>
@@ -203,7 +267,6 @@ export default function Shop() {
 
       {!isLoading && (brands.length > 0 || items.length > 0) && (
         <ShopFilterBar
-          isOpen={filtersOpen}
           brands={brands}
           categories={categories}
           selectedBrandId={selectedBrandId}
@@ -211,7 +274,6 @@ export default function Shop() {
           stockFilter={stockFilter}
           sortOrder={sortOrder}
           layout={layout}
-          onToggle={() => setFiltersOpen((open) => !open)}
           onBrandChange={setSelectedBrandId}
           onCategoryChange={setSelectedCategory}
           onStockFilterChange={setStockFilter}
@@ -223,22 +285,30 @@ export default function Shop() {
       {isLoading ? (
         <p className={styles.statusText}>Loading listings...</p>
       ) : visibleItems.length > 0 ? (
-        <section
-          className={layout === 'grid' ? styles.grid : styles.list}
-          aria-label="Listings"
-        >
-          {visibleItems.map((item) => (
-            <ShopCard
-              key={item.id}
-              item={item}
-              canManage={canManage}
-              isDeleting={deletingItemId === item.id}
-              isSelected={selectedIds.has(item.id)}
-              onDelete={deleteItem}
-              onToggleSelected={toggleSelected}
-            />
-          ))}
-        </section>
+        <>
+          <section
+            ref={gridRef}
+            className={layout === 'grid' ? styles.grid : styles.list}
+            aria-label="Listings"
+          >
+            {pageItems.map((item) => (
+              <ShopCard
+                key={item.id}
+                item={item}
+                canManage={canManage}
+                isDeleting={deletingItemId === item.id}
+                isSelected={selectedIds.has(item.id)}
+                onDelete={deleteItem}
+                onToggleSelected={toggleSelected}
+              />
+            ))}
+          </section>
+          <ShopPager
+            page={currentPage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
+        </>
       ) : (
         <div className={styles.emptyState}>
           <p>

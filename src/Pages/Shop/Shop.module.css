@@ -203,16 +203,20 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
   gap: 1.5rem;
-  /* Break out of the centered reading column and use ~60% of the viewport,
-     centered, so wide screens get a comfortable gutter. */
-  width: 60vw;
-  margin-left: calc(50% - 30vw);
 }
 
 .list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+/* Both layouts break out of the centered reading column and use ~60% of the
+   viewport, centered, so wide screens get a comfortable gutter. */
+.grid,
+.list {
+  width: 60vw;
+  margin-left: calc(50% - 30vw);
 }
 
 .list .card {
@@ -546,6 +550,106 @@
 .buyButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.addButton {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.addButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Cart */
+
+.cartList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cartRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+}
+
+.cartThumb,
+.cartThumbPlaceholder {
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+.cartInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1 1 10rem;
+}
+
+.quantity {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quantityButton {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.quantityButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.quantityValue {
+  min-width: 1.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.cartLineTotal {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.cartSummary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.cartSubtotal {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
 }
 
 .detailActions {

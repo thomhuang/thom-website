@@ -16,6 +16,7 @@ import ShopCard from './ShopCard';
 import ShopFilterBar from './ShopFilterBar';
 import {
   filterItems,
+  getCategories,
   getInitialLayout,
   layoutStorageKey,
   sortItems,
@@ -28,6 +29,7 @@ export default function Shop() {
   const [items, setItems] = useState<ShopItemSummary[]>([]);
   const [brands, setBrands] = useState<ShopBrand[]>([]);
   const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [stockFilter, setStockFilter] = useState<StockFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('random');
   const [randomSeed] = useState(() => Math.random());
@@ -149,10 +151,11 @@ export default function Shop() {
   };
 
   const visibleItems = sortItems(
-    filterItems(items, { selectedBrandId, stockFilter }),
+    filterItems(items, { selectedBrandId, selectedCategory, stockFilter }),
     sortOrder,
     randomSeed
   );
+  const categories = getCategories(items);
   const canManage = !isAuthLoading && isAdmin;
 
   return (
@@ -202,12 +205,15 @@ export default function Shop() {
         <ShopFilterBar
           isOpen={filtersOpen}
           brands={brands}
+          categories={categories}
           selectedBrandId={selectedBrandId}
+          selectedCategory={selectedCategory}
           stockFilter={stockFilter}
           sortOrder={sortOrder}
           layout={layout}
           onToggle={() => setFiltersOpen((open) => !open)}
           onBrandChange={setSelectedBrandId}
+          onCategoryChange={setSelectedCategory}
           onStockFilterChange={setStockFilter}
           onSortOrderChange={setSortOrder}
           onLayoutChange={setLayout}

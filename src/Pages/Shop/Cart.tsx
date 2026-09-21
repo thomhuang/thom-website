@@ -1,0 +1,144 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import { PAGES } from '../../Assets/constants';
+import { StartShopCheckoutAsync } from '../../api/Shop/ShopRouter';
+import { useCart } from './CartContext';
+import { formatPrice } from './format';
+import styles from './Shop.module.css';
+
+export default function Cart() {
+  const { lines, count, subtotalCents, setQuantity, remove, clear } = useCart();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState('');
+
+  const startCheckout = async () => {
+    setIsCheckingOut(true);
+    setCheckoutError('');
+
+    try {
+      const session = await StartShopCheckoutAsync(
+        lines.map((line) => ({ itemId: line.itemId, quantity: line.quantity }))
+      );
+      // Stripe's URL is server-controlled, but validate the origin anyway so a
+      // tampered response cannot turn this into an open redirect.
+      const checkout = new URL(session.url);
+      if (checkout.protocol !== 'https:' || checkout.hostname !== 'checkout.stripe.com') {
+        throw new Error('unexpected checkout URL');
+      }
+      window.location.assign(checkout.href);
+    } catch {
+      setCheckoutError('Checkout could not be started.');
+      setIsCheckingOut(false);
+    }
+  };
+
+  if (lines.length === 0) {
+    return (
+      <main className={styles.page}>
+        <h1>Cart</h1>
+        <p className={styles.statusText}>Your cart is empty.</p>
+        <div className={styles.adminActions}>
+          <Link className={styles.textLink} to={PAGES.Shop}>
+            Back to shop
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const currency = lines[0].currency || 'usd';
+
+  return (
+    <main className={styles.page}>
+      <div className={styles.adminActions}>
+        <Link className={styles.textLink} to={PAGES.Shop}>
+          Back to shop
+        </Link>
+      </div>
+
+      <h1>Cart</h1>
+
+      <ul className={styles.cartList}>
+        {lines.map((line) => (
+          <li key={line.itemId} className={styles.cartRow}>
+            {line.primaryImageUrl ? (
+              <img
+                className={styles.cartThumb}
+                src={line.primaryImageUrl}
+                alt=""
+              />
+            ) : (
+              <span className={styles.cartThumbPlaceholder} />
+            )}
+            <div className={styles.cartInfo}>
+              <Link
+                className={styles.textLink}
+                to={`${PAGES.ShopItem}/${line.itemId}`}
+              >
+                {line.title}
+              </Link>
+              <p className={styles.cardMeta}>
+                {formatPrice(line.priceCents, line.currency)} each
+              </p>
+            </div>
+            <div className={styles.quantity}>
+              <button
+                type="button"
+                className={styles.quantityButton}
+                onClick={() => setQuantity(line.itemId, line.quantity - 1)}
+                disabled={line.quantity <= 1}
+                aria-label={`Decrease quantity of ${line.title}`}
+              >
+                −
+              </button>
+              <span className={styles.quantityValue}>{line.quantity}</span>
+              <button
+                type="button"
+                className={styles.quantityButton}
+                onClick={() => setQuantity(line.itemId, line.quantity + 1)}
+                disabled={line.quantity >= line.stock}
+                aria-label={`Increase quantity of ${line.title}`}
+              >
+                +
+              </button>
+            </div>
+            <p className={styles.cartLineTotal}>
+              {formatPrice(line.priceCents * line.quantity, line.currency)}
+            </p>
+            <button
+              type="button"
+              className={styles.deleteButton}
+              onClick={() => remove(line.itemId)}
+            >
+              Remove
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <div className={styles.cartSummary}>
+        <p className={styles.cartSubtotal}>
+          Subtotal ({count}) {formatPrice(subtotalCents, currency)}
+        </p>
+        <p className={styles.cardMeta}>
+          Shipping and tax are calculated at checkout.
+        </p>
+        <button
+          type="button"
+          className={styles.buyButton}
+          onClick={startCheckout}
+          disabled={isCheckingOut}
+        >
+          {isCheckingOut ? 'Redirecting...' : 'Checkout'}
+        </button>
+        {checkoutError && (
+          <p className={styles.errorNotice}>{checkoutError}</p>
+        )}
+        <button type="button" className={styles.deleteButton} onClick={clear}>
+          Clear cart
+        </button>
+      </div>
+    </main>
+  );
+}

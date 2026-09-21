@@ -2,11 +2,13 @@ import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useTheme } from '../../hooks';
+import { useCart } from '../../Pages/Shop/CartContext';
 import AuthControl from './AuthControl';
 import styles from './Headers.module.css';
 
 export default function Header() {
     const [theme, toggleTheme] = useTheme();
+    const { count } = useCart();
 
     return (
         <header className={styles.header}>
@@ -22,6 +24,9 @@ export default function Header() {
                 </Link>
                 <Link to={PAGES.Shop} className={styles.navLink}>
                     shop
+                </Link>
+                <Link to={PAGES.ShopCart} className={styles.navLink}>
+                    cart{count > 0 ? ` (${count})` : ''}
                 </Link>
                 <AuthControl />
                 <button

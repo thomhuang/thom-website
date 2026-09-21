@@ -33,6 +33,7 @@ const ALPHA: ShopItemSummary = {
   title: 'Alpha Jacket',
   brandId: '1',
   brand: 'AlphaBrand',
+  category: 'tops',
   priceCents: 2000,
   currency: 'usd',
   stock: 1,
@@ -45,6 +46,7 @@ const BETA: ShopItemSummary = {
   title: 'Beta Tee',
   brandId: '2',
   brand: 'BetaBrand',
+  category: 'bottoms',
   priceCents: 1000,
   currency: 'usd',
   stock: 0,
@@ -57,6 +59,7 @@ const DRAFT: ShopItemSummary = {
   title: 'Gamma Draft',
   brandId: '',
   brand: '',
+  category: '',
   priceCents: 1500,
   currency: 'usd',
   stock: 1,
@@ -127,6 +130,21 @@ describe('Shop', () => {
     await user.selectOptions(screen.getByLabelText(/Brand/), '1');
     expect(screen.getByText('Alpha Jacket')).toBeInTheDocument();
     expect(screen.queryByText('Beta Tee')).not.toBeInTheDocument();
+  });
+
+  test('filters by category', async () => {
+    const user = userEvent.setup();
+    mockedGetItems.mockResolvedValue([ALPHA, BETA]);
+    mockedGetBrands.mockResolvedValue([]);
+
+    renderShop();
+
+    expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
+    expect(screen.getByText('Beta Tee')).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByLabelText(/Category/), 'bottoms');
+    expect(screen.queryByText('Alpha Jacket')).not.toBeInTheDocument();
+    expect(screen.getByText('Beta Tee')).toBeInTheDocument();
   });
 
   test('defaults to a random sort', async () => {

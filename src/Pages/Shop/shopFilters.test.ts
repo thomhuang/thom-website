@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import type { ShopItemSummary } from '../../api/Shop/ShopRouter';
 import {
   filterItems,
+  getCategories,
   getInitialLayout,
   layoutStorageKey,
   sortItems,
@@ -15,6 +16,7 @@ const makeItem = (
   title: 'Item',
   brandId: '1',
   brand: 'Brand',
+  category: '',
   priceCents: 1000,
   currency: 'usd',
   stock: 1,
@@ -86,17 +88,53 @@ describe('sortItems', () => {
 describe('filterItems', () => {
   test('filters by brand and stock', () => {
     expect(
-      filterItems([ALPHA, BETA], { selectedBrandId: '2', stockFilter: 'all' })
+      filterItems([ALPHA, BETA], {
+        selectedBrandId: '2',
+        selectedCategory: '',
+        stockFilter: 'all',
+      })
     ).toEqual([BETA]);
     expect(
-      filterItems([ALPHA, BETA], { selectedBrandId: '', stockFilter: 'in-stock' })
+      filterItems([ALPHA, BETA], {
+        selectedBrandId: '',
+        selectedCategory: '',
+        stockFilter: 'in-stock',
+      })
     ).toEqual([ALPHA]);
     expect(
       filterItems([ALPHA, BETA], {
         selectedBrandId: '',
+        selectedCategory: '',
         stockFilter: 'out-of-stock',
       })
     ).toEqual([BETA]);
+  });
+
+  test('filters by category', () => {
+    const top = makeItem({ id: '3', title: 'Top', category: 'tops' });
+    const bottom = makeItem({ id: '4', title: 'Bottom', category: 'bottoms' });
+
+    expect(
+      filterItems([ALPHA, top, bottom], {
+        selectedBrandId: '',
+        selectedCategory: 'tops',
+        stockFilter: 'all',
+      })
+    ).toEqual([top]);
+  });
+});
+
+describe('getCategories', () => {
+  test('returns the distinct non-empty categories sorted', () => {
+    const items = [
+      makeItem({ category: 'tops' }),
+      makeItem({ category: 'Bottoms' }),
+      makeItem({ category: 'tops' }),
+      makeItem({ category: '' }),
+      makeItem({ category: '  ' }),
+    ];
+
+    expect(getCategories(items)).toEqual(['Bottoms', 'tops']);
   });
 });
 
@@ -105,12 +143,12 @@ describe('getInitialLayout', () => {
     localStorage.clear();
   });
 
-  test('defaults to list', () => {
-    expect(getInitialLayout()).toBe('list');
+  test('defaults to grid', () => {
+    expect(getInitialLayout()).toBe('grid');
   });
 
-  test('reads a stored grid preference', () => {
-    localStorage.setItem(layoutStorageKey, 'grid');
-    expect(getInitialLayout()).toBe('grid');
+  test('reads a stored list preference', () => {
+    localStorage.setItem(layoutStorageKey, 'list');
+    expect(getInitialLayout()).toBe('list');
   });
 });

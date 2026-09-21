@@ -13,6 +13,7 @@ export interface ShopItemSummary {
   title: string;
   brandId: string;
   brand: string;
+  category: string;
   priceCents: number;
   currency: string;
   stock: number;
@@ -248,14 +249,18 @@ export async function DeleteShopImageAsync(
   });
 }
 
+export interface ShopCheckoutLineRequest {
+  itemId: string;
+  quantity: number;
+}
+
 export async function StartShopCheckoutAsync(
-  itemId: string,
-  quantity = 1
+  lines: ShopCheckoutLineRequest[]
 ): Promise<ShopCheckoutSession> {
   return apiRequest<ShopCheckoutSession>({
     method: 'POST',
     url: '/shop/checkout',
-    data: { itemId, quantity },
+    data: { items: lines },
     withCredentials: true,
   });
 }

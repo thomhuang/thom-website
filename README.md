@@ -75,8 +75,9 @@ are gitignored. Read the `.example` files for the shape of the config instead.
   `category` (free-form string) and `measurements: [{ label, valueInches }]`
   (inches, `0 < v ≤ 100`). Any label is allowed; absence is a missing row, not
   a `0`. On PATCH an omitted `measurements` preserves the stored set and an
-  empty array clears it. `GET /shop/items` summaries include neither. See the
-  `thom-server` docs for the full spec.
+  empty array clears it. `GET /shop/items` summaries include the category (for
+  the storefront filter) but not the measurements. See the `thom-server` docs
+  for the full spec.
 
   UI: the admin form (`ShopItemForm.tsx`) has a repeatable label/value editor
   with per-category quick-add chips from `measurements.ts`; the listing detail

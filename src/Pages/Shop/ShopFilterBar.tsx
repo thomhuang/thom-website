@@ -5,12 +5,15 @@ import styles from './Shop.module.css';
 type ShopFilterBarProps = {
   isOpen: boolean;
   brands: ShopBrand[];
+  categories: string[];
   selectedBrandId: string;
+  selectedCategory: string;
   stockFilter: StockFilter;
   sortOrder: SortOrder;
   layout: LayoutMode;
   onToggle: () => void;
   onBrandChange: (value: string) => void;
+  onCategoryChange: (value: string) => void;
   onStockFilterChange: (value: StockFilter) => void;
   onSortOrderChange: (value: SortOrder) => void;
   onLayoutChange: (value: LayoutMode) => void;
@@ -19,12 +22,15 @@ type ShopFilterBarProps = {
 export default function ShopFilterBar({
   isOpen,
   brands,
+  categories,
   selectedBrandId,
+  selectedCategory,
   stockFilter,
   sortOrder,
   layout,
   onToggle,
   onBrandChange,
+  onCategoryChange,
   onStockFilterChange,
   onSortOrderChange,
   onLayoutChange,
@@ -48,6 +54,24 @@ export default function ShopFilterBar({
           ' '
         )}
       >
+        {categories.length > 0 && (
+          <label className={styles.field} htmlFor="shop-category-filter">
+            Category
+            <select
+              id="shop-category-filter"
+              value={selectedCategory}
+              onChange={(event) => onCategoryChange(event.target.value)}
+            >
+              <option value="">All categories</option>
+              {categories.map((category) => (
+                <option value={category} key={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
         {brands.length > 0 && (
           <label className={styles.field} htmlFor="shop-brand-filter">
             Brand

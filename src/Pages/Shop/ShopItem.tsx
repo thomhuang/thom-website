@@ -10,6 +10,7 @@ import {
   StartShopCheckoutAsync,
 } from '../../api/Shop/ShopRouter';
 import { formatPrice, formatStock, getPrimaryImage } from './format';
+import { useCart } from './CartContext';
 import ShopImageManager from './ShopImageManager';
 import ShopItemGallery from './ShopItemGallery';
 import ShopItemMeasurementsTable from './ShopItemMeasurementsTable';
@@ -18,12 +19,14 @@ import styles from './Shop.module.css';
 export default function ShopItem() {
   const { itemId } = useParams<{ itemId?: string }>();
   const { isAdmin, isAuthLoading } = useAuth();
+  const { add: addToCart } = useCart();
   const [item, setItem] = useState<ShopItemResponse | null>(null);
   const [images, setImages] = useState<ShopImage[]>([]);
   const [selectedImageUrl, setSelectedImageUrl] = useState('');
   const [failedImageUrl, setFailedImageUrl] = useState('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
+  const [addedToCart, setAddedToCart] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [itemError, setItemError] = useState('');
 
@@ -110,7 +113,9 @@ export default function ShopItem() {
     setCheckoutError('');
 
     try {
-      const session = await StartShopCheckoutAsync(item.id);
+      const session = await StartShopCheckoutAsync([
+        { itemId: item.id, quantity: 1 },
+      ]);
       // Stripe's URL is server-controlled, but validate the origin anyway so a
       // tampered response cannot turn this into an open redirect.
       const checkout = new URL(session.url);
@@ -122,6 +127,19 @@ export default function ShopItem() {
       setCheckoutError('Checkout could not be started.');
       setIsCheckingOut(false);
     }
+  };
+
+  const addItemToCart = () => {
+    addToCart({
+      itemId: item.id,
+      title: item.title,
+      priceCents: item.priceCents,
+      currency: item.currency,
+      stock: item.stock,
+      primaryImageUrl: getPrimaryImage(images),
+      quantity: 1,
+    });
+    setAddedToCart(true);
   };
 
   return (
@@ -172,6 +190,14 @@ export default function ShopItem() {
               : isCheckingOut
               ? 'Redirecting...'
               : 'Buy now'}
+          </button>
+          <button
+            type="button"
+            className={styles.addButton}
+            onClick={addItemToCart}
+            disabled={isSoldOut}
+          >
+            {addedToCart ? 'Added to cart' : 'Add to cart'}
           </button>
           {checkoutError && (
             <p className={styles.errorNotice}>{checkoutError}</p>

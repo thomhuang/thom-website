@@ -5,6 +5,7 @@ export enum PAGES {
     Shop = '/shop',
     ShopItem = '/shop/item',
     ShopEntry = '/shop/entry',
+    ShopCart = '/shop/cart',
     ShopOrder = '/shop/order',
     OrderView = '/shop/order/view',
     ShopOrders = '/shop/orders',

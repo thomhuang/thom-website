@@ -12,7 +12,7 @@ export type StockFilter = 'all' | 'in-stock' | 'out-of-stock';
 export const layoutStorageKey = 'shop-layout';
 
 export const getInitialLayout = (): LayoutMode =>
-  localStorage.getItem(layoutStorageKey) === 'grid' ? 'grid' : 'list';
+  localStorage.getItem(layoutStorageKey) === 'list' ? 'list' : 'grid';
 
 // Deterministic PRNG so a given visit shuffles once and keeps that order while
 // the user filters or re-sorts, then reshuffles on the next mount/refresh.
@@ -62,15 +62,19 @@ export const sortItems = (
 
 type ItemFilterOptions = {
   selectedBrandId: string;
+  selectedCategory: string;
   stockFilter: StockFilter;
 };
 
 export const filterItems = (
   items: ShopItemSummary[],
-  { selectedBrandId, stockFilter }: ItemFilterOptions
+  { selectedBrandId, selectedCategory, stockFilter }: ItemFilterOptions
 ) =>
   items.filter((item) => {
     if (selectedBrandId && item.brandId !== selectedBrandId) {
+      return false;
+    }
+    if (selectedCategory && item.category !== selectedCategory) {
       return false;
     }
     if (stockFilter === 'in-stock' && item.stock < 1) {
@@ -82,3 +86,20 @@ export const filterItems = (
 
     return true;
   });
+
+// The distinct, non-empty categories present across the listings, sorted
+// case-insensitively for a stable dropdown. Category is free-form, so this is
+// derived from the loaded items rather than a fixed vocabulary.
+export const getCategories = (items: ShopItemSummary[]): string[] => {
+  const categories = new Set<string>();
+  for (const item of items) {
+    const category = item.category.trim();
+    if (category) {
+      categories.add(category);
+    }
+  }
+
+  return [...categories].sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: 'base' })
+  );
+};

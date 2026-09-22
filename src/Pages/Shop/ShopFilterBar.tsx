@@ -13,6 +13,7 @@ const SORT_OPTIONS: { value: SortOrder; label: string }[] = [
 ];
 
 type ShopFilterBarProps = {
+  isOpen: boolean;
   brands: ShopBrand[];
   categories: string[];
   selectedBrandId: string;
@@ -20,6 +21,7 @@ type ShopFilterBarProps = {
   stockFilter: StockFilter;
   sortOrder: SortOrder;
   layout: LayoutMode;
+  onToggle: () => void;
   onBrandChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
   onStockFilterChange: (value: StockFilter) => void;
@@ -28,6 +30,7 @@ type ShopFilterBarProps = {
 };
 
 export default function ShopFilterBar({
+  isOpen,
   brands,
   categories,
   selectedBrandId,
@@ -35,6 +38,7 @@ export default function ShopFilterBar({
   stockFilter,
   sortOrder,
   layout,
+  onToggle,
   onBrandChange,
   onCategoryChange,
   onStockFilterChange,
@@ -77,7 +81,24 @@ export default function ShopFilterBar({
     SORT_OPTIONS.find((option) => option.value === sortOrder)?.label ?? sortOrder;
 
   return (
-    <div className={styles.filterBar}>
+    <div className={styles.filterGroup}>
+      <button
+        type="button"
+        className={styles.filterToggle}
+        aria-expanded={isOpen}
+        aria-controls="shop-filters"
+        onClick={onToggle}
+      >
+        Filters
+        <span aria-hidden="true">{isOpen ? '−' : '+'}</span>
+      </button>
+
+      <div
+        id="shop-filters"
+        className={[styles.filterBar, isOpen ? styles.filterBarOpen : ''].join(
+          ' '
+        )}
+      >
       {categories.length > 0 && (
         <label className={styles.field} htmlFor="shop-category-filter">
           Category
@@ -219,6 +240,7 @@ export default function ShopFilterBar({
             </button>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

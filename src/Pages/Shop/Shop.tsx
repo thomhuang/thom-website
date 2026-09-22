@@ -54,6 +54,7 @@ export default function Shop() {
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isPublicationUpdating, setIsPublicationUpdating] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [gridColumns, setGridColumns] = useState(1);
   const gridRef = useRef<HTMLElement>(null);
@@ -267,6 +268,7 @@ export default function Shop() {
 
       {!isLoading && (brands.length > 0 || items.length > 0) && (
         <ShopFilterBar
+          isOpen={filtersOpen}
           brands={brands}
           categories={categories}
           selectedBrandId={selectedBrandId}
@@ -274,6 +276,7 @@ export default function Shop() {
           stockFilter={stockFilter}
           sortOrder={sortOrder}
           layout={layout}
+          onToggle={() => setFiltersOpen((open) => !open)}
           onBrandChange={setSelectedBrandId}
           onCategoryChange={setSelectedCategory}
           onStockFilterChange={setStockFilter}

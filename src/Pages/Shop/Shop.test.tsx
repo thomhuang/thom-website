@@ -134,6 +134,23 @@ describe('Shop', () => {
     expect(await screen.findByText('2 items')).toBeInTheDocument();
   });
 
+  test('toggles the filter panel on small screens', async () => {
+    mockedGetItems.mockResolvedValue([ALPHA]);
+
+    const user = userEvent.setup();
+    renderShop();
+
+    const toggle = await screen.findByRole('button', { name: 'Filters' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveAttribute('aria-controls', 'shop-filters');
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
   test('filters by availability and brand', async () => {
     const user = userEvent.setup();
     mockedGetItems.mockResolvedValue([ALPHA, BETA]);

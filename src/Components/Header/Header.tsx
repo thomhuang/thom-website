@@ -19,6 +19,9 @@ export default function Header() {
                 <Link to={PAGES.Home} className={styles.navLink}>
                     home
                 </Link>
+                <Link to={PAGES.Blog} className={styles.navLink}>
+                    blog
+                </Link>
                 <Link to={PAGES.Coffee} className={styles.navLink}>
                     coffee
                 </Link>

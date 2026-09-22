@@ -1,5 +1,8 @@
 export enum PAGES {
     Home = '/',
+    Blog = '/blog',
+    BlogPost = '/blog/post',
+    BlogEntry = '/blog/entry',
     Coffee = '/coffee',
     CoffeeEntry = '/coffee/entry',
     Shop = '/shop',

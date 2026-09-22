@@ -12,6 +12,8 @@ vi.mock('./api/client', () => ({
     switch (config.url) {
       case '/auth/me':
         return { authenticated: false, username: '' };
+      case '/blog':
+      case '/blog/categories':
       case '/coffee':
       case '/coffee/roasters':
       case '/coffee/grinders':
@@ -52,6 +54,14 @@ describe('route smoke tests', () => {
     expect(
       within(screen.getByRole('main')).getByRole('link', { name: 'shop' })
     ).toHaveAttribute('href', '/shop');
+  });
+
+  test('blog page renders its empty state', async () => {
+    renderAt('/blog');
+
+    expect(
+      await screen.findByText('No published posts yet.')
+    ).toBeInTheDocument();
   });
 
   test('coffee page renders its empty state', async () => {

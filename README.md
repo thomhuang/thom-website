@@ -69,6 +69,22 @@ embedded in the bundle and must never contain secrets.
 Local `.env*` and `.dev.vars*` files (except the committed `.example` files)
 are gitignored. Read the `.example` files for the shape of the config instead.
 
+## Implementation notes (blog)
+
+- **Posts are title + body + category.** `GET /blog` returns full posts
+  (drafts included for an admin session) and takes `?category=<id>`; the client
+  passes it via axios `params`. `GET /blog/categories` powers the public filter
+  select and the admin form's datalist. Categories are upserted by name on the
+  server (slug id, like the coffee roaster lookup), so the form is a plain text
+  input with suggestions rather than a separate category-management page.
+- **Bodies are simple markdown** rendered with `react-markdown` (raw HTML is
+  not rendered). Styling for rendered elements lives in `Blog.module.css`
+  under `.body`. Dates are UTC `YYYY-MM-DD HH:MM:SS`; `formatBlogDate`
+  normalizes before parsing so the browser reads them as UTC.
+- **Admin-only actions** (new/edit/delete) mirror the coffee journal: pages
+  gate on `useAuth().isAdmin`, writes send `withCredentials`, and the server
+  enforces auth regardless.
+
 ## Implementation notes (shop)
 
 - **Garment measurements are open-ended.** `GET /shop/items/{id}` returns

@@ -5,6 +5,9 @@ import styles from './App.module.css';
 import { AuthProvider } from './Auth/AuthContext';
 import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
+import Blog from './Pages/Blog/Blog';
+import BlogPost from './Pages/Blog/BlogPost';
+import BlogPostForm from './Pages/Blog/BlogPostForm';
 import Coffee from './Pages/Coffee/Coffee';
 import CoffeeEntry from './Pages/Coffee/CoffeeEntry';
 import ErrorPage from './Pages/ErrorPage/ErrorPage';
@@ -29,6 +32,13 @@ const App = () => {
             <main className={styles.main}>
               <Routes>
                 <Route path={PAGES.Home} Component={HomePage} />
+                <Route path={PAGES.Blog} Component={Blog} />
+                <Route path={`${PAGES.BlogPost}/:postId`} Component={BlogPost} />
+                <Route path={PAGES.BlogEntry} Component={BlogPostForm} />
+                <Route
+                  path={`${PAGES.BlogEntry}/:postId`}
+                  Component={BlogPostForm}
+                />
                 <Route path={PAGES.Coffee} Component={Coffee} />
                 <Route path={PAGES.CoffeeEntry} Component={CoffeeEntry} />
                 <Route

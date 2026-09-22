@@ -1,0 +1,301 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.page h1,
+.page h2,
+.page h3 {
+  margin: 0;
+}
+
+.page h1 {
+  font-size: 1.5rem;
+}
+
+.page h2,
+.page h3 {
+  font-size: 1.25rem;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+}
+
+.deck {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+}
+
+.notice {
+  margin: 0;
+  color: var(--muted);
+}
+
+.errorNotice {
+  margin: 0;
+  color: #b42318;
+}
+
+.publicState {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.publicState p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.textLink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.statusText {
+  margin: 0;
+  color: var(--muted);
+}
+
+.adminActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.postList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.listHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.sectionHeading {
+  margin: 0;
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.filterField select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.categoryLink {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.categoryLink:hover {
+  color: var(--fg);
+}
+
+.posts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.postItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.postLink {
+  color: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.postMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.draftBadge {
+  padding: 0 0.4rem;
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.emptyState p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.postHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.postHeader .draftBadge {
+  align-self: flex-start;
+}
+
+.dangerButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #b42318;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.dangerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.body p {
+  margin: 0;
+}
+
+.body h1,
+.body h2,
+.body h3 {
+  margin-top: 1rem;
+  font-size: 1.25rem;
+}
+
+.body ul,
+.body ol {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.body blockquote {
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+  color: var(--muted);
+}
+
+.body code {
+  padding: 0.1rem 0.3rem;
+  background: var(--border);
+  font-size: 0.9em;
+}
+
+.body pre {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  background: var(--border);
+}
+
+.body pre code {
+  padding: 0;
+  background: none;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.bodyInput {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9rem;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.saveButton {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--fg);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

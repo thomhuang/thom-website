@@ -109,6 +109,31 @@ describe('Shop', () => {
     ).toBeInTheDocument();
   });
 
+  test('shows the total listing count', async () => {
+    mockedGetItems.mockResolvedValue([ALPHA, BETA]);
+
+    renderShop();
+
+    expect(await screen.findByText('2 items')).toBeInTheDocument();
+  });
+
+  test('uses the singular for one listing', async () => {
+    mockedGetItems.mockResolvedValue([ALPHA]);
+
+    renderShop();
+
+    expect(await screen.findByText('1 item')).toBeInTheDocument();
+  });
+
+  test('counts drafts for the admin', async () => {
+    authState.isAdmin = true;
+    mockedGetItems.mockResolvedValue([ALPHA, DRAFT]);
+
+    renderShop();
+
+    expect(await screen.findByText('2 items')).toBeInTheDocument();
+  });
+
   test('filters by availability and brand', async () => {
     const user = userEvent.setup();
     mockedGetItems.mockResolvedValue([ALPHA, BETA]);

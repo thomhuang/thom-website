@@ -286,6 +286,9 @@ export default function Shop() {
         <p className={styles.statusText}>Loading listings...</p>
       ) : visibleItems.length > 0 ? (
         <>
+          <p className={styles.statusText}>
+            {items.length} item{items.length === 1 ? '' : 's'}
+          </p>
           <section
             ref={gridRef}
             className={layout === 'grid' ? styles.grid : styles.list}

@@ -416,7 +416,7 @@ export default function BlogPostForm() {
               <p className={styles.hint}>
                 {isImageUploading
                   ? 'Uploading image...'
-                  : 'Markdown supported: headings, emphasis, links, lists, code. Paste an image to upload it; put images on one line to sit them side by side, with alt text as the caption.'}
+                  : 'Markdown supported: headings, emphasis, links, lists, code. Headings get anchor ids, so [text](#heading-name) jumps to one. Paste an image to upload it; put images on one line to sit them side by side, with alt text as the caption.'}
               </p>
             </div>
 

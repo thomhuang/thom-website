@@ -49,4 +49,28 @@ describe('MarkdownBody', () => {
     expect(screen.getAllByRole('figure')).toHaveLength(1);
     expect(screen.queryByRole('figure')).not.toHaveTextContent(/\S/);
   });
+
+  test('gives headings a slug id so jump links resolve', () => {
+    render(
+      <MarkdownBody markdown={'[Jump to gear](#jump-to-gear)\n\n## Jump To Gear'} />
+    );
+
+    expect(screen.getByRole('heading', { name: 'Jump To Gear' })).toHaveAttribute(
+      'id',
+      'jump-to-gear'
+    );
+    expect(screen.getByRole('link', { name: 'Jump to gear' })).toHaveAttribute(
+      'href',
+      '#jump-to-gear'
+    );
+  });
+
+  test('slugs heading text that contains inline markup', () => {
+    render(<MarkdownBody markdown="## The **Best** Gear?" />);
+
+    expect(screen.getByRole('heading', { level: 2 })).toHaveAttribute(
+      'id',
+      'the-best-gear'
+    );
+  });
 });

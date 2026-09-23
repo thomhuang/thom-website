@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import type { Components } from 'react-markdown';
 
 import { headingText, slugifyHeading } from './slug';
+import remarkImageWidth from './imageWidth';
 import styles from './Blog.module.css';
 
 type MarkdownImage = ReactElement<{ src?: string; alt?: string }>;
@@ -85,5 +86,9 @@ const components: Components = {
 };
 
 export default function MarkdownBody({ markdown }: { markdown: string }) {
-  return <ReactMarkdown components={components}>{markdown}</ReactMarkdown>;
+  return (
+    <ReactMarkdown components={components} remarkPlugins={[remarkImageWidth]}>
+      {markdown}
+    </ReactMarkdown>
+  );
 }

@@ -73,4 +73,35 @@ describe('MarkdownBody', () => {
       'the-best-gear'
     );
   });
+
+  test('sizes an image from a trailing {width} attribute', () => {
+    render(<MarkdownBody markdown="![Solo](https://img.test/a.webp){width=50%}" />);
+
+    expect(screen.getByRole('img', { name: 'Solo' })).toHaveStyle({
+      width: '50%',
+    });
+    expect(screen.queryByText('{width=50%}')).not.toBeInTheDocument();
+  });
+
+  test('sizes images on one line independently', () => {
+    render(
+      <MarkdownBody markdown="![One](https://img.test/a.webp){width=30%} ![Two](https://img.test/b.webp){width=70%}" />
+    );
+
+    expect(screen.getByRole('img', { name: 'One' })).toHaveStyle({
+      width: '30%',
+    });
+    expect(screen.getByRole('img', { name: 'Two' })).toHaveStyle({
+      width: '70%',
+    });
+  });
+
+  test('leaves an invalid width as plain text', () => {
+    render(<MarkdownBody markdown="![Solo](https://img.test/a.webp){width=wide}" />);
+
+    expect(screen.getByText('{width=wide}')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Solo' })).not.toHaveAttribute(
+      'style'
+    );
+  });
 });

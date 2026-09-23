@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
@@ -10,6 +9,7 @@ import {
 } from '../../api/Blog/BlogRouter';
 import type { BlogPost as BlogPostType } from '../../api/Blog/BlogRouter';
 import { formatBlogDate } from './format';
+import MarkdownBody from './MarkdownBody';
 import styles from './Blog.module.css';
 
 export default function BlogPost() {
@@ -126,7 +126,7 @@ export default function BlogPost() {
           )}
 
           <div className={styles.body}>
-            <ReactMarkdown>{post.body}</ReactMarkdown>
+            <MarkdownBody markdown={post.body} />
           </div>
         </>
       )}

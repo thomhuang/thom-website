@@ -6,7 +6,6 @@ import {
   useState,
 } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
@@ -25,6 +24,7 @@ import {
   MAX_SOURCE_IMAGE_BYTES,
   prepareImageForUpload,
 } from '../Shop/imageUpload';
+import MarkdownBody from './MarkdownBody';
 import styles from './Blog.module.css';
 
 type BlogPostDraft = {
@@ -404,7 +404,7 @@ export default function BlogPostForm() {
               ) : (
                 <div className={`${styles.previewBody} ${styles.body}`}>
                   {draft.body.trim() ? (
-                    <ReactMarkdown>{draft.body}</ReactMarkdown>
+                    <MarkdownBody markdown={draft.body} />
                   ) : (
                     <p className={styles.hint}>Nothing to preview yet.</p>
                   )}
@@ -416,7 +416,7 @@ export default function BlogPostForm() {
               <p className={styles.hint}>
                 {isImageUploading
                   ? 'Uploading image...'
-                  : 'Markdown supported: headings, emphasis, links, lists, code. Paste an image to upload it.'}
+                  : 'Markdown supported: headings, emphasis, links, lists, code. Paste an image to upload it; put images on one line to sit them side by side, with alt text as the caption.'}
               </p>
             </div>
 

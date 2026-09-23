@@ -78,9 +78,16 @@ are gitignored. Read the `.example` files for the shape of the config instead.
   server (slug id, like the coffee roaster lookup), so the form is a plain text
   input with suggestions rather than a separate category-management page.
 - **Bodies are simple markdown** rendered with `react-markdown` (raw HTML is
-  not rendered). Styling for rendered elements lives in `Blog.module.css`
-  under `.body`. Dates are UTC `YYYY-MM-DD HH:MM:SS`; `formatBlogDate`
-  normalizes before parsing so the browser reads them as UTC.
+  not rendered) through the shared `MarkdownBody` component, used by the post
+  page and the form's Preview tab. Styling for rendered elements lives in
+  `Blog.module.css` under `.body`. Dates are UTC `YYYY-MM-DD HH:MM:SS`;
+  `formatBlogDate` normalizes before parsing so the browser reads them as UTC.
+- **Image rows and captions.** A paragraph containing nothing but images is
+  rendered as a `<figure>` row: images on one line (or on consecutive lines
+  within the same paragraph) sit side by side and each image's alt text becomes
+  its `<figcaption>`. A lone image becomes one full-width figure; `![](...)`
+  with no alt shows no caption. Prose that contains an image keeps it inline.
+  The row is a wrapping flex layout, so items stack on narrow screens.
 - **Admin-only actions** (new/edit/delete) mirror the coffee journal: pages
   gate on `useAuth().isAdmin`, writes send `withCredentials`, and the server
   enforces auth regardless.

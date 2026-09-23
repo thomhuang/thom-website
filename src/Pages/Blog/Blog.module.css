@@ -267,6 +267,32 @@
   font-size: 0.9rem;
 }
 
+.bodyTabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bodyTab {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.bodyTab[aria-pressed='true'] {
+  border-color: var(--fg);
+  font-weight: 600;
+}
+
+.previewBody {
+  min-height: 20rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+}
+
 .hint {
   margin: 0;
   color: var(--muted);

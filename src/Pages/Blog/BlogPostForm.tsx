@@ -1,15 +1,30 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react';
+import {
+  ChangeEvent,
+  ClipboardEvent,
+  FormEvent,
+  useEffect,
+  useState,
+} from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import {
+  CreateBlogImageUploadAsync,
   CreateBlogPostAsync,
   GetBlogCategoriesAsync,
   GetBlogPostByIdAsync,
   UpdateBlogPostAsync,
+  UploadBlogImageAsync,
 } from '../../api/Blog/BlogRouter';
 import type { BlogCategory } from '../../api/Blog/BlogRouter';
+import {
+  ALLOWED_IMAGE_TYPES,
+  MAX_IMAGE_BYTES,
+  MAX_SOURCE_IMAGE_BYTES,
+  prepareImageForUpload,
+} from '../Shop/imageUpload';
 import styles from './Blog.module.css';
 
 type BlogPostDraft = {
@@ -19,12 +34,31 @@ type BlogPostDraft = {
   published: boolean;
 };
 
+type BodyView = 'write' | 'preview';
+
 const createEmptyDraft = (): BlogPostDraft => ({
   title: '',
   body: '',
   category: '',
   published: false,
 });
+
+// Returns the first image file in a paste, if any. A paste can carry both text
+// and an image, but a pasted screenshot should win over any copied markup.
+function getPastedImage(data: DataTransfer | null): File | null {
+  if (!data) {
+    return null;
+  }
+
+  for (let index = 0; index < data.items.length; index += 1) {
+    const item = data.items[index];
+    if (item.kind === 'file' && item.type.startsWith('image/')) {
+      return item.getAsFile();
+    }
+  }
+
+  return null;
+}
 
 export default function BlogPostForm() {
   const { postId } = useParams<{ postId?: string }>();
@@ -38,6 +72,9 @@ export default function BlogPostForm() {
   const [isPostLoading, setIsPostLoading] = useState(isEditing);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [postLoadFailed, setPostLoadFailed] = useState(false);
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState('');
+  const [bodyView, setBodyView] = useState<BodyView>('write');
 
   useEffect(() => {
     if (!isAdmin || isAuthLoading) {
@@ -145,6 +182,77 @@ export default function BlogPostForm() {
             : value,
       }));
     };
+
+  const insertImageMarkdown = (
+    textarea: HTMLTextAreaElement,
+    markdown: string,
+    start: number,
+    end: number
+  ) => {
+    setDraft((currentDraft) => ({
+      ...currentDraft,
+      body: currentDraft.body.slice(0, start) + markdown + currentDraft.body.slice(end),
+    }));
+
+    const caret = start + markdown.length;
+    if (typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(() => {
+        textarea.setSelectionRange(caret, caret);
+      });
+    }
+  };
+
+  const handleBodyPaste = async (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    const file = getPastedImage(event.clipboardData);
+    if (!file) {
+      return;
+    }
+
+    event.preventDefault();
+
+    // The synthetic event is reused after the handler returns, so capture the
+    // node and selection now, before any await.
+    const textarea = event.currentTarget;
+    const start = textarea.selectionStart ?? draft.body.length;
+    const end = textarea.selectionEnd ?? draft.body.length;
+
+    setImageUploadError('');
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setImageUploadError('Use a JPEG, PNG, WebP, AVIF, or GIF image.');
+      return;
+    }
+    if (file.size > MAX_SOURCE_IMAGE_BYTES) {
+      setImageUploadError('That image is too large to process (over 50 MB).');
+      return;
+    }
+
+    setIsImageUploading(true);
+
+    try {
+      // Re-encoding may change the content type, so prepare the bytes before
+      // asking the server to sign for them.
+      const prepared = await prepareImageForUpload(file);
+
+      if (prepared.blob.size > MAX_IMAGE_BYTES) {
+        setImageUploadError('Images must be 10 MB or smaller.');
+        return;
+      }
+
+      const ticket = await CreateBlogImageUploadAsync(prepared.contentType);
+      await UploadBlogImageAsync(
+        ticket.uploadUrl,
+        prepared.blob,
+        ticket.contentType
+      );
+
+      insertImageMarkdown(textarea, `![](${ticket.url})`, start, end);
+    } catch {
+      setImageUploadError('Image could not be pasted.');
+    } finally {
+      setIsImageUploading(false);
+    }
+  };
 
   const savePost = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -266,15 +374,49 @@ export default function BlogPostForm() {
 
             <div className={styles.field}>
               <label htmlFor="post-body">Body</label>
-              <textarea
-                id="post-body"
-                className={styles.bodyInput}
-                rows={16}
-                value={draft.body}
-                onChange={updateDraft('body')}
-              />
+              <div className={styles.bodyTabs} role="group" aria-label="Body editor">
+                <button
+                  type="button"
+                  className={styles.bodyTab}
+                  aria-pressed={bodyView === 'write'}
+                  onClick={() => setBodyView('write')}
+                >
+                  Write
+                </button>
+                <button
+                  type="button"
+                  className={styles.bodyTab}
+                  aria-pressed={bodyView === 'preview'}
+                  onClick={() => setBodyView('preview')}
+                >
+                  Preview
+                </button>
+              </div>
+              {bodyView === 'write' ? (
+                <textarea
+                  id="post-body"
+                  className={styles.bodyInput}
+                  rows={16}
+                  value={draft.body}
+                  onChange={updateDraft('body')}
+                  onPaste={handleBodyPaste}
+                />
+              ) : (
+                <div className={`${styles.previewBody} ${styles.body}`}>
+                  {draft.body.trim() ? (
+                    <ReactMarkdown>{draft.body}</ReactMarkdown>
+                  ) : (
+                    <p className={styles.hint}>Nothing to preview yet.</p>
+                  )}
+                </div>
+              )}
+              {imageUploadError && (
+                <aside className={styles.errorNotice}>{imageUploadError}</aside>
+              )}
               <p className={styles.hint}>
-                Markdown supported: headings, emphasis, links, lists, code.
+                {isImageUploading
+                  ? 'Uploading image...'
+                  : 'Markdown supported: headings, emphasis, links, lists, code. Paste an image to upload it.'}
               </p>
             </div>
 

@@ -84,6 +84,13 @@ are gitignored. Read the `.example` files for the shape of the config instead.
 - **Admin-only actions** (new/edit/delete) mirror the coffee journal: pages
   gate on `useAuth().isAdmin`, writes send `withCredentials`, and the server
   enforces auth regardless.
+- **Pasted images upload straight to R2.** Pasting an image into the body
+  textarea prepares it (downscale/re-encode via the shared shop
+  `imageUpload.ts`), asks the server to presign an upload, PUTs it to R2, and
+  inserts `![](url)` markdown at the cursor. The server records each presign in
+  a `BlogUploads` table, commits the keys a saved post's body references, and a
+  sweeper deletes uploads left uncommitted for 24 hours — so an abandoned draft
+  does not leak objects.
 
 ## Implementation notes (shop)
 

@@ -1,13 +1,15 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
+  CreateBlogImageUploadAsync,
   CreateBlogPostAsync,
   GetBlogCategoriesAsync,
   GetBlogPostByIdAsync,
   UpdateBlogPostAsync,
+  UploadBlogImageAsync,
 } from '../../api/Blog/BlogRouter';
 import type { BlogPost } from '../../api/Blog/BlogRouter';
 import BlogPostForm from './BlogPostForm';
@@ -17,6 +19,8 @@ vi.mock('../../api/Blog/BlogRouter', () => ({
   GetBlogCategoriesAsync: vi.fn(),
   CreateBlogPostAsync: vi.fn(),
   UpdateBlogPostAsync: vi.fn(),
+  CreateBlogImageUploadAsync: vi.fn(),
+  UploadBlogImageAsync: vi.fn(),
 }));
 
 const authState = vi.hoisted(() => ({ isAdmin: false }));
@@ -29,6 +33,8 @@ const mockedGetPost = vi.mocked(GetBlogPostByIdAsync);
 const mockedGetCategories = vi.mocked(GetBlogCategoriesAsync);
 const mockedCreatePost = vi.mocked(CreateBlogPostAsync);
 const mockedUpdatePost = vi.mocked(UpdateBlogPostAsync);
+const mockedCreateImageUpload = vi.mocked(CreateBlogImageUploadAsync);
+const mockedUploadImage = vi.mocked(UploadBlogImageAsync);
 
 const renderFormAt = (path: string) =>
   render(
@@ -47,6 +53,8 @@ beforeEach(() => {
   mockedGetCategories.mockReset();
   mockedCreatePost.mockReset();
   mockedUpdatePost.mockReset();
+  mockedCreateImageUpload.mockReset();
+  mockedUploadImage.mockReset();
   mockedGetCategories.mockResolvedValue([]);
 });
 
@@ -161,5 +169,60 @@ describe('BlogPostForm', () => {
       await screen.findByText('A category is required.')
     ).toBeInTheDocument();
     expect(mockedCreatePost).not.toHaveBeenCalled();
+  });
+
+  test('pastes an image by uploading it and inserting markdown', async () => {
+    authState.isAdmin = true;
+    mockedCreateImageUpload.mockResolvedValue({
+      objectKey: 'blog/abc123.webp',
+      uploadUrl: 'https://r2.example.com/signed',
+      contentType: 'image/png',
+      expiresAt: '2026-09-22T00:00:00Z',
+      url: 'https://img.thomhuang.com/blog/abc123.webp',
+    });
+    mockedUploadImage.mockResolvedValue(undefined);
+
+    renderFormAt('/blog/entry');
+
+    const body = await screen.findByLabelText('Body');
+    const file = new File(['fake-image-bytes'], 'photo.png', {
+      type: 'image/png',
+    });
+    fireEvent.paste(body, {
+      clipboardData: {
+        items: [
+          { kind: 'file', type: 'image/png', getAsFile: () => file },
+        ],
+      },
+    });
+
+    await waitFor(() =>
+      expect(body).toHaveValue(
+        '![](https://img.thomhuang.com/blog/abc123.webp)'
+      )
+    );
+    expect(mockedCreateImageUpload).toHaveBeenCalledWith('image/png');
+    expect(mockedUploadImage).toHaveBeenCalledWith(
+      'https://r2.example.com/signed',
+      file,
+      'image/png'
+    );
+  });
+
+  test('previews the body as markdown', async () => {
+    authState.isAdmin = true;
+
+    const user = userEvent.setup();
+    renderFormAt('/blog/entry');
+
+    const body = await screen.findByLabelText('Body');
+    await user.type(body, '# A heading');
+
+    await user.click(screen.getByRole('button', { name: 'Preview' }));
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'A heading' })
+    ).toBeInTheDocument();
+    expect(screen.queryByLabelText('Body')).not.toBeInTheDocument();
   });
 });

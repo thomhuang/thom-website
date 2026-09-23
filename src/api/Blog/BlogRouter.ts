@@ -89,3 +89,41 @@ export async function DeleteBlogPostAsync(id: string): Promise<void> {
     withCredentials: true,
   });
 }
+
+export interface BlogImageUploadTicket {
+  objectKey: string;
+  uploadUrl: string;
+  contentType: string;
+  expiresAt: string;
+  url: string;
+}
+
+export async function CreateBlogImageUploadAsync(
+  contentType: string
+): Promise<BlogImageUploadTicket> {
+  return apiRequest<BlogImageUploadTicket>({
+    method: 'POST',
+    url: '/blog/images/presign',
+    data: { contentType },
+    withCredentials: true,
+  });
+}
+
+// The upload goes straight to R2 with a signed URL, so it must bypass axios:
+// no API base URL, no auth cookie, and the exact Content-Type that was signed.
+export async function UploadBlogImageAsync(
+  uploadUrl: string,
+  blob: Blob,
+  contentType: string
+): Promise<void> {
+  const response = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': contentType },
+    body: blob,
+    referrerPolicy: 'no-referrer',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Upload failed with status ${response.status}`);
+  }
+}

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { GetShopOrderByTokenAsync, ShopOrder } from '../../api/Shop/ShopRouter';
+import { useDocumentTitle } from '../../hooks';
 import { formatDateTime, formatPrice } from './format';
 import { formatOrderStatus, getOrderStatusClass } from './orderStatus';
 import ShippingAddress from './ShippingAddress';
@@ -17,6 +18,8 @@ export default function OrderView() {
   const [order, setOrder] = useState<ShopOrder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [orderError, setOrderError] = useState('');
+
+  useDocumentTitle(order ? `Order #${order.id}` : 'Order');
 
   useEffect(() => {
     if (!token) {

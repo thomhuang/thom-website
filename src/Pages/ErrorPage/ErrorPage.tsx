@@ -1,6 +1,9 @@
+import { useDocumentTitle } from '../../hooks';
 import styles from './ErrorPage.module.css';
 
 export default function ErrorPage() {
+  useDocumentTitle('Page not found');
+
   return (
     <div className={styles.text}>
       <h1>Oops!</h1>

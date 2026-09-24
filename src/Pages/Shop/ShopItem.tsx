@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
+import { useDocumentTitle } from '../../hooks';
 import {
   GetShopItemByIdAsync,
   ShopImage,
@@ -30,6 +31,8 @@ export default function ShopItem() {
   const [addedToCart, setAddedToCart] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [itemError, setItemError] = useState('');
+
+  useDocumentTitle(item ? item.title : 'Shop');
 
   useEffect(() => {
     if (!itemId) {

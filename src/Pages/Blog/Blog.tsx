@@ -8,10 +8,13 @@ import {
   GetBlogPostsAsync,
 } from '../../api/Blog/BlogRouter';
 import type { BlogCategory, BlogPost } from '../../api/Blog/BlogRouter';
+import { useDocumentTitle } from '../../hooks';
 import { formatBlogDate } from './format';
 import styles from './Blog.module.css';
 
 export default function Blog() {
+  useDocumentTitle('Blog');
+
   const { isAdmin, isAuthLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategoryId = searchParams.get('category') ?? '';

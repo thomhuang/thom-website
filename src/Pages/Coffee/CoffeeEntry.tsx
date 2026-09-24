@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
+import { useDocumentTitle } from '../../hooks';
 import {
   CreateCoffeeEntryAsync,
   UpdateCoffeeEntryAsync,
@@ -41,6 +42,8 @@ export default function CoffeeEntry() {
     ?.prefill;
   const { isAdmin, isAuthLoading } = useAuth();
   const isEditing = Boolean(entryId);
+
+  useDocumentTitle(isEditing ? 'Edit brew entry' : 'New brew entry');
 
   const [draft, setDraft] = useState<BrewLogDraft>(createEmptyDraft);
   const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('C');

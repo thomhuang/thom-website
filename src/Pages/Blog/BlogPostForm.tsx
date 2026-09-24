@@ -18,6 +18,7 @@ import {
   UploadBlogImageAsync,
 } from '../../api/Blog/BlogRouter';
 import type { BlogCategory } from '../../api/Blog/BlogRouter';
+import { useDocumentTitle } from '../../hooks';
 import {
   ALLOWED_IMAGE_TYPES,
   MAX_IMAGE_BYTES,
@@ -65,6 +66,8 @@ export default function BlogPostForm() {
   const navigate = useNavigate();
   const { isAdmin, isAuthLoading } = useAuth();
   const isEditing = Boolean(postId);
+
+  useDocumentTitle(isEditing ? 'Edit post' : 'New post');
 
   const [draft, setDraft] = useState<BlogPostDraft>(createEmptyDraft);
   const [categories, setCategories] = useState<BlogCategory[]>([]);

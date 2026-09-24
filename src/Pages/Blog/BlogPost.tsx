@@ -8,6 +8,7 @@ import {
   GetBlogPostByIdAsync,
 } from '../../api/Blog/BlogRouter';
 import type { BlogPost as BlogPostType } from '../../api/Blog/BlogRouter';
+import { useDocumentTitle } from '../../hooks';
 import { formatBlogDate } from './format';
 import MarkdownBody from './MarkdownBody';
 import styles from './Blog.module.css';
@@ -20,6 +21,8 @@ export default function BlogPost() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useDocumentTitle(post ? post.title : isLoading ? 'Blog' : 'Post not found');
 
   useEffect(() => {
     if (!postId) {

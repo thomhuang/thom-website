@@ -1,6 +1,9 @@
+import { useDocumentTitle } from '../../hooks';
 import styles from './Policies.module.css';
 
 export default function Policies() {
+  useDocumentTitle('Policies');
+
   return (
     <main className={styles.policies}>
       <h1 className={styles.title}>Policies</h1>

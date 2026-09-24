@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
+import { useDocumentTitle } from '../../hooks';
 import {
   GetShopOrdersAsync,
   ReleaseShopOrderHoldAsync,
@@ -14,6 +15,8 @@ import styles from './Shop.module.css';
 const ORDERS_PAGE_SIZE = 20;
 
 export default function ShopOrders() {
+  useDocumentTitle('Orders');
+
   const { isAdmin, isAuthLoading } = useAuth();
   const [orders, setOrders] = useState<ShopOrder[]>([]);
   const [nextCursor, setNextCursor] = useState('');

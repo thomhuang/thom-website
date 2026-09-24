@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { StartShopCheckoutAsync } from '../../api/Shop/ShopRouter';
+import { useDocumentTitle } from '../../hooks';
 import { useCart } from './CartContext';
 import { checkoutErrorMessage } from './checkoutError';
 import { formatPrice } from './format';
 import styles from './Shop.module.css';
 
 export default function Cart() {
+  useDocumentTitle('Cart');
+
   const { lines, count, subtotalCents, remove, clear } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');

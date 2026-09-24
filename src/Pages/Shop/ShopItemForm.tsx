@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
+import { useDocumentTitle } from '../../hooks';
 import {
   CreateShopItemAsync,
   GetShopBrandsAsync,
@@ -32,6 +33,8 @@ export default function ShopItemForm() {
   const navigate = useNavigate();
   const { isAdmin, isAuthLoading } = useAuth();
   const isEditing = Boolean(itemId);
+
+  useDocumentTitle(isEditing ? 'Edit listing' : 'New listing');
 
   const [draft, setDraft] = useState<ShopItemDraft>(createEmptyDraft);
   const [savedDraftJson, setSavedDraftJson] = useState<string | null>(null);

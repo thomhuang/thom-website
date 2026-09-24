@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
+import { useDocumentTitle } from '../../hooks';
 import {
   DeleteCoffeeEntryAsync,
   GetCoffeeEntriesAsync,
@@ -26,6 +27,8 @@ import type { TemperatureUnit } from './format';
 import styles from './Coffee.module.css';
 
 export default function Coffee() {
+  useDocumentTitle('Coffee journal');
+
   const { isAdmin, isAuthLoading } = useAuth();
   const [brewLogs, setBrewLogs] = useState<CoffeeEntrySummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);

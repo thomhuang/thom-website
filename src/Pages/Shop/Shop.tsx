@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
+import { useDocumentTitle } from '../../hooks';
 import {
   DeleteShopItemAsync,
   GetShopBrandsAsync,
@@ -40,6 +41,8 @@ const countGridColumns = (grid: HTMLElement): number => {
 };
 
 export default function Shop() {
+  useDocumentTitle('Shop');
+
   const { isAdmin, isAuthLoading } = useAuth();
   const [items, setItems] = useState<ShopItemSummary[]>([]);
   const [brands, setBrands] = useState<ShopBrand[]>([]);

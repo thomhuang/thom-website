@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { GetShopOrderAsync, PublicShopOrder } from '../../api/Shop/ShopRouter';
+import { useDocumentTitle } from '../../hooks';
 import { formatPrice } from './format';
 import { getOrderStatusCopy } from './orderStatus';
 import styles from './Shop.module.css';
@@ -19,6 +20,8 @@ export default function OrderConfirmation() {
   const [order, setOrder] = useState<PublicShopOrder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [orderError, setOrderError] = useState('');
+
+  useDocumentTitle('Order confirmation');
 
   useEffect(() => {
     if (!sessionId) {

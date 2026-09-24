@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 import AsciiFigure from "../../Components/AsciiFigure/AsciiFigure";
 import { PAGES } from "../../Assets/constants";
+import { useDocumentTitle } from "../../hooks";
 import styles from "./HomePage.module.css";
 
 // Public assets are served from the root, so we only need the glob's keys to
@@ -10,6 +11,8 @@ import styles from "./HomePage.module.css";
 const documents = import.meta.glob("/public/documents/*");
 
 export default function HomePage() {
+  useDocumentTitle("Thomas Huang");
+
   const files = Object.keys(documents).sort();
   const resumeHref = (files[files.length - 1] ?? "").replace("/public/", "/");
 

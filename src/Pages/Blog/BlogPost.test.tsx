@@ -73,6 +73,15 @@ describe('BlogPost', () => {
     );
   });
 
+  test('sets the document title to the post title', async () => {
+    mockedGetPost.mockResolvedValue(post);
+
+    renderPostAt('1');
+
+    await screen.findByRole('heading', { name: 'Hello world' });
+    await waitFor(() => expect(document.title).toBe('Hello world'));
+  });
+
   test('shows admin actions to admins', async () => {
     authState.isAdmin = true;
     mockedGetPost.mockResolvedValue(post);

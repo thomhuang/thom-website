@@ -15,6 +15,17 @@ Remaining work. Tick items off as they land; add new ones as they come up.
 
 - [x] Remove unused exports `categoryLabel` and `CATEGORY_LABELS` in `src/Pages/Shop/measurements.ts`
 
+## Code cleanup (useEffect audit)
+
+- [x] Stage 1: remove the derived-state effects in `Shop.tsx` — reset the page in
+      the filter/sort change handlers and clamp it during render (2026-09-23)
+- [ ] Stage 2: extract a shared `useAsync` hook and migrate the read-only fetch
+      effects (Blog, BlogPost, Shop, ShopItem, ShopOrders, OrderView,
+      OrderConfirmation, Coffee, CoffeeEntryDetail)
+- [ ] Stage 3: migrate the remaining fetch effects that fit (forms' admin loads,
+      `useCoffeeLookup`, `useCoffeeEntryLoader`)
+- [ ] Stage 4 (optional): React Router 7 loaders pilot on one read-only route
+
 ## Shop admin (server parity)
 
 - [x] Handle the new `expired` order status from stock reservation:

@@ -241,6 +241,37 @@ describe('Shop', () => {
     );
   });
 
+  test('returns to the first page when the sort changes', async () => {
+    const user = userEvent.setup();
+    localStorage.setItem('shop-layout', 'list');
+    mockedGetItems.mockResolvedValue([
+      ALPHA,
+      BETA,
+      DRAFT,
+      { ...ALPHA, id: '4', title: 'Delta Scarf' },
+    ]);
+
+    renderShop();
+
+    expect(await screen.findByText('4 items')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByRole('button', { name: '2' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Random' }));
+    await user.click(
+      screen.getByRole('menuitemradio', { name: 'Price: low to high' })
+    );
+
+    expect(screen.getByRole('button', { name: '1' })).toHaveAttribute(
+      'aria-current',
+      'page'
+    );
+  });
+
   test('sizes grid pages from the measured column count', async () => {
     const user = userEvent.setup();
     const originalGetComputedStyle = window.getComputedStyle.bind(window);

@@ -186,15 +186,33 @@ export default function Shop() {
     currentPage * pageSize
   );
 
-  // A new result set starts back at the first page.
-  useEffect(() => {
+  // Changing the result set starts back at the first page.
+  const changeBrand = (brandId: string) => {
+    setSelectedBrandId(brandId);
     setPage(1);
-  }, [selectedBrandId, selectedCategory, stockFilter, sortOrder]);
+  };
+
+  const changeCategory = (category: string) => {
+    setSelectedCategory(category);
+    setPage(1);
+  };
+
+  const changeStockFilter = (filter: StockFilter) => {
+    setStockFilter(filter);
+    setPage(1);
+  };
+
+  const changeSortOrder = (order: SortOrder) => {
+    setSortOrder(order);
+    setPage(1);
+  };
 
   // Keep the page in range when the page size shrinks (layout switch or resize).
-  useEffect(() => {
-    setPage((current) => Math.min(current, totalPages));
-  }, [totalPages]);
+  // Adjusting during render is React's alternative to an effect here, and avoids
+  // committing a frame with an out-of-range page.
+  if (page > totalPages) {
+    setPage(totalPages);
+  }
 
   // Size a grid page from the columns the responsive grid currently fits.
   useLayoutEffect(() => {
@@ -280,10 +298,10 @@ export default function Shop() {
           sortOrder={sortOrder}
           layout={layout}
           onToggle={() => setFiltersOpen((open) => !open)}
-          onBrandChange={setSelectedBrandId}
-          onCategoryChange={setSelectedCategory}
-          onStockFilterChange={setStockFilter}
-          onSortOrderChange={setSortOrder}
+          onBrandChange={changeBrand}
+          onCategoryChange={changeCategory}
+          onStockFilterChange={changeStockFilter}
+          onSortOrderChange={changeSortOrder}
           onLayoutChange={setLayout}
         />
       )}

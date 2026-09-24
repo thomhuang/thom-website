@@ -164,12 +164,17 @@ describe('Shop', () => {
     expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
     expect(screen.getByText('Beta Tee')).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText(/Availability/), 'out-of-stock');
+    await user.click(screen.getByRole('button', { name: 'All items' }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'Sold out' }));
     expect(screen.queryByText('Alpha Jacket')).not.toBeInTheDocument();
     expect(screen.getByText('Beta Tee')).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText(/Availability/), 'all');
-    await user.selectOptions(screen.getByLabelText(/Brand/), '1');
+    await user.click(screen.getByRole('button', { name: 'Sold out' }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'All items' }));
+    await user.click(screen.getByRole('button', { name: 'All brands' }));
+    await user.click(
+      screen.getByRole('menuitemradio', { name: 'AlphaBrand' })
+    );
     expect(screen.getByText('Alpha Jacket')).toBeInTheDocument();
     expect(screen.queryByText('Beta Tee')).not.toBeInTheDocument();
   });
@@ -184,7 +189,8 @@ describe('Shop', () => {
     expect(await screen.findByText('Alpha Jacket')).toBeInTheDocument();
     expect(screen.getByText('Beta Tee')).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText(/Category/), 'bottoms');
+    await user.click(screen.getByRole('button', { name: 'All categories' }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'bottoms' }));
     expect(screen.queryByText('Alpha Jacket')).not.toBeInTheDocument();
     expect(screen.getByText('Beta Tee')).toBeInTheDocument();
   });

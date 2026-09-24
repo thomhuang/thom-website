@@ -137,10 +137,6 @@
   margin-bottom: 0;
 }
 
-.filterBar .field {
-  min-width: 12rem;
-}
-
 .layoutField {
   display: flex;
   flex-direction: column;
@@ -166,7 +162,7 @@
   border-color: var(--fg);
 }
 
-.sortField {
+.dropdownField {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -174,7 +170,7 @@
   min-width: 12rem;
 }
 
-.sortButton {
+.dropdownButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -189,15 +185,15 @@
   cursor: pointer;
 }
 
-.sortButton svg {
+.dropdownButton svg {
   flex-shrink: 0;
 }
 
-.sortChevron {
+.dropdownChevron {
   margin-left: auto;
 }
 
-.sortMenu {
+.dropdownMenu {
   position: absolute;
   top: 100%;
   left: 0;
@@ -210,7 +206,7 @@
   background: var(--bg);
 }
 
-.sortMenuItem {
+.dropdownMenuItem {
   display: block;
   width: 100%;
   padding: 0.5rem 0.65rem;
@@ -222,12 +218,12 @@
   cursor: pointer;
 }
 
-.sortMenuItem:hover,
-.sortMenuItem:focus-visible {
+.dropdownMenuItem:hover,
+.dropdownMenuItem:focus-visible {
   background: var(--border);
 }
 
-.sortMenuItem[aria-checked='true'] {
+.dropdownMenuItem[aria-checked='true'] {
   font-weight: 600;
 }
 
@@ -1067,11 +1063,7 @@
     border: 1px solid var(--border);
   }
 
-  .filterBar .field {
-    min-width: 0;
-  }
-
-  .sortField {
+  .dropdownField {
     min-width: 0;
   }
 

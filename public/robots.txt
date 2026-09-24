@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Admin-only pages and per-order views carry no value in the index.
+Disallow: /blog/entry
+Disallow: /coffee/entry
+Disallow: /shop/entry
+Disallow: /shop/order
+Disallow: /shop/orders

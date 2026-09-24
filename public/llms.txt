@@ -1,0 +1,16 @@
+# Thomas Huang
+
+> Personal site of Thomas Huang, a backend software engineer. It hosts a coffee brew journal, a small shop of secondhand goods, and occasional blog posts.
+
+## Pages
+
+- [Home](https://www.thomhuang.com/): Introduction, resume link, and contact details.
+- [Coffee journal](https://www.thomhuang.com/coffee): Brew logs grouped by roaster and coffee, with recipes and tasting notes. Each entry also has its own page at `/coffee/{id}`.
+- [Shop](https://www.thomhuang.com/shop): Listings for items for sale, with photos, measurements, and prices. Each listing also has its own page at `/shop/item/{id}`.
+- [Blog](https://www.thomhuang.com/blog): Posts by category. Each post also has its own page at `/blog/post/{id}`.
+- [Policies](https://www.thomhuang.com/policies): Returns, shipping, terms of service, and privacy.
+
+## Notes
+
+- The site is a client-rendered single-page app; the pages above load their content from `https://www.thomhuang.com/api/*`.
+- Pages under `/blog/entry`, `/coffee/entry`, `/shop/entry`, and `/shop/orders` are admin-only.

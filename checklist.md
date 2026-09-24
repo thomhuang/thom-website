@@ -8,6 +8,7 @@ Remaining work. Tick items off as they land; add new ones as they come up.
 - [x] Deploy test: `npx wrangler deploy -c wrangler.test.jsonc`
 - [x] Verify hard refreshes on deep routes (`/coffee`, `/shop`, `/shop/item/:id`, `/policies`) — SPA fallback
 - [ ] Verify listing images load from `img.thomhuang.com` and admin uploads work under the deployed CSP
+- [ ] Deploy page-specific titles, `robots.txt`/`llms.txt`, and the public `/coffee/:id` page; verify titles update on navigation and a brew card links to its page
 - [ ] Deploy the blog feature (`/blog`, `/blog/post/:id`, `/blog/entry`) and verify creating/editing/viewing against test, then prod
 
 ## Code cleanup (from the audit)

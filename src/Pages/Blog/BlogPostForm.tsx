@@ -19,6 +19,7 @@ import {
 } from '../../api/Blog/BlogRouter';
 import type { BlogCategory } from '../../api/Blog/BlogRouter';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import {
   ALLOWED_IMAGE_TYPES,
   MAX_IMAGE_BYTES,
@@ -70,7 +71,6 @@ export default function BlogPostForm() {
   useDocumentTitle(isEditing ? 'Edit post' : 'New post');
 
   const [draft, setDraft] = useState<BlogPostDraft>(createEmptyDraft);
-  const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [formError, setFormError] = useState('');
   const [isPostLoading, setIsPostLoading] = useState(isEditing);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,37 +79,14 @@ export default function BlogPostForm() {
   const [imageUploadError, setImageUploadError] = useState('');
   const [bodyView, setBodyView] = useState<BodyView>('write');
 
-  useEffect(() => {
-    if (!isAdmin || isAuthLoading) {
-      return;
+  const { data: categories } = useAsync<BlogCategory[]>(
+    (signal) => GetBlogCategoriesAsync(signal),
+    [isAdmin, isAuthLoading],
+    {
+      enabled: !isAuthLoading && isAdmin,
+      initialData: [],
     }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadCategories = async () => {
-      try {
-        const loadedCategories = await GetBlogCategoriesAsync(
-          controller.signal
-        );
-
-        if (isMounted) {
-          setCategories(loadedCategories);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setCategories([]);
-        }
-      }
-    };
-
-    loadCategories();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [isAdmin, isAuthLoading]);
+  );
 
   useEffect(() => {
     if (!isEditing || !postId) {

@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import {
   CreateShopItemAsync,
   GetShopBrandsAsync,
@@ -38,7 +39,6 @@ export default function ShopItemForm() {
 
   const [draft, setDraft] = useState<ShopItemDraft>(createEmptyDraft);
   const [savedDraftJson, setSavedDraftJson] = useState<string | null>(null);
-  const [brandOptions, setBrandOptions] = useState<ShopBrand[]>([]);
   const [formError, setFormError] = useState('');
   const [isItemLoading, setIsItemLoading] = useState(isEditing);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,33 +105,15 @@ export default function ShopItemForm() {
     };
   }, [isAdmin, isAuthLoading, isEditing, itemId]);
 
-  useEffect(() => {
-    if (isAuthLoading || !isAdmin) {
-      return;
+  // Brand suggestions are optional; the listing form still works without them.
+  const { data: brandOptions } = useAsync<ShopBrand[]>(
+    (signal) => GetShopBrandsAsync(signal),
+    [isAdmin, isAuthLoading],
+    {
+      enabled: !isAuthLoading && isAdmin,
+      initialData: [],
     }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadBrands = async () => {
-      try {
-        const brands = await GetShopBrandsAsync(controller.signal);
-
-        if (isMounted) {
-          setBrandOptions(brands);
-        }
-      } catch {
-        // Brand suggestions are optional; the listing form still works.
-      }
-    };
-
-    loadBrands();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [isAdmin, isAuthLoading]);
+  );
 
   const updateDraft: UpdateShopItemDraft = (field) => (event) => {
     setDraft((currentDraft) => ({

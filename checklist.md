@@ -22,8 +22,11 @@ Remaining work. Tick items off as they land; add new ones as they come up.
 - [x] Stage 2: extract a shared `useAsync` hook and migrate the read-only fetch
       effects (Blog, BlogPost, Shop, ShopItem, ShopOrders, OrderView,
       OrderConfirmation, Coffee, CoffeeEntryDetail) (2026-09-23)
-- [ ] Stage 3: migrate the remaining fetch effects that fit (forms' admin loads,
-      `useCoffeeLookup`, `useCoffeeEntryLoader`)
+- [x] Stage 3: migrate the plain suggestion loads in `BlogPostForm` (categories)
+      and `ShopItemForm` (brands) to `useAsync` (2026-09-23)
+- [ ] Stage 3 (deferred): `useCoffeeLookup` merges fetched options into local
+      state and the form item/post loads seed editable drafts, so `useAsync` does
+      not model them — left as effects (a keyed remount is the alternative)
 - [ ] Stage 4 (optional): React Router 7 loaders pilot on one read-only route
 
 ## Shop admin (server parity)

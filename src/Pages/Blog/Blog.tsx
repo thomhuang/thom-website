@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
@@ -9,6 +8,7 @@ import {
 } from '../../api/Blog/BlogRouter';
 import type { BlogCategory, BlogPost } from '../../api/Blog/BlogRouter';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import { formatBlogDate } from './format';
 import styles from './Blog.module.css';
 
@@ -18,75 +18,21 @@ export default function Blog() {
   const { isAdmin, isAuthLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategoryId = searchParams.get('category') ?? '';
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [blogError, setBlogError] = useState('');
 
-  useEffect(() => {
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadCategories = async () => {
-      try {
-        const loadedCategories = await GetBlogCategoriesAsync(
-          controller.signal
-        );
-
-        if (isMounted) {
-          setCategories(loadedCategories);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setCategories([]);
-        }
-      }
-    };
-
-    loadCategories();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadPosts = async () => {
-      setBlogError('');
-      setIsLoading(true);
-
-      try {
-        const loadedPosts = await GetBlogPostsAsync(
-          selectedCategoryId || undefined,
-          controller.signal
-        );
-
-        if (isMounted) {
-          setPosts(loadedPosts);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setBlogError('Blog posts could not be loaded.');
-          setPosts([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadPosts();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [selectedCategoryId]);
+  const { data: categories } = useAsync<BlogCategory[]>(
+    (signal) => GetBlogCategoriesAsync(signal),
+    [],
+    { initialData: [] }
+  );
+  const {
+    data: posts,
+    isLoading,
+    error: blogError,
+  } = useAsync<BlogPost[]>(
+    (signal) => GetBlogPostsAsync(selectedCategoryId || undefined, signal),
+    [selectedCategoryId],
+    { initialData: [], errorMessage: 'Blog posts could not be loaded.' }
+  );
 
   const changeCategory = (categoryId: string) => {
     if (categoryId) {

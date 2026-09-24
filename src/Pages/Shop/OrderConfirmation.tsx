@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { GetShopOrderAsync, PublicShopOrder } from '../../api/Shop/ShopRouter';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import { formatPrice } from './format';
 import { getOrderStatusCopy } from './orderStatus';
 import styles from './Shop.module.css';
@@ -17,54 +18,24 @@ const MAX_POLLS = 40;
 export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id') ?? '';
-  const [order, setOrder] = useState<PublicShopOrder | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [orderError, setOrderError] = useState('');
+
+  const {
+    data: order,
+    setData: setOrder,
+    isLoading,
+    error,
+  } = useAsync<PublicShopOrder | null>(
+    (signal) => GetShopOrderAsync(sessionId, signal),
+    [sessionId],
+    {
+      enabled: Boolean(sessionId),
+      initialData: null,
+      errorMessage: 'Order could not be found.',
+    }
+  );
+  const orderError = sessionId ? error : 'No order was specified.';
 
   useDocumentTitle('Order confirmation');
-
-  useEffect(() => {
-    if (!sessionId) {
-      setIsLoading(false);
-      setOrderError('No order was specified.');
-      return;
-    }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadOrder = async () => {
-      setIsLoading(true);
-      setOrderError('');
-
-      try {
-        const loadedOrder = await GetShopOrderAsync(
-          sessionId,
-          controller.signal
-        );
-
-        if (isMounted) {
-          setOrder(loadedOrder);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setOrder(null);
-          setOrderError('Order could not be found.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadOrder();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [sessionId]);
 
   // The webhook can land after the Stripe redirect, so a pending order is polled
   // until it settles. A failed poll keeps the last known order rather than
@@ -111,7 +82,7 @@ export default function OrderConfirmation() {
         window.clearTimeout(timer);
       }
     };
-  }, [order?.status, sessionId]);
+  }, [order?.status, sessionId, setOrder]);
 
   if (isLoading) {
     return (

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import {
   DeleteCoffeeEntryAsync,
   GetCoffeeEntriesAsync,
@@ -30,60 +31,45 @@ export default function Coffee() {
   useDocumentTitle('Coffee journal');
 
   const { isAdmin, isAuthLoading } = useAuth();
-  const [brewLogs, setBrewLogs] = useState<CoffeeEntrySummary[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [journalError, setJournalError] = useState('');
   const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
-  const [roasterOptions, setRoasterOptions] = useState<CoffeeRoaster[]>([]);
-  const [grinderOptions, setGrinderOptions] = useState<CoffeeGrinder[]>([]);
+  const [actionError, setActionError] = useState('');
   const [selectedRoasterId, setSelectedRoasterId] = useState('');
   const [selectedGrinderId, setSelectedGrinderId] = useState('');
   const [selectedBrewMethod, setSelectedBrewMethod] = useState('');
   const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('C');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    let isMounted = true;
+  const {
+    data,
+    setData,
+    isLoading,
+    error: loadError,
+  } = useAsync(
+    async (signal) => {
+      const [entries, roasters, grinders] = await Promise.all([
+        GetCoffeeEntriesAsync(signal),
+        GetCoffeeRoastersAsync(signal).catch(() => [] as CoffeeRoaster[]),
+        GetCoffeeGrindersAsync(signal).catch(() => [] as CoffeeGrinder[]),
+      ]);
 
-    const loadCoffeeEntries = async () => {
-      setJournalError('');
-
-      try {
-        const [entries, roasters, grinders] = await Promise.all([
-          GetCoffeeEntriesAsync(controller.signal),
-          GetCoffeeRoastersAsync(controller.signal).catch(
-            () => [] as CoffeeRoaster[]
-          ),
-          GetCoffeeGrindersAsync(controller.signal).catch(
-            () => [] as CoffeeGrinder[]
-          ),
-        ]);
-
-        if (isMounted) {
-          setBrewLogs(entries);
-          setRoasterOptions(roasters);
-          setGrinderOptions(grinders);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setJournalError('Coffee entries could not be loaded.');
-          setBrewLogs([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadCoffeeEntries();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, []);
+      return { entries, roasters, grinders };
+    },
+    [],
+    {
+      initialData: {
+        entries: [] as CoffeeEntrySummary[],
+        roasters: [] as CoffeeRoaster[],
+        grinders: [] as CoffeeGrinder[],
+      },
+      errorMessage: 'Coffee entries could not be loaded.',
+    }
+  );
+  const {
+    entries: brewLogs,
+    roasters: roasterOptions,
+    grinders: grinderOptions,
+  } = data;
+  const journalError = loadError || actionError;
 
   const deleteEntry = async (entry: CoffeeEntrySummary) => {
     const confirmed = window.confirm(
@@ -94,16 +80,19 @@ export default function Coffee() {
       return;
     }
 
-    setJournalError('');
+    setActionError('');
     setDeletingEntryId(entry.id);
 
     try {
       await DeleteCoffeeEntryAsync(entry.id);
-      setBrewLogs((currentEntries) =>
-        currentEntries.filter((currentEntry) => currentEntry.id !== entry.id)
-      );
+      setData((current) => ({
+        ...current,
+        entries: current.entries.filter(
+          (currentEntry) => currentEntry.id !== entry.id
+        ),
+      }));
     } catch {
-      setJournalError('Coffee entry could not be deleted.');
+      setActionError('Coffee entry could not be deleted.');
     } finally {
       setDeletingEntryId(null);
     }

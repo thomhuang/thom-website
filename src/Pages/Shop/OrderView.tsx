@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { GetShopOrderByTokenAsync, ShopOrder } from '../../api/Shop/ShopRouter';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import { formatDateTime, formatPrice } from './format';
 import { formatOrderStatus, getOrderStatusClass } from './orderStatus';
 import ShippingAddress from './ShippingAddress';
@@ -15,54 +15,23 @@ import styles from './Shop.module.css';
 export default function OrderView() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
-  const [order, setOrder] = useState<ShopOrder | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [orderError, setOrderError] = useState('');
+
+  const {
+    data: order,
+    isLoading,
+    error,
+  } = useAsync<ShopOrder | null>(
+    (signal) => GetShopOrderByTokenAsync(token, signal),
+    [token],
+    {
+      enabled: Boolean(token),
+      initialData: null,
+      errorMessage: 'This order link is invalid or has expired.',
+    }
+  );
+  const orderError = token ? error : 'No order was specified.';
 
   useDocumentTitle(order ? `Order #${order.id}` : 'Order');
-
-  useEffect(() => {
-    if (!token) {
-      setIsLoading(false);
-      setOrderError('No order was specified.');
-      return;
-    }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadOrder = async () => {
-      setIsLoading(true);
-      setOrderError('');
-
-      try {
-        const loadedOrder = await GetShopOrderByTokenAsync(
-          token,
-          controller.signal
-        );
-
-        if (isMounted) {
-          setOrder(loadedOrder);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setOrder(null);
-          setOrderError('This order link is invalid or has expired.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadOrder();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [token]);
 
   if (isLoading) {
     return (

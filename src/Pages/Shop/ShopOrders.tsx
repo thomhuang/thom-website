@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import {
   GetShopOrdersAsync,
   ReleaseShopOrderHoldAsync,
@@ -18,54 +19,32 @@ export default function ShopOrders() {
   useDocumentTitle('Orders');
 
   const { isAdmin, isAuthLoading } = useAuth();
-  const [orders, setOrders] = useState<ShopOrder[]>([]);
-  const [nextCursor, setNextCursor] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [ordersError, setOrdersError] = useState('');
+  const [actionError, setActionError] = useState('');
 
-  useEffect(() => {
-    if (isAuthLoading || !isAdmin) {
-      return;
+  const {
+    data,
+    setData,
+    isLoading,
+    error: loadError,
+  } = useAsync(
+    async (signal) => {
+      const page = await GetShopOrdersAsync({
+        signal,
+        limit: ORDERS_PAGE_SIZE,
+      });
+
+      return { orders: page.orders ?? [], nextCursor: page.nextCursor };
+    },
+    [isAdmin, isAuthLoading],
+    {
+      enabled: !isAuthLoading && isAdmin,
+      initialData: { orders: [] as ShopOrder[], nextCursor: '' },
+      errorMessage: 'Orders could not be loaded.',
     }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadOrders = async () => {
-      setIsLoading(true);
-      setOrdersError('');
-
-      try {
-        const page = await GetShopOrdersAsync({
-          signal: controller.signal,
-          limit: ORDERS_PAGE_SIZE,
-        });
-
-        if (isMounted) {
-          setOrders(page.orders ?? []);
-          setNextCursor(page.nextCursor);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setOrders([]);
-          setNextCursor('');
-          setOrdersError('Orders could not be loaded.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadOrders();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [isAdmin, isAuthLoading]);
+  );
+  const { orders, nextCursor } = data;
+  const ordersError = loadError || actionError;
 
   const loadMore = async () => {
     if (!nextCursor || isLoadingMore) {
@@ -73,7 +52,7 @@ export default function ShopOrders() {
     }
 
     setIsLoadingMore(true);
-    setOrdersError('');
+    setActionError('');
 
     try {
       const page = await GetShopOrdersAsync({
@@ -81,29 +60,32 @@ export default function ShopOrders() {
         limit: ORDERS_PAGE_SIZE,
       });
 
-      setOrders((current) => [...current, ...(page.orders ?? [])]);
-      setNextCursor(page.nextCursor);
+      setData((current) => ({
+        orders: [...current.orders, ...(page.orders ?? [])],
+        nextCursor: page.nextCursor,
+      }));
     } catch {
-      setOrdersError('More orders could not be loaded.');
+      setActionError('More orders could not be loaded.');
     } finally {
       setIsLoadingMore(false);
     }
   };
 
   const releaseHold = async (order: ShopOrder) => {
-    setOrdersError('');
+    setActionError('');
 
     try {
       await ReleaseShopOrderHoldAsync(order.stripeSessionId);
-      setOrders((current) =>
-        current.map((existing) =>
+      setData((current) => ({
+        ...current,
+        orders: current.orders.map((existing) =>
           existing.id === order.id
             ? { ...existing, status: 'expired' as const }
             : existing
-        )
-      );
+        ),
+      }));
     } catch {
-      setOrdersError('The hold could not be released.');
+      setActionError('The hold could not be released.');
     }
   };
 

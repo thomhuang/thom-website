@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import {
   DeleteShopItemAsync,
   GetShopBrandsAsync,
@@ -44,16 +45,13 @@ export default function Shop() {
   useDocumentTitle('Shop');
 
   const { isAdmin, isAuthLoading } = useAuth();
-  const [items, setItems] = useState<ShopItemSummary[]>([]);
-  const [brands, setBrands] = useState<ShopBrand[]>([]);
+  const [actionError, setActionError] = useState('');
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [stockFilter, setStockFilter] = useState<StockFilter>('all');
   const [sortOrder, setSortOrder] = useState<SortOrder>('random');
   const [randomSeed] = useState(() => Math.random());
   const [layout, setLayout] = useState<LayoutMode>(getInitialLayout);
-  const [isLoading, setIsLoading] = useState(true);
-  const [shopError, setShopError] = useState('');
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isPublicationUpdating, setIsPublicationUpdating] = useState(false);
@@ -62,44 +60,31 @@ export default function Shop() {
   const [gridColumns, setGridColumns] = useState(1);
   const gridRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    let isMounted = true;
+  const {
+    data,
+    setData,
+    isLoading,
+    error: loadError,
+  } = useAsync(
+    async (signal) => {
+      const [loadedItems, loadedBrands] = await Promise.all([
+        GetShopItemsAsync(signal),
+        GetShopBrandsAsync(signal).catch((): ShopBrand[] => []),
+      ]);
 
-    const loadItems = async () => {
-      setShopError('');
-
-      try {
-        const [loadedItems, loadedBrands] = await Promise.all([
-          GetShopItemsAsync(controller.signal),
-          GetShopBrandsAsync(controller.signal).catch(
-            (): ShopBrand[] => []
-          ),
-        ]);
-
-        if (isMounted) {
-          setItems(loadedItems);
-          setBrands(loadedBrands);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setShopError('Listings could not be loaded.');
-          setItems([]);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadItems();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, []);
+      return { items: loadedItems, brands: loadedBrands };
+    },
+    [],
+    {
+      initialData: {
+        items: [] as ShopItemSummary[],
+        brands: [] as ShopBrand[],
+      },
+      errorMessage: 'Listings could not be loaded.',
+    }
+  );
+  const { items, brands } = data;
+  const shopError = loadError || actionError;
 
   useEffect(() => {
     localStorage.setItem(layoutStorageKey, layout);
@@ -112,21 +97,24 @@ export default function Shop() {
       return;
     }
 
-    setShopError('');
+    setActionError('');
     setDeletingItemId(item.id);
 
     try {
       await DeleteShopItemAsync(item.id);
-      setItems((currentItems) =>
-        currentItems.filter((currentItem) => currentItem.id !== item.id)
-      );
+      setData((current) => ({
+        ...current,
+        items: current.items.filter(
+          (currentItem) => currentItem.id !== item.id
+        ),
+      }));
       setSelectedIds((currentIds) => {
         const nextIds = new Set(currentIds);
         nextIds.delete(item.id);
         return nextIds;
       });
     } catch {
-      setShopError('Listing could not be deleted.');
+      setActionError('Listing could not be deleted.');
     } finally {
       setDeletingItemId(null);
     }
@@ -149,19 +137,20 @@ export default function Shop() {
       return;
     }
 
-    setShopError('');
+    setActionError('');
     setIsPublicationUpdating(true);
 
     try {
       await UpdateShopItemsPublicationAsync([...selectedIds], isPublished);
-      setItems((currentItems) =>
-        currentItems.map((item) =>
+      setData((current) => ({
+        ...current,
+        items: current.items.map((item) =>
           selectedIds.has(item.id) ? { ...item, isPublished } : item
-        )
-      );
+        ),
+      }));
       setSelectedIds(new Set());
     } catch {
-      setShopError(
+      setActionError(
         isPublished
           ? 'Selected listings could not be published.'
           : 'Selected listings could not be unpublished.'

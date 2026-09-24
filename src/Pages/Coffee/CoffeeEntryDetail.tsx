@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { GetCoffeeEntryByIdAsync } from '../../api/Coffee/CoffeeRouter';
 import type { CoffeeEntry } from '../../api/Coffee/CoffeeRouter';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import CoffeeEntryDetails from './CoffeeEntryDetails';
 import { formatCoffeeMetadata, formatRatingStars } from './coffeeGroups';
 import type { TemperatureUnit } from './format';
@@ -14,54 +14,23 @@ const temperatureUnit: TemperatureUnit = 'C';
 
 export default function CoffeeEntryDetail() {
   const { entryId } = useParams<{ entryId?: string }>();
-  const [entry, setEntry] = useState<CoffeeEntry | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadFailed, setLoadFailed] = useState(false);
+
+  const {
+    data: entry,
+    isLoading,
+    error,
+  } = useAsync<CoffeeEntry | null>(
+    (signal) => GetCoffeeEntryByIdAsync(entryId ?? '', signal),
+    [entryId],
+    {
+      enabled: Boolean(entryId),
+      initialData: null,
+      errorMessage: 'Brew entry could not be loaded.',
+    }
+  );
+  const loadFailed = Boolean(error);
 
   useDocumentTitle(entry ? `${entry.coffeeName} #${entry.id}` : 'Coffee journal');
-
-  useEffect(() => {
-    if (!entryId) {
-      setIsLoading(false);
-      setLoadFailed(true);
-      return;
-    }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadEntry = async () => {
-      setIsLoading(true);
-      setLoadFailed(false);
-
-      try {
-        const loadedEntry = await GetCoffeeEntryByIdAsync(
-          entryId,
-          controller.signal
-        );
-
-        if (isMounted) {
-          setEntry(loadedEntry);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setEntry(null);
-          setLoadFailed(true);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadEntry();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [entryId]);
 
   if (isLoading) {
     return (

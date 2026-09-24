@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import {
   GetShopItemByIdAsync,
   ShopImage,
@@ -22,59 +23,28 @@ export default function ShopItem() {
   const { itemId } = useParams<{ itemId?: string }>();
   const { isAdmin, isAuthLoading } = useAuth();
   const { add: addToCart } = useCart();
-  const [item, setItem] = useState<ShopItemResponse | null>(null);
-  const [images, setImages] = useState<ShopImage[]>([]);
   const [selectedImageUrl, setSelectedImageUrl] = useState('');
   const [failedImageUrl, setFailedImageUrl] = useState('');
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState('');
   const [addedToCart, setAddedToCart] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [itemError, setItemError] = useState('');
+
+  const {
+    data: item,
+    setData: setItem,
+    isLoading,
+    error: itemError,
+  } = useAsync<ShopItemResponse | null>(
+    (signal) => GetShopItemByIdAsync(itemId ?? '', signal),
+    [itemId],
+    {
+      enabled: Boolean(itemId),
+      initialData: null,
+      errorMessage: 'Listing could not be found.',
+    }
+  );
 
   useDocumentTitle(item ? item.title : 'Shop');
-
-  useEffect(() => {
-    if (!itemId) {
-      setIsLoading(false);
-      setItemError('Listing could not be found.');
-      return;
-    }
-
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadItem = async () => {
-      setIsLoading(true);
-      setItemError('');
-
-      try {
-        const loadedItem = await GetShopItemByIdAsync(itemId, controller.signal);
-
-        if (isMounted) {
-          setItem(loadedItem);
-          setImages(loadedItem.images);
-          setSelectedImageUrl(getPrimaryImage(loadedItem.images));
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setItem(null);
-          setItemError('Listing could not be found.');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadItem();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [itemId]);
 
   if (isLoading) {
     return (
@@ -101,13 +71,15 @@ export default function ShopItem() {
 
   const isSoldOut = item.stock < 1;
   const measurements = item.measurements ?? [];
+  const images = item.images;
+  const activeImageUrl = selectedImageUrl || getPrimaryImage(images);
 
   const handleImagesChange = (nextImages: ShopImage[]) => {
-    setImages(nextImages);
+    setItem((current) =>
+      current ? { ...current, images: nextImages } : current
+    );
     setSelectedImageUrl((currentUrl) =>
-      nextImages.some((image) => image.url === currentUrl)
-        ? currentUrl
-        : getPrimaryImage(nextImages)
+      nextImages.some((image) => image.url === currentUrl) ? currentUrl : ''
     );
     setFailedImageUrl('');
   };
@@ -158,7 +130,7 @@ export default function ShopItem() {
         <ShopItemGallery
           images={images}
           title={item.title}
-          selectedImageUrl={selectedImageUrl}
+          selectedImageUrl={activeImageUrl}
           failedImageUrl={failedImageUrl}
           onSelectImage={setSelectedImageUrl}
           onImageError={setFailedImageUrl}

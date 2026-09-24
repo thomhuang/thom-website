@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
@@ -9,6 +9,7 @@ import {
 } from '../../api/Blog/BlogRouter';
 import type { BlogPost as BlogPostType } from '../../api/Blog/BlogRouter';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import { formatBlogDate } from './format';
 import MarkdownBody from './MarkdownBody';
 import styles from './Blog.module.css';
@@ -17,49 +18,24 @@ export default function BlogPost() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const { isAdmin, isAuthLoading } = useAuth();
-  const [post, setPost] = useState<BlogPostType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadFailed, setLoadFailed] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useDocumentTitle(post ? post.title : isLoading ? 'Blog' : 'Post not found');
-
-  useEffect(() => {
-    if (!postId) {
-      return;
+  const {
+    data: post,
+    isLoading,
+    error,
+  } = useAsync<BlogPostType | null>(
+    (signal) => GetBlogPostByIdAsync(postId ?? '', signal),
+    [postId],
+    {
+      enabled: Boolean(postId),
+      initialData: null,
+      errorMessage: 'Post could not be loaded.',
     }
+  );
+  const loadFailed = Boolean(error);
 
-    const controller = new AbortController();
-    let isMounted = true;
-
-    const loadPost = async () => {
-      try {
-        const loadedPost = await GetBlogPostByIdAsync(
-          postId,
-          controller.signal
-        );
-
-        if (isMounted) {
-          setPost(loadedPost);
-        }
-      } catch {
-        if (!controller.signal.aborted && isMounted) {
-          setLoadFailed(true);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadPost();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [postId]);
+  useDocumentTitle(post ? post.title : isLoading ? 'Blog' : 'Post not found');
 
   const deletePost = async () => {
     if (!post || !window.confirm(`Delete "${post.title}"?`)) {

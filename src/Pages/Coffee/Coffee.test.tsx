@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -182,5 +182,29 @@ describe('Coffee journal', () => {
     expect(
       screen.queryByRole('link', { name: 'New brew for Ethiopia Guji' })
     ).not.toBeInTheDocument();
+  });
+
+  test('titles the page as the coffee journal', async () => {
+    mockedGetEntries.mockResolvedValue([]);
+
+    renderCoffee();
+
+    await waitFor(() => expect(document.title).toBe('Coffee journal'));
+  });
+
+  test('links each brew card to its own page', async () => {
+    mockedGetEntries.mockResolvedValue([
+      makeEntry({
+        id: '7',
+        coffeeName: 'Ethiopia Guji',
+        roaster: 'Onyx',
+        brewMethod: 'v60',
+      }),
+    ]);
+
+    renderCoffee();
+
+    const link = await screen.findByRole('link', { name: 'V60' });
+    expect(link).toHaveAttribute('href', '/coffee/7');
   });
 });

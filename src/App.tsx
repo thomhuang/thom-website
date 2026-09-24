@@ -10,6 +10,7 @@ import BlogPost from './Pages/Blog/BlogPost';
 import BlogPostForm from './Pages/Blog/BlogPostForm';
 import Coffee from './Pages/Coffee/Coffee';
 import CoffeeEntry from './Pages/Coffee/CoffeeEntry';
+import CoffeeEntryDetail from './Pages/Coffee/CoffeeEntryDetail';
 import ErrorPage from './Pages/ErrorPage/ErrorPage';
 import HomePage from './Pages/HomePage/HomePage';
 import Policies from './Pages/Policies/Policies';
@@ -40,6 +41,10 @@ const App = () => {
                   Component={BlogPostForm}
                 />
                 <Route path={PAGES.Coffee} Component={Coffee} />
+                <Route
+                  path={`${PAGES.Coffee}/:entryId`}
+                  Component={CoffeeEntryDetail}
+                />
                 <Route path={PAGES.CoffeeEntry} Component={CoffeeEntry} />
                 <Route
                   path={`${PAGES.CoffeeEntry}/:entryId`}

@@ -34,6 +34,9 @@ test("accepts the public cacheable paths", () => {
     "/shop/items",
     "/shop/items/7",
     "/shop/brands",
+    "/blog",
+    "/blog/categories",
+    "/blog/2",
   ]) {
     assert.equal(isCacheablePublicPath(pathname), true, pathname);
   }
@@ -48,6 +51,8 @@ test("rejects non-public, nested, and non-numeric paths", () => {
     "/apiary",
     "/coffee/12/extra",
     "/shop/items/abc",
+    "/blog/2/extra",
+    "/blog/abc",
   ]) {
     assert.equal(isCacheablePublicPath(pathname), false, pathname);
   }
@@ -70,11 +75,12 @@ test("identifies always-public paths", () => {
     "/coffee/grinders",
     "/coffee/12",
     "/shop/brands",
+    "/blog/categories",
   ]) {
     assert.equal(isAlwaysPublicPath(pathname), true, pathname);
   }
 
-  for (const pathname of ["/shop/items", "/shop/items/7", "/shop/orders", "/auth/me"]) {
+  for (const pathname of ["/shop/items", "/shop/items/7", "/blog", "/blog/2", "/shop/orders", "/auth/me"]) {
     assert.equal(isAlwaysPublicPath(pathname), false, pathname);
   }
 });
@@ -87,9 +93,10 @@ test("an auth cookie does not disable the cache for always-public paths", () => 
   assert.equal(isCacheableRequest(withCookie, "/coffee"), true);
   assert.equal(isCacheableRequest(withCookie, "/coffee/12"), true);
   assert.equal(isCacheableRequest(withCookie, "/shop/brands"), true);
+  assert.equal(isCacheableRequest(withCookie, "/blog/categories"), true);
 });
 
-test("an auth cookie disables the cache for auth-varying shop item paths", () => {
+test("an auth cookie disables the cache for auth-varying shop and blog paths", () => {
   const anonymous = new Request("https://example.com/api/shop/items");
   const withCookie = new Request("https://example.com/api/shop/items", {
     headers: { Cookie: "auth=token" },
@@ -99,4 +106,8 @@ test("an auth cookie disables the cache for auth-varying shop item paths", () =>
   assert.equal(isCacheableRequest(withCookie, "/shop/items"), false);
   assert.equal(isCacheableRequest(anonymous, "/shop/items/7"), true);
   assert.equal(isCacheableRequest(withCookie, "/shop/items/7"), false);
+  assert.equal(isCacheableRequest(anonymous, "/blog"), true);
+  assert.equal(isCacheableRequest(withCookie, "/blog"), false);
+  assert.equal(isCacheableRequest(anonymous, "/blog/2"), true);
+  assert.equal(isCacheableRequest(withCookie, "/blog/2"), false);
 });

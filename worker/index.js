@@ -19,6 +19,7 @@ const alwaysPublicPaths = new Set([
   "/coffee/roasters",
   "/coffee/grinders",
   "/shop/brands",
+  "/blog/categories",
 ]);
 
 // /coffee/{id} for a numeric id is always public.
@@ -26,8 +27,8 @@ const alwaysPublicDetailPath = /^\/coffee\/\d+$/;
 
 // Paths that serve drafts to an authenticated admin: cached for anonymous
 // readers, but never served from cache to a request carrying a cookie.
-const authVaryingPaths = new Set(["/shop/items"]);
-const authVaryingDetailPath = /^\/shop\/items\/\d+$/;
+const authVaryingPaths = new Set(["/shop/items", "/blog"]);
+const authVaryingDetailPath = /^\/(shop\/items|blog)\/\d+$/;
 
 // Every path the Worker may cache. The id pattern deliberately excludes
 // /shop/items/{id}/images and /shop/orders*.

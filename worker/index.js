@@ -4,64 +4,43 @@
 // origin keeps the auth cookie first-party instead of third-party.
 //
 // Anonymous GETs on a short allowlist of public paths are served from the
-// Worker Cache API. Paths whose response varies by viewer (shop items, which
-// serve drafts to an admin) are never served from cache to a cookie-bearing
-// request; paths that are public for everyone stay cached either way.
+// Worker Cache API. Every cacheable path bypasses the cache for a
+// cookie-bearing request, so an authenticated admin's edits (a new coffee
+// entry, brand, or post) are visible immediately instead of after the shared
+// cache's max-age.
 
 export function stripApiPrefix(pathname) {
   return pathname.replace(/^\/api(?=\/|$)/, "") || "/";
 }
 
-// Paths (after stripApiPrefix) whose response is identical for every viewer,
-// with or without the auth cookie.
-const alwaysPublicPaths = new Set([
+// Paths (after stripApiPrefix) cached for anonymous readers but never served
+// from cache to a request carrying a cookie, so the admin always sees fresh
+// data after editing.
+const authVaryingPaths = new Set([
   "/coffee",
   "/coffee/roasters",
   "/coffee/grinders",
+  "/shop/items",
   "/shop/brands",
+  "/blog",
   "/blog/categories",
 ]);
-
-// /coffee/{id} for a numeric id is always public.
-const alwaysPublicDetailPath = /^\/coffee\/\d+$/;
-
-// Paths that serve drafts to an authenticated admin: cached for anonymous
-// readers, but never served from cache to a request carrying a cookie.
-const authVaryingPaths = new Set(["/shop/items", "/blog"]);
-const authVaryingDetailPath = /^\/(shop\/items|blog)\/\d+$/;
+const authVaryingDetailPath = /^\/(coffee|shop\/items|blog)\/\d+$/;
 
 // Every path the Worker may cache. The id pattern deliberately excludes
 // /shop/items/{id}/images and /shop/orders*.
 export function isCacheablePublicPath(pathname) {
-  return (
-    alwaysPublicPaths.has(pathname) ||
-    alwaysPublicDetailPath.test(pathname) ||
-    authVaryingPaths.has(pathname) ||
-    authVaryingDetailPath.test(pathname)
-  );
-}
-
-// A response that never varies by viewer stays cacheable even when the request
-// carries the auth cookie, so a logged-in admin keeps the cache on public reads
-// like the coffee list instead of paying an origin round trip on every one.
-export function isAlwaysPublicPath(pathname) {
-  return (
-    alwaysPublicPaths.has(pathname) || alwaysPublicDetailPath.test(pathname)
-  );
+  return authVaryingPaths.has(pathname) || authVaryingDetailPath.test(pathname);
 }
 
 export function hasCookieHeader(request) {
   return request.headers.has("Cookie");
 }
 
-// Whether a GET may use the cache. An always-public path ignores the cookie;
-// an auth-varying path is only cacheable for anonymous requests so an admin's
-// draft view is never served from a shared entry.
+// Whether a GET may use the cache. A cookie-bearing request (an admin session)
+// always bypasses the cache so edits are visible immediately.
 export function isCacheableRequest(request, pathname) {
-  return (
-    isCacheablePublicPath(pathname) &&
-    (isAlwaysPublicPath(pathname) || !hasCookieHeader(request))
-  );
+  return isCacheablePublicPath(pathname) && !hasCookieHeader(request);
 }
 
 export default {

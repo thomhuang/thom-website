@@ -38,7 +38,3 @@ Remaining work. Tick items off as they land; add new ones as they come up.
 ## Local env
 
 - [ ] If `.env.local` sets `REACT_APP_API_URL`, rename it to `VITE_API_URL` (Vite ignores the old prefix)
-
-## Process
-
-- [ ] Create the shared `BOARD.md` that AGENTS.md references next to the repos, or remove that section

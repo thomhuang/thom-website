@@ -88,23 +88,6 @@
   margin: 0;
 }
 
-.filterField {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  color: var(--muted);
-  font-size: 0.875rem;
-}
-
-.filterField select {
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-}
-
 .categoryLink {
   color: var(--muted);
   text-decoration: underline;

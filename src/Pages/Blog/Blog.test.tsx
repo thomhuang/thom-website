@@ -114,8 +114,8 @@ describe('Blog', () => {
     expect(await screen.findByText('Gear post')).toBeInTheDocument();
     expect(mockedGetPosts).toHaveBeenCalledWith('gear', expect.anything());
     expect(
-      (screen.getByLabelText('Category') as HTMLSelectElement).value
-    ).toBe('gear');
+      screen.getByRole('button', { name: 'Gear' })
+    ).toBeInTheDocument();
   });
 
   test('selecting a category filters the list', async () => {
@@ -127,9 +127,10 @@ describe('Blog', () => {
 
     const user = userEvent.setup();
     renderBlog();
-    await screen.findByLabelText('Category');
+    await screen.findByRole('button', { name: 'All' });
 
-    await user.selectOptions(screen.getByLabelText('Category'), 'gear');
+    await user.click(screen.getByRole('button', { name: 'All' }));
+    await user.click(screen.getByRole('menuitemradio', { name: 'Gear' }));
 
     await waitFor(() =>
       expect(mockedGetPosts).toHaveBeenLastCalledWith(
@@ -138,8 +139,8 @@ describe('Blog', () => {
       )
     );
     expect(
-      (screen.getByLabelText('Category') as HTMLSelectElement).value
-    ).toBe('gear');
+      screen.getByRole('button', { name: 'Gear' })
+    ).toBeInTheDocument();
   });
 
   test('renders the empty state', async () => {

@@ -93,10 +93,6 @@
   margin-bottom: 0;
 }
 
-.filterBar .field {
-  min-width: 12rem;
-}
-
 @media (max-width: 640px) {
   .filterToggle {
     display: flex;
@@ -124,10 +120,6 @@
     margin-bottom: 0;
     padding: 1rem;
     border: 1px solid var(--border);
-  }
-
-  .filterBar .field {
-    min-width: 0;
   }
 }
 

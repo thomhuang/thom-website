@@ -2,6 +2,7 @@ import type {
   CoffeeGrinder,
   CoffeeRoaster,
 } from '../../api/Coffee/CoffeeRouter';
+import Dropdown from '../../Components/Dropdown/Dropdown';
 import { formatBrewMethod } from './coffeeGroups';
 import styles from './Coffee.module.css';
 
@@ -52,57 +53,48 @@ export default function CoffeeFilters({
         )}
       >
         {roasterOptions.length > 0 && (
-          <label className={styles.field} htmlFor="coffee-roaster-filter">
-            Roaster
-            <select
-              id="coffee-roaster-filter"
-              value={selectedRoasterId}
-              onChange={(event) => onRoasterChange(event.target.value)}
-            >
-              <option value="">All roasters</option>
-              {roasterOptions.map((roaster) => (
-                <option value={roaster.id} key={roaster.id}>
-                  {roaster.roaster}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Dropdown
+            label="Roaster"
+            value={selectedRoasterId}
+            options={[
+              { value: '', label: 'All roasters' },
+              ...roasterOptions.map((roaster) => ({
+                value: roaster.id,
+                label: roaster.roaster,
+              })),
+            ]}
+            onChange={onRoasterChange}
+          />
         )}
 
         {grinderOptions.length > 0 && (
-          <label className={styles.field} htmlFor="coffee-grinder-filter">
-            Grinder
-            <select
-              id="coffee-grinder-filter"
-              value={selectedGrinderId}
-              onChange={(event) => onGrinderChange(event.target.value)}
-            >
-              <option value="">All grinders</option>
-              {grinderOptions.map((grinder) => (
-                <option value={grinder.id} key={grinder.id}>
-                  {grinder.grinder}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Dropdown
+            label="Grinder"
+            value={selectedGrinderId}
+            options={[
+              { value: '', label: 'All grinders' },
+              ...grinderOptions.map((grinder) => ({
+                value: grinder.id,
+                label: grinder.grinder,
+              })),
+            ]}
+            onChange={onGrinderChange}
+          />
         )}
 
         {brewMethodOptions.length > 0 && (
-          <label className={styles.field} htmlFor="coffee-method-filter">
-            Brew method
-            <select
-              id="coffee-method-filter"
-              value={selectedBrewMethod}
-              onChange={(event) => onBrewMethodChange(event.target.value)}
-            >
-              <option value="">All methods</option>
-              {brewMethodOptions.map((method) => (
-                <option value={method} key={method}>
-                  {formatBrewMethod(method)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Dropdown
+            label="Brew method"
+            value={selectedBrewMethod}
+            options={[
+              { value: '', label: 'All methods' },
+              ...brewMethodOptions.map((method) => ({
+                value: method,
+                label: formatBrewMethod(method),
+              })),
+            ]}
+            onChange={onBrewMethodChange}
+          />
         )}
       </div>
     </div>

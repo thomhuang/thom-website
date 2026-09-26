@@ -7,6 +7,7 @@ import {
   GetBlogPostsAsync,
 } from '../../api/Blog/BlogRouter';
 import type { BlogCategory, BlogPost } from '../../api/Blog/BlogRouter';
+import Dropdown from '../../Components/Dropdown/Dropdown';
 import { useDocumentTitle } from '../../hooks';
 import { useAsync } from '../../useAsync';
 import { formatBlogDate } from './format';
@@ -68,20 +69,18 @@ export default function Blog() {
             Posts
           </h2>
           {categories.length > 0 && (
-            <label className={styles.filterField}>
-              Category
-              <select
-                value={selectedCategoryId}
-                onChange={(event) => changeCategory(event.target.value)}
-              >
-                <option value="">All</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.category}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Dropdown
+              label="Category"
+              value={selectedCategoryId}
+              options={[
+                { value: '', label: 'All' },
+                ...categories.map((category) => ({
+                  value: category.id,
+                  label: category.category,
+                })),
+              ]}
+              onChange={changeCategory}
+            />
           )}
         </div>
 

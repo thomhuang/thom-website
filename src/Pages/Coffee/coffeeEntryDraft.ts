@@ -68,6 +68,7 @@ export const brewMethods: SelectOption[] = [
   { value: 'turbo-shot', label: 'Turbo Shot' },
   { value: 'orea-z1', label: 'Orea Z1' },
   { value: 'gabi-master-a', label: 'Gabi Dripper' },
+  { value: 'oxo-rapid-brewer', label: 'OXO Rapid Brewer' },
 ];
 
 export const roastLevels: SelectOption[] = [

@@ -10,6 +10,12 @@ vi.mock('../../api/Coffee/CoffeeRouter', () => ({
   GetCoffeeEntryByIdAsync: vi.fn(),
 }));
 
+const authState = vi.hoisted(() => ({ isAdmin: false }));
+
+vi.mock('../../Auth/AuthContext', () => ({
+  useAuth: () => ({ isAdmin: authState.isAdmin, isAuthLoading: false }),
+}));
+
 const mockedGetEntry = vi.mocked(GetCoffeeEntryByIdAsync);
 
 const entry: CoffeeEntry = {
@@ -51,6 +57,7 @@ const renderDetailAt = (entryId: string) =>
 
 beforeEach(() => {
   document.title = '';
+  authState.isAdmin = false;
   mockedGetEntry.mockReset();
 });
 
@@ -67,6 +74,29 @@ describe('Coffee entry detail', () => {
     expect(screen.getByText('Jasmine, peach.')).toBeInTheDocument();
 
     await waitFor(() => expect(document.title).toBe('Ethiopia Guji #42'));
+  });
+
+  test('shows an edit link for admins only', async () => {
+    mockedGetEntry.mockResolvedValue(entry);
+
+    renderDetailAt('42');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Ethiopia Guji' })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Edit' })).not.toBeInTheDocument();
+  });
+
+  test('links an admin to the edit form', async () => {
+    authState.isAdmin = true;
+    mockedGetEntry.mockResolvedValue(entry);
+
+    renderDetailAt('42');
+
+    expect(await screen.findByRole('link', { name: 'Edit' })).toHaveAttribute(
+      'href',
+      '/coffee/entry/42'
+    );
   });
 
   test('shows a not-found state for a missing entry', async () => {

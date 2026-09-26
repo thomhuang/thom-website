@@ -8,7 +8,9 @@ import {
   createLookupOption,
   createRequestFromDraft,
   filterOptionsBySearch,
+  getDaysSinceRoast,
   getRatioValue,
+  getRoastDate,
   getYieldAmount,
   mergeById,
   validateDraft,
@@ -68,6 +70,26 @@ describe('getYieldAmount', () => {
   });
 });
 
+describe('getDaysSinceRoast', () => {
+  test('counts whole days from the roast date to the brew date', () => {
+    expect(getDaysSinceRoast('2026-01-01', '2025-12-22')).toBe('10');
+  });
+
+  test('is blank unless both dates are set', () => {
+    expect(getDaysSinceRoast('', '2025-12-22')).toBe('');
+    expect(getDaysSinceRoast('2026-01-01', '')).toBe('');
+  });
+});
+
+describe('getRoastDate', () => {
+  test('round-trips a days-since-roast gap', () => {
+    expect(getRoastDate('2026-01-01', 10)).toBe('2025-12-22');
+    expect(
+      getDaysSinceRoast('2026-01-01', getRoastDate('2026-01-01', 10))
+    ).toBe('10');
+  });
+});
+
 describe('validateDraft', () => {
   test('accepts a blank draft', () => {
     expect(validateDraft(createEmptyDraft())).toEqual({});
@@ -88,6 +110,16 @@ describe('validateDraft', () => {
     expect(
       validateDraft({ ...createEmptyDraft(), dose: '20.5' }).dose
     ).toBe('Enter a whole number');
+  });
+
+  test('flags a roast date after the brew date', () => {
+    expect(
+      validateDraft({
+        ...createEmptyDraft(),
+        date: '2026-01-01',
+        roastDate: '2026-01-05',
+      }).roastDate
+    ).toBe('Roast date must be on or before the brew date');
   });
 });
 
@@ -129,7 +161,7 @@ describe('createDraftFromEntry', () => {
     ).toMatchObject({
       date: '2026-01-01',
       coffeeName: 'Ethiopia Guji',
-      daysSinceRoast: '10',
+      roastDate: '2025-12-22',
       ratio: '16.67',
       grindSetting: '5',
       dose: '20',
@@ -149,7 +181,7 @@ describe('createDraftFromPrefill', () => {
         origin: 'Guji',
         coffeeVarietal: 'Heirloom',
         processingMethod: 'Washed',
-        daysSinceRoast: '10',
+        roastDate: '2025-12-22',
         roastLevel: 'light',
         roasterId: 'onyx',
         roaster: 'Onyx',
@@ -160,7 +192,7 @@ describe('createDraftFromPrefill', () => {
     expect(draft).toMatchObject({
       coffeeName: 'Ethiopia Guji',
       origin: 'Guji',
-      daysSinceRoast: '10',
+      roastDate: '2025-12-22',
       roasterId: 'onyx',
       brewMethod: '',
       ratio: '',

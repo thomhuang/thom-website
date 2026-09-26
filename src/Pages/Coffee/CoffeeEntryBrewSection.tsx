@@ -1,6 +1,12 @@
+import Dropdown from '../../Components/Dropdown/Dropdown';
 import CoffeeLookupPicker from './CoffeeLookupPicker';
 import { RATIO_PREFIX, roastLevels } from './coffeeEntryDraft';
-import type { BrewLogDraft, FieldErrors, UpdateDraft } from './coffeeEntryDraft';
+import type {
+  BrewLogDraft,
+  FieldErrors,
+  SetDraftField,
+  UpdateDraft,
+} from './coffeeEntryDraft';
 import type { TemperatureUnit } from './format';
 import type { CoffeeLookup } from './useCoffeeLookup';
 import styles from './Coffee.module.css';
@@ -11,6 +17,7 @@ type CoffeeEntryBrewSectionProps = {
   yieldAmount: string;
   temperatureUnit: TemperatureUnit;
   updateDraft: UpdateDraft;
+  setDraftField: SetDraftField;
   changeTemperatureUnit: (unit: TemperatureUnit) => void;
   grinder: CoffeeLookup;
 };
@@ -21,6 +28,7 @@ export default function CoffeeEntryBrewSection({
   yieldAmount,
   temperatureUnit,
   updateDraft,
+  setDraftField,
   changeTemperatureUnit,
   grinder,
 }: CoffeeEntryBrewSectionProps) {
@@ -75,21 +83,13 @@ export default function CoffeeEntryBrewSection({
           )}
         </label>
 
-        <label className={styles.field} htmlFor="roast-level">
-          <span className={styles.labelRow}>Roast level</span>
-          <select
-            id="roast-level"
-            value={draft.roastLevel}
-            onChange={updateDraft('roastLevel')}
-          >
-            <option value="">Select</option>
-            {roastLevels.map((option) => (
-              <option value={option.value} key={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Dropdown
+          label="Roast level"
+          value={draft.roastLevel}
+          options={[{ value: '', label: 'Select' }, ...roastLevels]}
+          onChange={(value) => setDraftField('roastLevel', value)}
+          buttonAriaLabel="Roast level"
+        />
 
         <label className={styles.field} htmlFor="dose">
           Dose (g)

@@ -1,18 +1,30 @@
+import Dropdown from '../../Components/Dropdown/Dropdown';
 import CoffeeLookupPicker from './CoffeeLookupPicker';
 import { brewMethods } from './coffeeEntryDraft';
-import type { BrewLogDraft, UpdateDraft } from './coffeeEntryDraft';
+import type {
+  BrewLogDraft,
+  FieldErrors,
+  SetDraftField,
+  UpdateDraft,
+} from './coffeeEntryDraft';
 import type { CoffeeLookup } from './useCoffeeLookup';
 import styles from './Coffee.module.css';
 
 type CoffeeEntryDetailsSectionProps = {
   draft: BrewLogDraft;
+  fieldErrors: FieldErrors;
+  daysSinceRoast: string;
   updateDraft: UpdateDraft;
+  setDraftField: SetDraftField;
   roaster: CoffeeLookup;
 };
 
 export default function CoffeeEntryDetailsSection({
   draft,
+  fieldErrors,
+  daysSinceRoast,
   updateDraft,
+  setDraftField,
   roaster,
 }: CoffeeEntryDetailsSectionProps) {
   return (
@@ -34,25 +46,18 @@ export default function CoffeeEntryDetailsSection({
           />
         </label>
 
-        <label className={styles.field} htmlFor="brew-method">
-          <span className={styles.labelRow}>
-            Brew method
-            <span className={styles.required}>Required</span>
-          </span>
-          <select
-            id="brew-method"
-            value={draft.brewMethod}
-            onChange={updateDraft('brewMethod')}
-            required
-          >
-            <option value="">Select</option>
-            {brewMethods.map((option) => (
-              <option value={option.value} key={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Dropdown
+          label={
+            <span className={styles.labelRow}>
+              Brew method
+              <span className={styles.required}>Required</span>
+            </span>
+          }
+          value={draft.brewMethod}
+          options={[{ value: '', label: 'Select' }, ...brewMethods]}
+          onChange={(value) => setDraftField('brewMethod', value)}
+          buttonAriaLabel="Brew method"
+        />
 
         <label className={styles.field} htmlFor="coffee-name">
           <span className={styles.labelRow}>
@@ -101,16 +106,28 @@ export default function CoffeeEntryDetailsSection({
           />
         </label>
 
+        <label className={styles.field} htmlFor="roast-date">
+          Roast date
+          <input
+            id="roast-date"
+            type="date"
+            value={draft.roastDate}
+            onChange={updateDraft('roastDate')}
+          />
+          {fieldErrors.roastDate && (
+            <span className={styles.fieldError}>{fieldErrors.roastDate}</span>
+          )}
+        </label>
+
         <label className={styles.field} htmlFor="days-since-roast">
           Days since roast
           <input
             id="days-since-roast"
-            type="number"
-            min="0"
-            inputMode="numeric"
-            value={draft.daysSinceRoast}
-            onChange={updateDraft('daysSinceRoast')}
+            type="text"
+            value={daysSinceRoast}
             placeholder="12"
+            readOnly
+            aria-readonly="true"
           />
         </label>
       </div>

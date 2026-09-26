@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { PAGES } from '../../Assets/constants';
 import type { CoffeeEntrySummary } from '../../api/Coffee/CoffeeRouter';
 import CoffeeEntryDetails from './CoffeeEntryDetails';
-import { formatBrewMethod, formatRatingStars } from './coffeeGroups';
+import RatingStars from './RatingStars';
+import { formatBrewMethod } from './coffeeGroups';
 import type { TemperatureUnit } from './format';
 import styles from './Coffee.module.css';
 
@@ -39,9 +40,7 @@ export default function CoffeeEntryCard({
         </summary>
 
         <p className={styles.ratingRow} aria-label={`Rated ${entry.rating} out of 5`}>
-          <span className={styles.stars} aria-hidden="true">
-            {formatRatingStars(entry.rating)}
-          </span>
+          <RatingStars rating={entry.rating} />
           <span className={styles.ratingValue}>{entry.rating}/5</span>
         </p>
 

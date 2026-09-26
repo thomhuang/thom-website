@@ -13,7 +13,7 @@ export type BrewLogDraft = {
   origin: string;
   coffeeVarietal: string;
   processingMethod: string;
-  daysSinceRoast: string;
+  roastDate: string;
   roasterId: string;
   brewMethod: string;
   ratio: string;
@@ -40,6 +40,8 @@ export type BrewLogFieldChangeHandler = ChangeEventHandler<
 
 export type UpdateDraft = (field: BrewLogTextField) => BrewLogFieldChangeHandler;
 
+export type SetDraftField = (field: BrewLogTextField, value: string) => void;
+
 export type SelectOption = {
   value: string;
   label: string;
@@ -57,7 +59,7 @@ export type CoffeePrefill = {
   origin: string;
   coffeeVarietal: string;
   processingMethod: string;
-  daysSinceRoast: string;
+  roastDate: string;
   roastLevel: string;
   roasterId: string;
   roaster: string;
@@ -92,7 +94,7 @@ export const createEmptyDraft = (): BrewLogDraft => ({
   origin: '',
   coffeeVarietal: '',
   processingMethod: '',
-  daysSinceRoast: '',
+  roastDate: '',
   roasterId: '',
   brewMethod: '',
   ratio: '',
@@ -118,7 +120,7 @@ export const createDraftFromPrefill = (
   origin: prefill.origin,
   coffeeVarietal: prefill.coffeeVarietal,
   processingMethod: prefill.processingMethod,
-  daysSinceRoast: prefill.daysSinceRoast,
+  roastDate: prefill.roastDate,
   roastLevel: prefill.roastLevel,
   roasterId,
 });
@@ -133,7 +135,7 @@ export const createDraftFromEntry = (
   origin: entry.origin || '',
   coffeeVarietal: entry.coffeeVarietal || '',
   processingMethod: entry.processingMethod || '',
-  daysSinceRoast: String(entry.daysSinceRoast),
+  roastDate: getRoastDate(entry.date, entry.daysSinceRoast),
   roasterId,
   brewMethod: entry.brewMethod,
   ratio: getRatioValue(entry.ratio),
@@ -173,6 +175,45 @@ export const getYieldAmount = (dose: string, ratio: string): string => {
   }
 
   return String(Math.round(parsedDose * parsedRatio));
+};
+
+const MS_PER_DAY = 86_400_000;
+
+const parseDateValue = (value: string) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+
+  if (!match) {
+    return null;
+  }
+
+  return new Date(
+    Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  );
+};
+
+// The roast date is the form's input; the server only stores the derived
+// whole-day gap to the brew date.
+export const getDaysSinceRoast = (date: string, roastDate: string): string => {
+  const brewDate = parseDateValue(date);
+  const roast = parseDateValue(roastDate);
+
+  if (!brewDate || !roast) {
+    return '';
+  }
+
+  return String(Math.round((brewDate.getTime() - roast.getTime()) / MS_PER_DAY));
+};
+
+// Reconstructs the roast date an entry with a known days-since-roast implies.
+export const getRoastDate = (date: string, daysSinceRoast: number): string => {
+  const brewDate = parseDateValue(date);
+
+  if (!brewDate) {
+    return '';
+  }
+
+  const roast = new Date(brewDate.getTime() - daysSinceRoast * MS_PER_DAY);
+  return roast.toISOString().slice(0, 10);
 };
 
 export const slugifyCoffeeValue = (value: string) =>
@@ -232,14 +273,16 @@ export const createRequestFromDraft = (
   temperatureUnit: TemperatureUnit
 ): CoffeeEntryRequest => {
   const yieldAmount = getYieldAmount(draft.dose, draft.ratio);
+  const daysSinceRoast = getDaysSinceRoast(draft.date, draft.roastDate);
+  const { roastDate, ...fields } = draft;
 
   return {
-    ...draft,
+    ...fields,
     roaster: roaster.label,
     grinder: grinder.label,
     ratio: `${RATIO_PREFIX}${draft.ratio.trim()}`,
     grindSetting: draft.grindSetting ? Number(draft.grindSetting) : undefined,
-    daysSinceRoast: draft.daysSinceRoast ? Number(draft.daysSinceRoast) : undefined,
+    daysSinceRoast: daysSinceRoast !== '' ? Number(daysSinceRoast) : undefined,
     dose: draft.dose ? Number(draft.dose) : undefined,
     yieldAmount: yieldAmount ? Number(yieldAmount) : undefined,
     waterTemperature: draft.waterTemperature
@@ -275,6 +318,10 @@ export const validateDraft = (draft: BrewLogDraft): FieldErrors => {
   }
   if (draft.bloomWater && !/^\d+$/.test(String(draft.bloomWater).trim())) {
     errors.bloomWater = 'Enter a whole number';
+  }
+  const daysSinceRoast = getDaysSinceRoast(draft.date, draft.roastDate);
+  if (daysSinceRoast && Number(daysSinceRoast) < 0) {
+    errors.roastDate = 'Roast date must be on or before the brew date';
   }
 
   return errors;

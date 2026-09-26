@@ -1,12 +1,14 @@
 import { Link, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
+import { useAuth } from '../../Auth/AuthContext';
 import { GetCoffeeEntryByIdAsync } from '../../api/Coffee/CoffeeRouter';
 import type { CoffeeEntry } from '../../api/Coffee/CoffeeRouter';
 import { useDocumentTitle } from '../../hooks';
 import { useAsync } from '../../useAsync';
 import CoffeeEntryDetails from './CoffeeEntryDetails';
-import { formatCoffeeMetadata, formatRatingStars } from './coffeeGroups';
+import RatingStars from './RatingStars';
+import { formatCoffeeMetadata } from './coffeeGroups';
 import type { TemperatureUnit } from './format';
 import styles from './Coffee.module.css';
 
@@ -14,6 +16,7 @@ const temperatureUnit: TemperatureUnit = 'C';
 
 export default function CoffeeEntryDetail() {
   const { entryId } = useParams<{ entryId?: string }>();
+  const { isAdmin, isAuthLoading } = useAuth();
 
   const {
     data: entry,
@@ -56,6 +59,7 @@ export default function CoffeeEntryDetail() {
   }
 
   const metadata = formatCoffeeMetadata(entry);
+  const canManage = !isAuthLoading && isAdmin;
 
   return (
     <main className={styles.page}>
@@ -63,6 +67,14 @@ export default function CoffeeEntryDetail() {
         <Link className={styles.textLink} to={PAGES.Coffee}>
           Back to coffee journal
         </Link>
+        {canManage && (
+          <Link
+            className={styles.textLink}
+            to={`${PAGES.CoffeeEntry}/${entry.id}`}
+          >
+            Edit
+          </Link>
+        )}
       </div>
 
       <section className={styles.intro}>
@@ -78,9 +90,7 @@ export default function CoffeeEntryDetail() {
             className={styles.ratingRow}
             aria-label={`Rated ${entry.rating} out of 5`}
           >
-            <span className={styles.stars} aria-hidden="true">
-              {formatRatingStars(entry.rating)}
-            </span>
+            <RatingStars rating={entry.rating} />
             <span className={styles.ratingValue}>{entry.rating}/5</span>
           </p>
 

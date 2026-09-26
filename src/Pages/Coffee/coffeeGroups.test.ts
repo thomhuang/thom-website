@@ -214,7 +214,7 @@ describe('getEntryStatGroups', () => {
 });
 
 describe('getGroupPrefill', () => {
-  test('carries the first entry bean details, including days since roast', () => {
+  test('carries the first entry bean details, including the roast date', () => {
     const [group] = groupEntriesByCoffee([
       makeEntry({
         coffeeName: 'Guji',
@@ -231,7 +231,7 @@ describe('getGroupPrefill', () => {
       origin: 'Guji',
       roasterId: 'onyx',
       roaster: 'Onyx',
-      daysSinceRoast: '10',
+      roastDate: '2025-12-22',
       roastLevel: 'light',
     });
   });

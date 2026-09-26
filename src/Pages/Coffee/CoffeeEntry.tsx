@@ -14,12 +14,14 @@ import CoffeeEntryNotesSection from './CoffeeEntryNotesSection';
 import {
   createEmptyDraft,
   createRequestFromDraft,
+  getDaysSinceRoast,
   getYieldAmount,
   validateDraft,
 } from './coffeeEntryDraft';
 import type {
   BrewLogDraft,
   CoffeePrefill,
+  SetDraftField,
   UpdateDraft,
 } from './coffeeEntryDraft';
 import { fromCelsius, roundToTenth, toCelsius } from './format';
@@ -93,6 +95,7 @@ export default function CoffeeEntry() {
     () => getYieldAmount(draft.dose, draft.ratio),
     [draft.dose, draft.ratio]
   );
+  const daysSinceRoast = getDaysSinceRoast(draft.date, draft.roastDate);
   const isFormLoading = isEntryLoading || roaster.isLoading || grinder.isLoading;
   const canShowEntryFailure =
     !isAuthLoading && isAdmin && !isFormLoading && entryLoadFailed;
@@ -107,6 +110,10 @@ export default function CoffeeEntry() {
         [field]: event.target.value,
       }));
     };
+
+  const setDraftField: SetDraftField = (field, value) => {
+    setDraft((currentDraft) => ({ ...currentDraft, [field]: value }));
+  };
 
   const changeTemperatureUnit = (nextUnit: TemperatureUnit) => {
     if (nextUnit === temperatureUnit) {
@@ -142,6 +149,11 @@ export default function CoffeeEntry() {
     event.preventDefault();
 
     if (Object.keys(fieldErrors).length > 0) {
+      return;
+    }
+
+    if (!draft.brewMethod) {
+      setFormError('Select a brew method before saving.');
       return;
     }
 
@@ -232,7 +244,10 @@ export default function CoffeeEntry() {
           <form className={styles.form} onSubmit={saveEntry}>
             <CoffeeEntryDetailsSection
               draft={draft}
+              fieldErrors={fieldErrors}
+              daysSinceRoast={daysSinceRoast}
               updateDraft={updateDraft}
+              setDraftField={setDraftField}
               roaster={roaster}
             />
             <CoffeeEntryBrewSection
@@ -241,6 +256,7 @@ export default function CoffeeEntry() {
               yieldAmount={yieldAmount}
               temperatureUnit={temperatureUnit}
               updateDraft={updateDraft}
+              setDraftField={setDraftField}
               changeTemperatureUnit={changeTemperatureUnit}
               grinder={grinder}
             />

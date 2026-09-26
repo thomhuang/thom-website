@@ -279,7 +279,22 @@
 }
 
 .stars {
-  letter-spacing: 0.1rem;
+  display: inline-flex;
+  gap: 0.1rem;
+}
+
+.star {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+}
+
+.starFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .ratingValue {
@@ -534,18 +549,30 @@
   gap: 0.25rem;
 }
 
-.starButton {
+.ratingStar {
+  position: relative;
+  display: inline-block;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.halfButton {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
   padding: 0;
   border: 0;
   background: none;
-  color: var(--muted);
-  font-size: 1.1rem;
-  line-height: 1;
   cursor: pointer;
 }
 
-.activeStar {
-  color: var(--fg);
+.halfButtonLeft {
+  left: 0;
+}
+
+.halfButtonRight {
+  right: 0;
 }
 
 .unitToggle {

@@ -1,4 +1,5 @@
 import type { BrewLogDraft, FieldErrors, UpdateDraft } from './coffeeEntryDraft';
+import { Star } from './RatingStars';
 import styles from './Coffee.module.css';
 
 type CoffeeEntryNotesSectionProps = {
@@ -85,23 +86,35 @@ export default function CoffeeEntryNotesSection({
 
         <div className={styles.ratingField}>
           <span>Rating</span>
-          <div className={styles.ratingButtons}>
-            {[1, 2, 3, 4, 5].map((ratingValue) => (
-              <button
-                type="button"
-                className={[
-                  styles.starButton,
-                  draft.rating >= ratingValue ? styles.activeStar : '',
-                ].join(' ')}
-                onClick={() => changeRating(ratingValue)}
-                aria-label={`${ratingValue} star rating`}
-                aria-pressed={draft.rating === ratingValue}
-                key={ratingValue}
-              >
-                <span aria-hidden="true">
-                  {draft.rating >= ratingValue ? '\u2605' : '\u2606'}
-                </span>
-              </button>
+          <div
+            className={styles.ratingButtons}
+            role="group"
+            aria-label="Rating"
+          >
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span className={styles.ratingStar} key={star}>
+                <Star fraction={draft.rating - (star - 1)} />
+                <button
+                  type="button"
+                  className={[
+                    styles.halfButton,
+                    styles.halfButtonLeft,
+                  ].join(' ')}
+                  onClick={() => changeRating(star - 0.5)}
+                  aria-label={`${star - 0.5} star rating`}
+                  aria-pressed={draft.rating === star - 0.5}
+                />
+                <button
+                  type="button"
+                  className={[
+                    styles.halfButton,
+                    styles.halfButtonRight,
+                  ].join(' ')}
+                  onClick={() => changeRating(star)}
+                  aria-label={`${star} star rating`}
+                  aria-pressed={draft.rating === star}
+                />
+              </span>
             ))}
           </div>
         </div>

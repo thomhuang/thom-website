@@ -2,7 +2,7 @@ import type {
   CoffeeEntrySummary,
   CoffeeRoaster,
 } from '../../api/Coffee/CoffeeRouter';
-import { brewMethods } from './coffeeEntryDraft';
+import { brewMethods, getRoastDate } from './coffeeEntryDraft';
 import type { CoffeePrefill } from './coffeeEntryDraft';
 import { formatTemperature } from './format';
 import type { TemperatureUnit } from './format';
@@ -93,9 +93,6 @@ export const getEntryStatGroups = (
       stats: group.stats.filter((stat) => Boolean(stat.value)),
     }))
     .filter((group) => group.stats.length > 0);
-
-export const formatRatingStars = (rating: number) =>
-  '★'.repeat(rating) + '☆'.repeat(Math.max(0, 5 - rating));
 
 export const getTastingNotes = (entry: CoffeeEntrySummary) =>
   entry.tastingNotes || entry.notes || '';
@@ -247,7 +244,7 @@ export const getGroupPrefill = (group: CoffeeGroup): CoffeePrefill => {
     origin: entry.origin,
     coffeeVarietal: entry.coffeeVarietal,
     processingMethod: entry.processingMethod,
-    daysSinceRoast: String(entry.daysSinceRoast ?? ''),
+    roastDate: getRoastDate(entry.date, entry.daysSinceRoast ?? 0),
     roastLevel: entry.roastLevel ?? '',
     roasterId: entry.roasterId ?? '',
     roaster: entry.roaster,

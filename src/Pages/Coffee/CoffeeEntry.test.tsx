@@ -79,7 +79,7 @@ describe('CoffeeEntry prefill', () => {
       origin: 'Guji',
       coffeeVarietal: 'Heirloom',
       processingMethod: 'Washed',
-      daysSinceRoast: '10',
+      roastDate: '2025-12-22',
       roastLevel: 'light',
       roasterId: 'onyx',
       roaster: 'Onyx',
@@ -99,12 +99,19 @@ describe('CoffeeEntry prefill', () => {
     expect(screen.getByDisplayValue('Guji')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Heirloom')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Washed')).toBeInTheDocument();
-    expect(screen.getByLabelText(/roast level/i)).toHaveValue('light');
-    expect(screen.getByLabelText(/days since roast/i)).toHaveValue(10);
+    expect(
+      screen.getByRole('button', { name: /roast level/i })
+    ).toHaveTextContent('Light');
+    expect(screen.getByLabelText(/roast date/i)).toHaveValue('2025-12-22');
+    expect(screen.getByLabelText(/days since roast/i)).toHaveAttribute(
+      'readonly'
+    );
     expect(screen.getByLabelText('Search roaster')).toHaveValue('Onyx');
 
     // Brew specifics are not carried over.
-    expect(screen.getByLabelText(/brew method/i)).toHaveValue('');
+    expect(
+      screen.getByRole('button', { name: /brew method/i })
+    ).toHaveTextContent('Select');
     expect(screen.getByLabelText(/grind setting/i)).toHaveValue('');
     expect(screen.getByLabelText('Search grinder')).toHaveValue('');
   });

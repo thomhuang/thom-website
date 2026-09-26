@@ -1,5 +1,5 @@
 import type { ShopBrand } from '../../api/Shop/ShopRouter';
-import ShopDropdown from './ShopDropdown';
+import Dropdown from '../../Components/Dropdown/Dropdown';
 import type { LayoutMode, SortOrder, StockFilter } from './shopFilters';
 import styles from './Shop.module.css';
 
@@ -70,7 +70,7 @@ export default function ShopFilterBar({
         )}
       >
         {categories.length > 0 && (
-          <ShopDropdown
+          <Dropdown
             label="Category"
             value={selectedCategory}
             options={[
@@ -85,7 +85,7 @@ export default function ShopFilterBar({
         )}
 
         {brands.length > 0 && (
-          <ShopDropdown
+          <Dropdown
             label="Brand"
             value={selectedBrandId}
             options={[
@@ -99,14 +99,14 @@ export default function ShopFilterBar({
           />
         )}
 
-        <ShopDropdown
+        <Dropdown
           label="Availability"
           value={stockFilter}
           options={STOCK_OPTIONS}
           onChange={(value) => onStockFilterChange(value as StockFilter)}
         />
 
-        <ShopDropdown
+        <Dropdown
           label="Sort"
           value={sortOrder}
           options={SORT_OPTIONS}

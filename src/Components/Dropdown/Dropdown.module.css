@@ -1,0 +1,72 @@
+.dropdownField {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 12rem;
+}
+
+.dropdownButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdownButton svg {
+  flex-shrink: 0;
+}
+
+.dropdownChevron {
+  margin-left: auto;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  max-height: 16rem;
+  overflow-y: auto;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.dropdownMenuItem {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdownMenuItem:hover,
+.dropdownMenuItem:focus-visible {
+  background: var(--border);
+}
+
+.dropdownMenuItem[aria-checked='true'] {
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .dropdownField {
+    min-width: 0;
+  }
+}

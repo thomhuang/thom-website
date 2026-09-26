@@ -1,28 +1,30 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import styles from './Shop.module.css';
+import styles from './Dropdown.module.css';
 
-export type ShopDropdownOption = {
+export type DropdownOption = {
   value: string;
   label: string;
 };
 
-type ShopDropdownProps = {
-  label: string;
+type DropdownProps = {
+  label: ReactNode;
   value: string;
-  options: ShopDropdownOption[];
+  options: DropdownOption[];
   onChange: (value: string) => void;
   icon?: ReactNode;
+  buttonAriaLabel?: string;
 };
 
-export default function ShopDropdown({
+export default function Dropdown({
   label,
   value,
   options,
   onChange,
   icon,
-}: ShopDropdownProps) {
+  buttonAriaLabel,
+}: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const fieldRef = useRef<HTMLDivElement>(null);
   const labelId = useId();
@@ -67,6 +69,7 @@ export default function ShopDropdown({
         className={styles.dropdownButton}
         aria-haspopup="menu"
         aria-expanded={isOpen}
+        aria-label={buttonAriaLabel}
         onClick={() => setIsOpen((open) => !open)}
       >
         {icon}

@@ -17,7 +17,7 @@ export default function HomePage() {
   const resumeHref = (files[files.length - 1] ?? "").replace("/public/", "/");
 
   return (
-    <div className={styles.text}>
+    <div>
       <p className={styles.header}>Hi, I'm Thomas.</p>
       <div className={styles.layout}>
         <div className={styles.body}>

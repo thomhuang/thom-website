@@ -119,7 +119,7 @@ export default function Coffee() {
       </section>
 
       {canManage && (
-        <div className={styles.adminActions}>
+        <div>
           <Link className={styles.textLink} to={PAGES.CoffeeEntry}>
             New brew entry
           </Link>
@@ -147,7 +147,7 @@ export default function Coffee() {
           />
         )}
 
-        <section className={styles.entryList} aria-labelledby="coffee-entries">
+        <section aria-labelledby="coffee-entries">
           <div className={styles.sectionHeader}>
             <h2 id="coffee-entries">Brew entries</h2>
             {!isLoading && visibleLogs.length > 0 && (

@@ -58,7 +58,7 @@ export const getEntryStatGroups = (
     {
       title: 'Brew',
       stats: [
-        { label: 'Method', value: entry.brewMethod },
+        { label: 'Method', value: formatBrewMethod(entry.brewMethod) },
         { label: 'Ratio', value: entry.ratio },
         { label: 'Dose', value: formatGrams(entry.dose) },
         { label: 'Yield', value: formatGrams(entry.yieldAmount) },

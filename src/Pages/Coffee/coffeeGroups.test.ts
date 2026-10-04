@@ -205,7 +205,7 @@ describe('getEntryStatGroups', () => {
       {
         title: 'Brew',
         stats: [
-          { label: 'Method', value: 'v60' },
+          { label: 'Method', value: 'V60' },
           { label: 'Ratio', value: '1:16' },
         ],
       },

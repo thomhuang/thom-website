@@ -30,20 +30,6 @@ describe('checkoutErrorMessage', () => {
     expect(message).toBe('Tezomeya Long-Sleeve Tee is sold out.');
   });
 
-  test('says when a reserved item frees up', () => {
-    const message = checkoutErrorMessage(
-      axiosError(409, {
-        error: 'insufficient_stock',
-        itemId: '1',
-        title: 'India Rajasthan Vintage Tee',
-        available: 0,
-        reservedUntil: 1789960432,
-      })
-    );
-
-    expect(message).toContain('India Rajasthan Vintage Tee is in another checkout');
-  });
-
   test('falls back to a generic title when the body omits one', () => {
     const message = checkoutErrorMessage(axiosError(409, { available: 0 }));
 

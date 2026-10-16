@@ -6,10 +6,8 @@ import styles from './Shop.module.css';
 
 export default function ShopOrderCard({
   order,
-  onRelease,
 }: {
   order: ShopOrder;
-  onRelease?: (order: ShopOrder) => void;
 }) {
   return (
     <article className={styles.orderCard}>
@@ -52,16 +50,6 @@ export default function ShopOrderCard({
       </ul>
 
       <p className={styles.orderSession}>{order.stripeSessionId}</p>
-
-      {order.status === 'pending' && onRelease && (
-        <button
-          type="button"
-          className={styles.deleteButton}
-          onClick={() => onRelease(order)}
-        >
-          Release hold
-        </button>
-      )}
     </article>
   );
 }

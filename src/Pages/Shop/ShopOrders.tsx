@@ -7,7 +7,6 @@ import { useDocumentTitle } from '../../hooks';
 import { useAsync } from '../../useAsync';
 import {
   GetShopOrdersAsync,
-  ReleaseShopOrderHoldAsync,
   ShopOrder,
 } from '../../api/Shop/ShopRouter';
 import ShopOrderCard from './ShopOrderCard';
@@ -71,24 +70,6 @@ export default function ShopOrders() {
     }
   };
 
-  const releaseHold = async (order: ShopOrder) => {
-    setActionError('');
-
-    try {
-      await ReleaseShopOrderHoldAsync(order.stripeSessionId);
-      setData((current) => ({
-        ...current,
-        orders: current.orders.map((existing) =>
-          existing.id === order.id
-            ? { ...existing, status: 'expired' as const }
-            : existing
-        ),
-      }));
-    } catch {
-      setActionError('The hold could not be released.');
-    }
-  };
-
   return (
     <main className={styles.page}>
       <section className={styles.intro} aria-labelledby="shop-orders-title">
@@ -131,7 +112,7 @@ export default function ShopOrders() {
       {!isAuthLoading && isAdmin && !isLoading && orders.length > 0 && (
         <section className={styles.orderList} aria-label="Orders">
           {orders.map((order) => (
-            <ShopOrderCard key={order.id} order={order} onRelease={releaseHold} />
+            <ShopOrderCard key={order.id} order={order} />
           ))}
         </section>
       )}

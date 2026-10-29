@@ -159,14 +159,14 @@
 
 .roasterSummary::after,
 .groupSummary::after {
-  content: '+';
+  content: '\25B8';
   color: var(--muted);
   line-height: 1;
 }
 
 .roasterDetails[open] .roasterSummary::after,
 .groupDetails[open] .groupSummary::after {
-  content: '\2013';
+  content: '\25BE';
 }
 
 .roasterTitle {
@@ -181,7 +181,6 @@
   flex-direction: column;
   gap: 1.5rem;
   margin-top: 1.25rem;
-  border-left: 2px solid var(--border);
 }
 
 .coffeeGroup {
@@ -202,9 +201,10 @@
 }
 
 .entryGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
 }
 
 .sectionHeader {
@@ -225,32 +225,54 @@
   gap: 1rem;
 }
 
-.cardSummary {
+.brewRow {
+  padding: 0.25rem 0;
+}
+
+.brewRowDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.brewRowSummary {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.25rem 0.5rem;
+  gap: 0.25rem 0.75rem;
   cursor: pointer;
   list-style: none;
 }
 
-.cardSummary::-webkit-details-marker {
+.brewRowSummary::-webkit-details-marker {
   display: none;
 }
 
-.cardTitle {
+.brewRowTitle {
   margin: 0;
   font-size: 1rem;
+  font-weight: 400;
 }
 
-.cardSummary::after {
-  content: '+';
+.brewRowDate {
+  color: var(--muted);
+}
+
+.brewRowRating {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.brewRowSummary::after {
+  content: '\25B8';
   color: var(--muted);
   line-height: 1;
 }
 
-.cardDetails[open] .cardSummary::after {
-  content: '\2013';
+.brewRowDetails[open] .brewRowSummary::after {
+  content: '\25BE';
 }
 
 .entryDate {
@@ -412,6 +434,82 @@
 
 .inlineFields {
   align-items: end;
+}
+
+.profileRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profileManager {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.profileManagerSummary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.profileManagerSummary::-webkit-details-marker {
+  display: none;
+}
+
+.profileManagerSummary::after {
+  content: '\25B8';
+  color: var(--muted);
+  line-height: 1;
+}
+
+.profileManager[open] .profileManagerSummary::after {
+  content: '\25BE';
+}
+
+.profileManagerTitle {
+  margin: 0;
+}
+
+.profileList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.profileItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.profileName {
+  font-weight: 600;
+}
+
+.profileMethod,
+.profileNotes {
+  color: var(--muted);
+}
+
+.profileNotes {
+  flex-basis: 100%;
+}
+
+.profileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .field,

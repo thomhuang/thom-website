@@ -24,10 +24,10 @@ export default function CoffeeEntryCard({
   onDelete,
 }: CoffeeEntryCardProps) {
   return (
-    <article className={styles.card}>
-      <details className={styles.cardDetails}>
-        <summary className={styles.cardSummary}>
-          <h5 className={styles.cardTitle}>
+    <article className={styles.brewRow}>
+      <details className={styles.brewRowDetails}>
+        <summary className={styles.brewRowSummary}>
+          <h5 className={styles.brewRowTitle}>
             <Link
               className={styles.textLink}
               to={`${PAGES.Coffee}/${entry.id}`}
@@ -36,13 +36,15 @@ export default function CoffeeEntryCard({
               {formatBrewMethod(entry.brewMethod) || entry.date}
             </Link>
           </h5>
-          <span className={styles.entryDate}>{entry.date}</span>
+          <span className={styles.brewRowDate}>{entry.date}</span>
+          <span
+            className={styles.brewRowRating}
+            aria-label={`Rated ${entry.rating} out of 5`}
+          >
+            <RatingStars rating={entry.rating} />
+            <span className={styles.ratingValue}>{entry.rating}/5</span>
+          </span>
         </summary>
-
-        <p className={styles.ratingRow} aria-label={`Rated ${entry.rating} out of 5`}>
-          <RatingStars rating={entry.rating} />
-          <span className={styles.ratingValue}>{entry.rating}/5</span>
-        </p>
 
         {canManage && (
           <div className={styles.entryActions}>

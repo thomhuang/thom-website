@@ -18,6 +18,7 @@ import type {
 } from '../../api/Coffee/CoffeeRouter';
 import AsciiFigure from '../../Components/AsciiFigure/AsciiFigure';
 import CoffeeFilters from './CoffeeFilters';
+import CoffeeProfileManager from './CoffeeProfileManager';
 import CoffeeRoasterSection from './CoffeeRoasterSection';
 import {
   filterEntries,
@@ -125,6 +126,8 @@ export default function Coffee() {
           </Link>
         </div>
       )}
+
+      {canManage && <CoffeeProfileManager />}
 
       {journalError && (
         <aside className={styles.errorNotice}>{journalError}</aside>

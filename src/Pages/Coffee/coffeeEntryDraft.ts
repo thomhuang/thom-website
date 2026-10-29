@@ -25,6 +25,8 @@ export type BrewLogDraft = {
   bloomTime: string;
   bloomWater: string;
   pourNotes: string;
+  profileId: string;
+  sessionNotes: string;
   roastLevel: string;
   notes: string;
   rating: number;
@@ -106,6 +108,8 @@ export const createEmptyDraft = (): BrewLogDraft => ({
   bloomTime: '',
   bloomWater: '',
   pourNotes: '',
+  profileId: '',
+  sessionNotes: '',
   roastLevel: '',
   notes: '',
   rating: 0,
@@ -147,6 +151,8 @@ export const createDraftFromEntry = (
   bloomTime: entry.bloomTime,
   bloomWater: String(entry.bloomWater),
   pourNotes: entry.pourNotes,
+  profileId: entry.profileId ?? '',
+  sessionNotes: entry.sessionNotes ?? '',
   roastLevel: entry.roastLevel,
   notes: entry.notes || entry.tastingNotes,
   rating: entry.rating,

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   GetCoffeeEntriesAsync,
   GetCoffeeGrindersAsync,
+  GetCoffeeProfilesAsync,
   GetCoffeeRoastersAsync,
 } from '../../api/Coffee/CoffeeRouter';
 import type { CoffeeEntry } from '../../api/Coffee/CoffeeRouter';
@@ -15,6 +16,10 @@ vi.mock('../../api/Coffee/CoffeeRouter', () => ({
   GetCoffeeRoastersAsync: vi.fn(),
   GetCoffeeGrindersAsync: vi.fn(),
   DeleteCoffeeEntryAsync: vi.fn(),
+  GetCoffeeProfilesAsync: vi.fn(),
+  CreateCoffeeProfileAsync: vi.fn(),
+  UpdateCoffeeProfileAsync: vi.fn(),
+  DeleteCoffeeProfileAsync: vi.fn(),
 }));
 
 const authState = vi.hoisted(() => ({ isAdmin: false }));
@@ -26,6 +31,7 @@ vi.mock('../../Auth/AuthContext', () => ({
 const mockedGetEntries = vi.mocked(GetCoffeeEntriesAsync);
 const mockedGetRoasters = vi.mocked(GetCoffeeRoastersAsync);
 const mockedGetGrinders = vi.mocked(GetCoffeeGrindersAsync);
+const mockedGetProfiles = vi.mocked(GetCoffeeProfilesAsync);
 
 const makeEntry = (overrides: Partial<CoffeeEntry>): CoffeeEntry => ({
   id: '1',
@@ -63,8 +69,10 @@ beforeEach(() => {
   mockedGetEntries.mockReset();
   mockedGetRoasters.mockReset();
   mockedGetGrinders.mockReset();
+  mockedGetProfiles.mockReset();
   mockedGetRoasters.mockResolvedValue([]);
   mockedGetGrinders.mockResolvedValue([]);
+  mockedGetProfiles.mockResolvedValue([]);
 });
 
 describe('Coffee journal', () => {

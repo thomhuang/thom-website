@@ -1,3 +1,5 @@
+import Dropdown from '../../Components/Dropdown/Dropdown';
+import type { DropdownOption } from '../../Components/Dropdown/Dropdown';
 import type { BrewLogDraft, FieldErrors, UpdateDraft } from './coffeeEntryDraft';
 import { Star } from './RatingStars';
 import styles from './Coffee.module.css';
@@ -7,6 +9,11 @@ type CoffeeEntryNotesSectionProps = {
   fieldErrors: FieldErrors;
   updateDraft: UpdateDraft;
   changeRating: (rating: number) => void;
+  profileOptions: DropdownOption[];
+  selectedProfileId: string;
+  isSavingProfile: boolean;
+  onSelectProfile: (profileId: string) => void;
+  onSaveProfile: () => void;
 };
 
 export default function CoffeeEntryNotesSection({
@@ -14,6 +21,11 @@ export default function CoffeeEntryNotesSection({
   fieldErrors,
   updateDraft,
   changeRating,
+  profileOptions,
+  selectedProfileId,
+  isSavingProfile,
+  onSelectProfile,
+  onSaveProfile,
 }: CoffeeEntryNotesSectionProps) {
   return (
     <>
@@ -56,6 +68,26 @@ export default function CoffeeEntryNotesSection({
           </label>
         </div>
 
+        <div className={styles.profileRow}>
+          <Dropdown
+            label="Pour profile"
+            value={selectedProfileId}
+            options={[{ value: '', label: 'None' }, ...profileOptions]}
+            onChange={onSelectProfile}
+            buttonAriaLabel="Pour profile"
+          />
+          <button
+            type="button"
+            className={styles.addButton}
+            onClick={onSaveProfile}
+            disabled={isSavingProfile}
+          >
+            {isSavingProfile
+              ? 'Saving'
+              : 'Save current pour notes as a profile'}
+          </button>
+        </div>
+
         <label className={styles.field} htmlFor="pour-notes">
           Pour notes
           <textarea
@@ -63,6 +95,16 @@ export default function CoffeeEntryNotesSection({
             value={draft.pourNotes}
             onChange={updateDraft('pourNotes')}
             rows={4}
+          />
+        </label>
+
+        <label className={styles.field} htmlFor="session-notes">
+          Session notes
+          <textarea
+            id="session-notes"
+            value={draft.sessionNotes}
+            onChange={updateDraft('sessionNotes')}
+            rows={3}
           />
         </label>
       </section>

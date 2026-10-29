@@ -22,6 +22,8 @@ export interface CoffeeEntrySummary {
   bloomTime?: string;
   bloomWater?: number;
   pourNotes?: string;
+  profileId?: string;
+  sessionNotes?: string;
   roastLevel?: string;
   notes?: string;
   tastingNotes: string;
@@ -41,6 +43,8 @@ export interface CoffeeEntry extends CoffeeEntrySummary {
   bloomTime: string;
   bloomWater: number;
   pourNotes: string;
+  profileId?: string;
+  sessionNotes?: string;
   roastLevel: string;
   notes: string;
   createdAt?: string;
@@ -55,6 +59,14 @@ export interface CoffeeRoaster {
 export interface CoffeeGrinder {
   id: string;
   grinder: string;
+  createdAt?: string;
+}
+
+export interface CoffeeProfile {
+  id: string;
+  name: string;
+  brewMethod: string;
+  notes: string;
   createdAt?: string;
 }
 
@@ -132,6 +144,47 @@ export async function CreateCoffeeGrinderAsync(
     method: 'POST',
     url: '/coffee/grinders',
     data: request,
+    withCredentials: true,
+  });
+}
+
+export async function GetCoffeeProfilesAsync(
+  signal?: AbortSignal
+): Promise<CoffeeProfile[]> {
+  return apiRequest<CoffeeProfile[]>({
+    method: 'GET',
+    signal,
+    url: '/coffee/profiles',
+  });
+}
+
+export async function CreateCoffeeProfileAsync(
+  request: CoffeeProfile
+): Promise<CoffeeProfile> {
+  return apiRequest<CoffeeProfile>({
+    method: 'POST',
+    url: '/coffee/profiles',
+    data: request,
+    withCredentials: true,
+  });
+}
+
+export async function UpdateCoffeeProfileAsync(
+  id: string,
+  request: CoffeeProfile
+): Promise<CoffeeProfile> {
+  return apiRequest<CoffeeProfile>({
+    method: 'PATCH',
+    url: `/coffee/profiles/${id}`,
+    data: request,
+    withCredentials: true,
+  });
+}
+
+export async function DeleteCoffeeProfileAsync(id: string): Promise<void> {
+  await apiRequest<void>({
+    method: 'DELETE',
+    url: `/coffee/profiles/${id}`,
     withCredentials: true,
   });
 }

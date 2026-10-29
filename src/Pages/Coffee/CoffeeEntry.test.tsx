@@ -7,6 +7,7 @@ import {
   CreateCoffeeEntryAsync,
   GetCoffeeEntryByIdAsync,
   GetCoffeeGrindersAsync,
+  GetCoffeeProfilesAsync,
   GetCoffeeRoastersAsync,
   UpdateCoffeeEntryAsync,
 } from '../../api/Coffee/CoffeeRouter';
@@ -22,6 +23,8 @@ vi.mock('../../api/Coffee/CoffeeRouter', () => ({
   UpdateCoffeeEntryAsync: vi.fn(),
   CreateCoffeeRoasterAsync: vi.fn(),
   CreateCoffeeGrinderAsync: vi.fn(),
+  GetCoffeeProfilesAsync: vi.fn(),
+  CreateCoffeeProfileAsync: vi.fn(),
 }));
 
 vi.mock('../../Auth/AuthContext', () => ({
@@ -32,6 +35,7 @@ const mockedGetRoasters = vi.mocked(GetCoffeeRoastersAsync);
 const mockedGetGrinders = vi.mocked(GetCoffeeGrindersAsync);
 const mockedGetEntry = vi.mocked(GetCoffeeEntryByIdAsync);
 const mockedUpdateEntry = vi.mocked(UpdateCoffeeEntryAsync);
+const mockedGetProfiles = vi.mocked(GetCoffeeProfilesAsync);
 
 const makeEntry = (overrides: Partial<CoffeeEntryResponse> = {}): CoffeeEntryResponse => ({
   id: 'entry-1',
@@ -67,9 +71,11 @@ beforeEach(() => {
   mockedGetGrinders.mockReset();
   mockedGetEntry.mockReset();
   mockedUpdateEntry.mockReset();
+  mockedGetProfiles.mockReset();
   vi.mocked(CreateCoffeeEntryAsync).mockReset();
   mockedGetRoasters.mockResolvedValue([]);
   mockedGetGrinders.mockResolvedValue([]);
+  mockedGetProfiles.mockResolvedValue([]);
 });
 
 describe('CoffeeEntry prefill', () => {
@@ -149,6 +155,45 @@ describe('CoffeeEntry ratio', () => {
     expect(mockedUpdateEntry).toHaveBeenCalledWith(
       'entry-1',
       expect.objectContaining({ ratio: '1:17', yieldAmount: 340 })
+    );
+  });
+});
+
+describe('CoffeeEntry profiles', () => {
+  test('selecting a profile fills the pour notes', async () => {
+    mockedGetRoasters.mockResolvedValue([{ id: 'onyx', roaster: 'Onyx' }]);
+    mockedGetGrinders.mockResolvedValue([{ id: 'df64', grinder: 'DF64' }]);
+    mockedGetProfiles.mockResolvedValue([
+      {
+        id: 'v60-46',
+        name: 'V60 4:6',
+        brewMethod: 'v60',
+        notes: 'Bloom 45s, then four pours',
+      },
+    ]);
+
+    render(
+      <MemoryRouter initialEntries={['/coffee/entry']}>
+        <CoffeeEntry />
+      </MemoryRouter>
+    );
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Brew method' })
+    );
+    await userEvent.click(
+      await screen.findByRole('menuitemradio', { name: 'V60' })
+    );
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Pour profile' })
+    );
+    await userEvent.click(
+      await screen.findByRole('menuitemradio', { name: 'V60 4:6' })
+    );
+
+    expect(screen.getByLabelText(/pour notes/i)).toHaveValue(
+      'Bloom 45s, then four pours'
     );
   });
 });

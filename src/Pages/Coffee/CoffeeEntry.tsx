@@ -4,10 +4,14 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PAGES } from '../../Assets/constants';
 import { useAuth } from '../../Auth/AuthContext';
 import { useDocumentTitle } from '../../hooks';
+import { useAsync } from '../../useAsync';
 import {
   CreateCoffeeEntryAsync,
+  CreateCoffeeProfileAsync,
+  GetCoffeeProfilesAsync,
   UpdateCoffeeEntryAsync,
 } from '../../api/Coffee/CoffeeRouter';
+import type { CoffeeProfile } from '../../api/Coffee/CoffeeRouter';
 import CoffeeEntryBrewSection from './CoffeeEntryBrewSection';
 import CoffeeEntryDetailsSection from './CoffeeEntryDetailsSection';
 import CoffeeEntryNotesSection from './CoffeeEntryNotesSection';
@@ -51,6 +55,7 @@ export default function CoffeeEntry() {
   const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('C');
   const [formError, setFormError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const roaster = useCoffeeLookup({
     loadOptions: loadRoasterOptions,
@@ -88,6 +93,15 @@ export default function CoffeeEntry() {
     setFormError,
   });
 
+  const { data: profiles, setData: setProfiles } = useAsync(
+    (signal) => GetCoffeeProfilesAsync(signal).catch(() => [] as CoffeeProfile[]),
+    [],
+    {
+      initialData: [] as CoffeeProfile[],
+      errorMessage: 'Profiles could not be loaded.',
+    }
+  );
+
   const selectedRoaster = roaster.selectedOption;
   const selectedGrinder = grinder.selectedOption;
   const fieldErrors = useMemo(() => validateDraft(draft), [draft]);
@@ -112,7 +126,13 @@ export default function CoffeeEntry() {
     };
 
   const setDraftField: SetDraftField = (field, value) => {
-    setDraft((currentDraft) => ({ ...currentDraft, [field]: value }));
+    setDraft((currentDraft) => {
+      const next = { ...currentDraft, [field]: value };
+      if (field === 'brewMethod' && value !== currentDraft.brewMethod) {
+        next.profileId = '';
+      }
+      return next;
+    });
   };
 
   const changeTemperatureUnit = (nextUnit: TemperatureUnit) => {
@@ -143,6 +163,74 @@ export default function CoffeeEntry() {
 
   const changeRating = (rating: number) => {
     setDraft((currentDraft) => ({ ...currentDraft, rating }));
+  };
+
+  const profileOptions = profiles
+    .filter((profile) => profile.brewMethod === draft.brewMethod)
+    .map((profile) => ({ value: profile.id, label: profile.name }));
+  const selectedProfileId = profileOptions.some(
+    (option) => option.value === draft.profileId
+  )
+    ? draft.profileId
+    : '';
+
+  const selectProfile = (profileId: string) => {
+    setDraft((currentDraft) => {
+      const profile = profiles.find(
+        (option) => option.id === profileId
+      );
+      return {
+        ...currentDraft,
+        profileId,
+        pourNotes: profile ? profile.notes : currentDraft.pourNotes,
+      };
+    });
+  };
+
+  const saveProfile = async () => {
+    if (!draft.brewMethod) {
+      setFormError('Select a brew method before saving a profile.');
+      return;
+    }
+    if (!draft.pourNotes.trim()) {
+      setFormError('Add pour notes before saving a profile.');
+      return;
+    }
+
+    const name = window.prompt('Name for this pour profile:');
+    if (!name || !name.trim()) {
+      return;
+    }
+
+    const trimmedName = name.trim();
+    if (
+      profiles.some(
+        (profile) => profile.name.toLowerCase() === trimmedName.toLowerCase()
+      )
+    ) {
+      setFormError('A profile with this name already exists.');
+      return;
+    }
+
+    setIsSavingProfile(true);
+    try {
+      const profile = await CreateCoffeeProfileAsync({
+        id: '',
+        name: trimmedName,
+        brewMethod: draft.brewMethod,
+        notes: draft.pourNotes,
+      });
+      setProfiles((current) => [...current, profile]);
+      setDraft((currentDraft) => ({
+        ...currentDraft,
+        profileId: profile.id,
+      }));
+      setFormError('');
+    } catch {
+      setFormError('Profile could not be saved.');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const saveEntry = async (event: FormEvent<HTMLFormElement>) => {
@@ -265,6 +353,11 @@ export default function CoffeeEntry() {
               fieldErrors={fieldErrors}
               updateDraft={updateDraft}
               changeRating={changeRating}
+              profileOptions={profileOptions}
+              selectedProfileId={selectedProfileId}
+              isSavingProfile={isSavingProfile}
+              onSelectProfile={selectProfile}
+              onSaveProfile={saveProfile}
             />
 
             <div className={styles.actions}>

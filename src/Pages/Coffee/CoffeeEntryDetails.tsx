@@ -31,13 +31,19 @@ export default function CoffeeEntryDetails({
         </div>
       ))}
 
-      {(tastingNotes || entry.pourNotes) && (
+      {(tastingNotes || entry.pourNotes || entry.sessionNotes) && (
         <div className={styles.entryText}>
           {tastingNotes && <p className={styles.entryNotes}>{tastingNotes}</p>}
           {entry.pourNotes && (
             <p className={styles.entryNotes}>
               <span className={styles.entryNoteLabel}>Pour notes</span>
               {entry.pourNotes}
+            </p>
+          )}
+          {entry.sessionNotes && (
+            <p className={styles.entryNotes}>
+              <span className={styles.entryNoteLabel}>Session notes</span>
+              {entry.sessionNotes}
             </p>
           )}
         </div>

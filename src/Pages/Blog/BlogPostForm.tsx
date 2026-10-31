@@ -3,6 +3,7 @@ import {
   ClipboardEvent,
   FormEvent,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -12,8 +13,11 @@ import { useAuth } from '../../Auth/AuthContext';
 import {
   CreateBlogImageUploadAsync,
   CreateBlogPostAsync,
+  DeleteBlogDraftAsync,
   GetBlogCategoriesAsync,
+  GetBlogDraftAsync,
   GetBlogPostByIdAsync,
+  PutBlogDraftAsync,
   UpdateBlogPostAsync,
   UploadBlogImageAsync,
 } from '../../api/Blog/BlogRouter';
@@ -78,6 +82,8 @@ export default function BlogPostForm() {
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [imageUploadError, setImageUploadError] = useState('');
   const [bodyView, setBodyView] = useState<BodyView>('write');
+  const [restoredDraft, setRestoredDraft] = useState(false);
+  const hasEditedRef = useRef(false);
 
   const { data: categories } = useAsync<BlogCategory[]>(
     (signal) => GetBlogCategoriesAsync(signal),
@@ -144,6 +150,62 @@ export default function BlogPostForm() {
     };
   }, [isEditing, postId, isAdmin, isAuthLoading]);
 
+  // A brand-new post is autosaved to a server-side draft slot. On mount, load
+  // the saved draft (if any) unless the admin has already started typing.
+  useEffect(() => {
+    if (isEditing || isAuthLoading || !isAdmin) {
+      return;
+    }
+
+    const controller = new AbortController();
+    let isMounted = true;
+
+    const loadDraft = async () => {
+      try {
+        const saved = await GetBlogDraftAsync(controller.signal);
+
+        if (isMounted && !hasEditedRef.current) {
+          if (saved.title || saved.body || saved.category || saved.published) {
+            setDraft({
+              title: saved.title,
+              body: saved.body,
+              category: saved.category,
+              published: saved.published,
+            });
+            setRestoredDraft(true);
+          }
+        }
+      } catch {
+        // A failed load just means there is nothing to restore.
+      }
+    };
+
+    loadDraft();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [isEditing, isAuthLoading, isAdmin]);
+
+  // Autosave the draft, debounced, once the admin has made an edit.
+  useEffect(() => {
+    if (isEditing || !hasEditedRef.current) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      PutBlogDraftAsync({
+        title: draft.title,
+        body: draft.body,
+        category: draft.category,
+        published: draft.published,
+      }).catch(() => {});
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [draft, isEditing]);
+
   const canShowForm =
     !isAuthLoading && isAdmin && !isPostLoading && !postLoadFailed;
   const titleIsMissing = draft.title.trim() === '';
@@ -154,6 +216,7 @@ export default function BlogPostForm() {
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { value, type } = event.target;
 
+      hasEditedRef.current = true;
       setDraft((currentDraft) => ({
         ...currentDraft,
         [field]:
@@ -169,6 +232,7 @@ export default function BlogPostForm() {
     start: number,
     end: number
   ) => {
+    hasEditedRef.current = true;
     setDraft((currentDraft) => ({
       ...currentDraft,
       body: currentDraft.body.slice(0, start) + markdown + currentDraft.body.slice(end),
@@ -262,6 +326,10 @@ export default function BlogPostForm() {
         ? await UpdateBlogPostAsync(postId as string, request)
         : await CreateBlogPostAsync(request);
 
+      if (!isEditing) {
+        DeleteBlogDraftAsync().catch(() => {});
+      }
+
       navigate(`${PAGES.BlogPost}/${savedPost.id}`);
     } catch {
       setFormError(
@@ -320,6 +388,12 @@ export default function BlogPostForm() {
         <>
           {formError && (
             <aside className={styles.errorNotice}>{formError}</aside>
+          )}
+
+          {restoredDraft && (
+            <aside className={styles.notice}>
+              Restored an unsaved draft. It saves automatically as you type.
+            </aside>
           )}
 
           <form className={styles.form} onSubmit={savePost}>

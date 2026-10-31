@@ -6,8 +6,11 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   CreateBlogImageUploadAsync,
   CreateBlogPostAsync,
+  DeleteBlogDraftAsync,
   GetBlogCategoriesAsync,
+  GetBlogDraftAsync,
   GetBlogPostByIdAsync,
+  PutBlogDraftAsync,
   UpdateBlogPostAsync,
   UploadBlogImageAsync,
 } from '../../api/Blog/BlogRouter';
@@ -21,6 +24,9 @@ vi.mock('../../api/Blog/BlogRouter', () => ({
   UpdateBlogPostAsync: vi.fn(),
   CreateBlogImageUploadAsync: vi.fn(),
   UploadBlogImageAsync: vi.fn(),
+  GetBlogDraftAsync: vi.fn(),
+  PutBlogDraftAsync: vi.fn(),
+  DeleteBlogDraftAsync: vi.fn(),
 }));
 
 const authState = vi.hoisted(() => ({ isAdmin: false }));
@@ -35,6 +41,9 @@ const mockedCreatePost = vi.mocked(CreateBlogPostAsync);
 const mockedUpdatePost = vi.mocked(UpdateBlogPostAsync);
 const mockedCreateImageUpload = vi.mocked(CreateBlogImageUploadAsync);
 const mockedUploadImage = vi.mocked(UploadBlogImageAsync);
+const mockedGetDraft = vi.mocked(GetBlogDraftAsync);
+const mockedPutDraft = vi.mocked(PutBlogDraftAsync);
+const mockedDeleteDraft = vi.mocked(DeleteBlogDraftAsync);
 
 const renderFormAt = (path: string) =>
   render(
@@ -55,7 +64,23 @@ beforeEach(() => {
   mockedUpdatePost.mockReset();
   mockedCreateImageUpload.mockReset();
   mockedUploadImage.mockReset();
+  mockedGetDraft.mockReset();
+  mockedPutDraft.mockReset();
+  mockedDeleteDraft.mockReset();
   mockedGetCategories.mockResolvedValue([]);
+  mockedGetDraft.mockResolvedValue({
+    title: '',
+    body: '',
+    category: '',
+    published: false,
+  });
+  mockedPutDraft.mockResolvedValue({
+    title: '',
+    body: '',
+    category: '',
+    published: false,
+  });
+  mockedDeleteDraft.mockResolvedValue(undefined);
 });
 
 describe('BlogPostForm', () => {
@@ -224,5 +249,68 @@ describe('BlogPostForm', () => {
       await screen.findByRole('heading', { level: 1, name: 'A heading' })
     ).toBeInTheDocument();
     expect(screen.queryByLabelText('Body')).not.toBeInTheDocument();
+  });
+
+  test('restores a saved draft on open', async () => {
+    authState.isAdmin = true;
+    mockedGetDraft.mockResolvedValue({
+      title: 'Saved title',
+      body: 'Saved body',
+      category: 'Coffee',
+      published: false,
+    });
+
+    renderFormAt('/blog/entry');
+
+    expect(await screen.findByLabelText('Title')).toHaveValue('Saved title');
+    expect(screen.getByLabelText('Category')).toHaveValue('Coffee');
+    expect(screen.getByLabelText('Body')).toHaveValue('Saved body');
+    expect(
+      screen.getByText(/Restored an unsaved draft/)
+    ).toBeInTheDocument();
+  });
+
+  test('autosaves the draft as you type', async () => {
+    authState.isAdmin = true;
+
+    const user = userEvent.setup();
+    renderFormAt('/blog/entry');
+
+    await user.type(await screen.findByLabelText('Title'), 'Hello');
+
+    await waitFor(
+      () =>
+        expect(mockedPutDraft).toHaveBeenCalledWith({
+          title: 'Hello',
+          body: '',
+          category: '',
+          published: false,
+        }),
+      { timeout: 2000 }
+    );
+  });
+
+  test('clears the autosaved draft after creating a post', async () => {
+    authState.isAdmin = true;
+    mockedCreatePost.mockResolvedValue({
+      id: '7',
+      title: 'New title',
+      body: 'Some body',
+      categoryId: 'coffee',
+      category: 'Coffee',
+      published: true,
+      createdAt: '2026-09-01 12:00:00',
+      updatedAt: '2026-09-01 12:00:00',
+    });
+
+    const user = userEvent.setup();
+    renderFormAt('/blog/entry');
+
+    await user.type(await screen.findByLabelText('Title'), 'New title');
+    await user.type(screen.getByLabelText('Category'), 'Coffee');
+    await user.click(screen.getByRole('button', { name: 'Save post' }));
+
+    await waitFor(() => expect(mockedDeleteDraft).toHaveBeenCalled());
+    expect(await screen.findByText('saved post')).toBeInTheDocument();
   });
 });

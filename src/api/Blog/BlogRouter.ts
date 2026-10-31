@@ -90,6 +90,38 @@ export async function DeleteBlogPostAsync(id: string): Promise<void> {
   });
 }
 
+// The in-progress "new post" form is autosaved to a single server-side draft
+// slot so it survives leaving the editor. There is no draft for edits.
+export async function GetBlogDraftAsync(
+  signal?: AbortSignal
+): Promise<BlogPostRequest> {
+  return apiRequest<BlogPostRequest>({
+    method: 'GET',
+    signal,
+    url: '/blog/draft',
+    withCredentials: true,
+  });
+}
+
+export async function PutBlogDraftAsync(
+  draft: BlogPostRequest
+): Promise<BlogPostRequest> {
+  return apiRequest<BlogPostRequest>({
+    method: 'PUT',
+    url: '/blog/draft',
+    data: draft,
+    withCredentials: true,
+  });
+}
+
+export async function DeleteBlogDraftAsync(): Promise<void> {
+  await apiRequest<void>({
+    method: 'DELETE',
+    url: '/blog/draft',
+    withCredentials: true,
+  });
+}
+
 export interface BlogImageUploadTicket {
   objectKey: string;
   uploadUrl: string;

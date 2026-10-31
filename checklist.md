@@ -10,6 +10,7 @@ Remaining work. Tick items off as they land; add new ones as they come up.
 - [ ] Verify listing images load from `img.thomhuang.com` and admin uploads work under the deployed CSP
 - [ ] Deploy page-specific titles, `robots.txt`/`llms.txt`, and the public `/coffee/:id` page; verify titles update on navigation and a brew card links to its page
 - [ ] Deploy the blog feature (`/blog`, `/blog/post/:id`, `/blog/entry`) and verify creating/editing/viewing against test, then prod
+- [ ] Deploy the blog draft autosave (server `/blog/draft` endpoints + `BlogDraft` table must land before the website autosaves a new post)
 
 ## Code cleanup (from the audit)
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ChangeEvent, MouseEvent } from 'react';
+import type { ChangeEvent, CSSProperties, MouseEvent, PointerEvent } from 'react';
 
 import styles from './MusicPlayer.module.css';
 
@@ -101,6 +101,15 @@ export default function MusicPlayer() {
     const [duration, setDuration] = useState(0);
     const [hover, setHover] = useState<{ time: number; x: number } | null>(null);
     const seekingRef = useRef(false);
+    const [position, setPosition] = useState<{ left: number; top: number } | null>(
+        null
+    );
+    const dragRef = useRef<{
+        startX: number;
+        startY: number;
+        startLeft: number;
+        startTop: number;
+    } | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -237,6 +246,45 @@ export default function MusicPlayer() {
         setHover(null);
     };
 
+    const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+        const target = event.target as HTMLElement;
+        if (target.closest('button, input, iframe')) {
+            return;
+        }
+        if (window.matchMedia('(max-width: 640px)').matches) {
+            return;
+        }
+        const rect = event.currentTarget.getBoundingClientRect();
+        dragRef.current = {
+            startX: event.clientX,
+            startY: event.clientY,
+            startLeft: rect.left,
+            startTop: rect.top,
+        };
+        event.currentTarget.setPointerCapture(event.pointerId);
+    };
+
+    const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+        const drag = dragRef.current;
+        if (!drag) {
+            return;
+        }
+        const rect = event.currentTarget.getBoundingClientRect();
+        const left = Math.min(
+            Math.max(drag.startLeft + event.clientX - drag.startX, 0),
+            window.innerWidth - rect.width
+        );
+        const top = Math.min(
+            Math.max(drag.startTop + event.clientY - drag.startY, 0),
+            window.innerHeight - rect.height
+        );
+        setPosition({ left, top });
+    };
+
+    const handlePointerUp = () => {
+        dragRef.current = null;
+    };
+
     const scrubber = (
         <div className={styles.scrubberWrap} onMouseLeave={handleScrubberLeave}>
             {hover !== null && duration > 0 && (
@@ -342,9 +390,21 @@ export default function MusicPlayer() {
         </div>
     );
 
+    const positionStyle: CSSProperties | undefined = position
+        ? { left: position.left, top: position.top, right: 'auto', bottom: 'auto' }
+        : undefined;
+
+    const dragProps = {
+        style: positionStyle,
+        onPointerDown: handlePointerDown,
+        onPointerMove: handlePointerMove,
+        onPointerUp: handlePointerUp,
+        onPointerCancel: handlePointerUp,
+    };
+
     if (view === 'note') {
         return (
-            <div className={styles.player}>
+            <div className={styles.player} {...dragProps}>
                 <div className={styles.hostWrap} aria-hidden="true">
                     <div ref={hostRef} />
                 </div>
@@ -362,7 +422,7 @@ export default function MusicPlayer() {
 
     if (view === 'video') {
         return (
-            <div className={`${styles.player} ${styles.video}`}>
+            <div className={`${styles.player} ${styles.video}`} {...dragProps}>
                 <div className={`${styles.hostWrap} ${styles.hostWrapVisible}`}>
                     <div ref={hostRef} />
                 </div>
@@ -396,7 +456,7 @@ export default function MusicPlayer() {
     }
 
     return (
-        <div className={styles.player}>
+        <div className={styles.player} {...dragProps}>
             <div className={styles.hostWrap} aria-hidden="true">
                 <div ref={hostRef} />
             </div>

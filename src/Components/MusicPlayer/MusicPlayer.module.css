@@ -6,6 +6,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    cursor: grab;
+    user-select: none;
     max-width: min(28rem, calc(100vw - 2rem));
     padding: 0.5rem 0.75rem;
     background: var(--bg);

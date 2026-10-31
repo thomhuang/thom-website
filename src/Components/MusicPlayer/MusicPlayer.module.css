@@ -213,3 +213,25 @@
     align-items: center;
     gap: 0.5rem;
 }
+
+@media (max-width: 640px) {
+    .player {
+        position: relative;
+        max-width: none;
+        margin-bottom: 1rem;
+        border-radius: 0.75rem;
+    }
+
+    .video {
+        width: 100%;
+    }
+
+    .scrubberWrap {
+        flex: 1 1 auto;
+        min-width: 3rem;
+    }
+
+    .scrubber {
+        width: 100%;
+    }
+}

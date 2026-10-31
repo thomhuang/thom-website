@@ -67,8 +67,8 @@ const App = () => {
                 <Route path="*" Component={ErrorPage} />
               </Routes>
             </main>
-            <Footer/>
             <MusicPlayer/>
+            <Footer/>
           </div>
         </CartProvider>
       </AuthProvider>

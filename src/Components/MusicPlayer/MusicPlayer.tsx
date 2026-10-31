@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ChangeEvent, CSSProperties, MouseEvent, PointerEvent } from 'react';
 
 import styles from './MusicPlayer.module.css';
@@ -101,15 +101,16 @@ export default function MusicPlayer() {
     const [duration, setDuration] = useState(0);
     const [hover, setHover] = useState<{ time: number; x: number } | null>(null);
     const seekingRef = useRef(false);
-    const [position, setPosition] = useState<{ left: number; top: number } | null>(
+    const [position, setPosition] = useState<{ left: number; bottom: number } | null>(
         null
     );
     const dragRef = useRef<{
         startX: number;
         startY: number;
         startLeft: number;
-        startTop: number;
+        startBottom: number;
     } | null>(null);
+    const rootRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -178,6 +179,24 @@ export default function MusicPlayer() {
         }, 250);
         return () => window.clearInterval(id);
     }, [ready]);
+
+    useLayoutEffect(() => {
+        if (!position || !rootRef.current) {
+            return;
+        }
+        const rect = rootRef.current.getBoundingClientRect();
+        const left = Math.min(
+            Math.max(position.left, 0),
+            Math.max(0, window.innerWidth - rect.width)
+        );
+        const bottom = Math.min(
+            Math.max(position.bottom, 0),
+            Math.max(0, window.innerHeight - rect.height)
+        );
+        if (left !== position.left || bottom !== position.bottom) {
+            setPosition({ left, bottom });
+        }
+    }, [view, position]);
 
     if (failed) {
         return null;
@@ -259,7 +278,7 @@ export default function MusicPlayer() {
             startX: event.clientX,
             startY: event.clientY,
             startLeft: rect.left,
-            startTop: rect.top,
+            startBottom: window.innerHeight - rect.bottom,
         };
         event.currentTarget.setPointerCapture(event.pointerId);
     };
@@ -274,11 +293,11 @@ export default function MusicPlayer() {
             Math.max(drag.startLeft + event.clientX - drag.startX, 0),
             window.innerWidth - rect.width
         );
-        const top = Math.min(
-            Math.max(drag.startTop + event.clientY - drag.startY, 0),
+        const bottom = Math.min(
+            Math.max(drag.startBottom - (event.clientY - drag.startY), 0),
             window.innerHeight - rect.height
         );
-        setPosition({ left, top });
+        setPosition({ left, bottom });
     };
 
     const handlePointerUp = () => {
@@ -391,7 +410,7 @@ export default function MusicPlayer() {
     );
 
     const positionStyle: CSSProperties | undefined = position
-        ? { left: position.left, top: position.top, right: 'auto', bottom: 'auto' }
+        ? { left: position.left, bottom: position.bottom, right: 'auto', top: 'auto' }
         : undefined;
 
     const dragProps = {
@@ -404,7 +423,7 @@ export default function MusicPlayer() {
 
     if (view === 'note') {
         return (
-            <div className={styles.player} {...dragProps}>
+            <div className={styles.player} ref={rootRef} {...dragProps}>
                 <div className={styles.hostWrap} aria-hidden="true">
                     <div ref={hostRef} />
                 </div>
@@ -422,7 +441,7 @@ export default function MusicPlayer() {
 
     if (view === 'video') {
         return (
-            <div className={`${styles.player} ${styles.video}`} {...dragProps}>
+            <div className={`${styles.player} ${styles.video}`} ref={rootRef} {...dragProps}>
                 <div className={`${styles.hostWrap} ${styles.hostWrapVisible}`}>
                     <div ref={hostRef} />
                 </div>
@@ -456,7 +475,7 @@ export default function MusicPlayer() {
     }
 
     return (
-        <div className={styles.player} {...dragProps}>
+        <div className={styles.player} ref={rootRef} {...dragProps}>
             <div className={styles.hostWrap} aria-hidden="true">
                 <div ref={hostRef} />
             </div>

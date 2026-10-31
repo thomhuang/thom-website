@@ -24,7 +24,22 @@ export default function CoffeeBrewPager({
         disabled={page <= 1}
         aria-label="Previous brews"
       >
-        ‹
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            d="M15 5l-7 7 7 7"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
       <span className={styles.brewPagerCount}>
         {page} / {totalPages}
@@ -36,7 +51,22 @@ export default function CoffeeBrewPager({
         disabled={page >= totalPages}
         aria-label="Next brews"
       >
-        ›
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            d="M9 5l7 7-7 7"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
     </nav>
   );

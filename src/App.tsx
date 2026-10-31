@@ -5,6 +5,7 @@ import styles from './App.module.css';
 import { AuthProvider } from './Auth/AuthContext';
 import Footer from './Components/Footer/Footer';
 import Header from './Components/Header/Header';
+import MusicPlayer from './Components/MusicPlayer/MusicPlayer';
 import Blog from './Pages/Blog/Blog';
 import BlogPost from './Pages/Blog/BlogPost';
 import BlogPostForm from './Pages/Blog/BlogPostForm';
@@ -67,6 +68,7 @@ const App = () => {
               </Routes>
             </main>
             <Footer/>
+            <MusicPlayer/>
           </div>
         </CartProvider>
       </AuthProvider>

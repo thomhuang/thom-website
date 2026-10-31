@@ -1,0 +1,215 @@
+.player {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: min(28rem, calc(100vw - 2rem));
+    padding: 0.5rem 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.video {
+    flex-direction: column;
+    align-items: stretch;
+    width: 20rem;
+    max-width: calc(100vw - 2rem);
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+}
+
+.hostWrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20rem;
+    aspect-ratio: 16 / 9;
+    visibility: hidden;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.hostWrapVisible {
+    position: static;
+    width: 100%;
+    visibility: visible;
+    pointer-events: auto;
+    border-radius: 0.5rem;
+    background: #000;
+}
+
+.hostWrapVisible iframe {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.note {
+    color: var(--muted);
+    flex: none;
+    user-select: none;
+}
+
+.noteButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.noteButton:hover {
+    color: var(--fg);
+}
+
+.title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.75rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scrubber {
+    width: 6rem;
+    flex: none;
+    accent-color: var(--fg);
+    cursor: pointer;
+    margin: 0;
+}
+
+.scrubber:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.scrubberWrap {
+    position: relative;
+    display: flex;
+    flex: none;
+}
+
+.timeTooltip {
+    position: absolute;
+    bottom: calc(100% + 0.5rem);
+    transform: translateX(-50%);
+    padding: 0.1rem 0.4rem;
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.time {
+    flex: none;
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.timeRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timeRow .scrubberWrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.timeRow .scrubber {
+    width: 100%;
+}
+
+.volumeControl {
+    position: relative;
+    flex: none;
+    display: inline-flex;
+}
+
+.volumePopover {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 0.25rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: center;
+}
+
+.volumeSlider {
+    writing-mode: vertical-lr;
+    direction: rtl;
+    width: 1.5rem;
+    height: 6rem;
+    accent-color: var(--fg);
+    cursor: pointer;
+    margin: 0;
+}
+
+.volumeSlider:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--fg);
+    flex: none;
+}
+
+.control:hover:not(:disabled) {
+    background: var(--border);
+}
+
+.control:disabled {
+    color: var(--muted);
+    cursor: default;
+}
+
+.control svg {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+}
+
+.videoBar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.videoControls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

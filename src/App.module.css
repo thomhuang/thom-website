@@ -10,4 +10,5 @@
 .main {
     margin: 2.5rem 0 3rem;
     flex: 1;
+    position: relative;
 }

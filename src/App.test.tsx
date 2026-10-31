@@ -33,27 +33,15 @@ const renderAt = (path: string) => {
 };
 
 describe('route smoke tests', () => {
-  test('home page renders', async () => {
-    renderAt('/');
+  test('home page renders', () => {
+    const { container } = renderAt('/');
 
     expect(
-      await screen.findByText("Hi, I'm Thomas.")
+      screen.getByRole('link', { name: 'resume' })
     ).toBeInTheDocument();
     expect(
-      await screen.findByText(
-        (_content, element) =>
-          Boolean(
-            element?.textContent?.includes('Feel free to check out my coffee log')
-          ),
-        { selector: 'p' }
-      )
+      container.querySelector('pre[aria-hidden="true"]')
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: 'coffee log' })
-    ).toHaveAttribute('href', '/coffee');
-    expect(
-      within(screen.getByRole('main')).getByRole('link', { name: 'shop' })
-    ).toHaveAttribute('href', '/shop');
   });
 
   test('blog page renders its empty state', async () => {

@@ -1,77 +1,13 @@
-import { Link } from "react-router-dom";
-
 import AsciiFigure from "../../Components/AsciiFigure/AsciiFigure";
-import { PAGES } from "../../Assets/constants";
 import { useDocumentTitle } from "../../hooks";
 import styles from "./HomePage.module.css";
-
-// Public assets are served from the root, so we only need the glob's keys to
-// discover the newest document and link to it directly. Importing them would
-// make Vite try to process files that already live in `public/`.
-const documents = import.meta.glob("/public/documents/*");
 
 export default function HomePage() {
   useDocumentTitle("Thomas Huang");
 
-  const files = Object.keys(documents).sort();
-  const resumeHref = (files[files.length - 1] ?? "").replace("/public/", "/");
-
   return (
-    <div>
-      <p className={styles.header}>Hi, I'm Thomas.</p>
-      <div className={styles.layout}>
-        <div className={styles.body}>
-        <p>
-          {"I'm a backend software engineer at Homes.com. Here's my "}
-          <a
-            className={styles.click}
-            href={resumeHref}
-            target="_blank"
-            rel="noreferrer"
-          >
-            resume
-          </a>
-          .
-        </p>
-        <p>
-          Feel free to check out my{" "}
-          <Link className={styles.click} to={PAGES.Coffee}>
-            coffee log
-          </Link>{" "}
-          and my{" "}
-          <Link className={styles.click} to={PAGES.Shop}>
-            shop
-          </Link>
-          , where I'll be selling random things of mine.
-        </p>
-        <p>
-          You can find my work on{" "}
-          <a
-            className={styles.click}
-            href="https://github.com/thomhuang/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            GitHub
-          </a>
-          , and reach me via{" "}
-          <a className={styles.click} href="mailto:thomaskhuangg@gmail.com">
-            email
-          </a>
-          {" or "}
-          <a
-            className={styles.click}
-            href="https://www.linkedin.com/in/thomaskhuang/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            LinkedIn
-          </a>
-          .
-        </p>
-        </div>
-        <AsciiFigure size="large" />
-      </div>
+    <div className={styles.figure}>
+      <AsciiFigure size="large" />
     </div>
   );
 }

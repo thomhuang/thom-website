@@ -271,10 +271,10 @@ describe('Coffee journal', () => {
     ).toBeInTheDocument();
   });
 
-  test('paginates brews within a coffee, five per page', async () => {
+  test('paginates brews within a coffee, three per page', async () => {
     const user = userEvent.setup();
     mockedGetEntries.mockResolvedValue(
-      Array.from({ length: 6 }, (_, index) =>
+      Array.from({ length: 4 }, (_, index) =>
         makeEntry({
           id: String(index + 1),
           coffeeName: 'Ethiopia Guji',
@@ -287,7 +287,7 @@ describe('Coffee journal', () => {
 
     await screen.findByRole('heading', { level: 3, name: 'Onyx' });
 
-    expect(screen.getAllByRole('article')).toHaveLength(5);
+    expect(screen.getAllByRole('article')).toHaveLength(3);
 
     await user.click(screen.getByRole('button', { name: 'Next' }));
 

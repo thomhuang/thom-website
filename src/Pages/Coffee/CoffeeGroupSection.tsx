@@ -5,7 +5,7 @@ import { PAGES } from '../../Assets/constants';
 import type { CoffeeEntrySummary } from '../../api/Coffee/CoffeeRouter';
 import CoffeeEntryCard from './CoffeeEntryCard';
 import CoffeePager from './CoffeePager';
-import { getTotalPages, useCoffeePageSize } from './coffeePagination';
+import { getTotalPages, useBrewPageSize } from './coffeePagination';
 import {
   formatCoffeeMetadata,
   formatCount,
@@ -37,7 +37,7 @@ export default function CoffeeGroupSection({
   const brewCount = formatCount(group.entries.length, 'brew', 'brews');
 
   const [entryPage, setEntryPage] = useState(1);
-  const pageSize = useCoffeePageSize();
+  const pageSize = useBrewPageSize();
   const totalPages = getTotalPages(group.entries.length, pageSize);
   const currentPage = Math.min(entryPage, totalPages);
   const pageEntries = group.entries.slice(

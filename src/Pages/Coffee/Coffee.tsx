@@ -18,8 +18,10 @@ import type {
 } from '../../api/Coffee/CoffeeRouter';
 import AsciiFigure from '../../Components/AsciiFigure/AsciiFigure';
 import CoffeeFilters from './CoffeeFilters';
+import CoffeePager from './CoffeePager';
 import CoffeeProfileManager from './CoffeeProfileManager';
 import CoffeeRoasterSection from './CoffeeRoasterSection';
+import { getTotalPages, useCoffeePageSize } from './coffeePagination';
 import {
   filterEntries,
   getBrewMethodOptions,
@@ -39,6 +41,8 @@ export default function Coffee() {
   const [selectedBrewMethod, setSelectedBrewMethod] = useState('');
   const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>('C');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [roasterPage, setRoasterPage] = useState(1);
+  const pageSize = useCoffeePageSize();
 
   const {
     data,
@@ -106,11 +110,41 @@ export default function Coffee() {
     selectedBrewMethod,
     roasterOptions,
   });
+  const roasterGroups = groupEntriesByRoaster(visibleLogs);
+  const totalPages = getTotalPages(roasterGroups.length, pageSize);
+  const currentPage = Math.min(roasterPage, totalPages);
+  const pageGroups = roasterGroups.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
   const hasFilters =
     roasterOptions.length > 0 ||
     grinderOptions.length > 0 ||
     brewMethodOptions.length > 0;
   const canManage = !isAuthLoading && isAdmin;
+
+  // Changing the result set starts back at the first page.
+  const changeRoaster = (roasterId: string) => {
+    setSelectedRoasterId(roasterId);
+    setRoasterPage(1);
+  };
+
+  const changeGrinder = (grinderId: string) => {
+    setSelectedGrinderId(grinderId);
+    setRoasterPage(1);
+  };
+
+  const changeBrewMethod = (brewMethod: string) => {
+    setSelectedBrewMethod(brewMethod);
+    setRoasterPage(1);
+  };
+
+  // Keep the page in range when the result set shrinks (filter change or
+  // deletion). Adjusting during render is React's alternative to an effect
+  // here, and avoids committing a frame with an out-of-range page.
+  if (roasterPage > totalPages) {
+    setRoasterPage(totalPages);
+  }
 
   return (
     <main className={styles.page}>
@@ -144,9 +178,9 @@ export default function Coffee() {
             selectedGrinderId={selectedGrinderId}
             selectedBrewMethod={selectedBrewMethod}
             onToggle={() => setFiltersOpen((open) => !open)}
-            onRoasterChange={setSelectedRoasterId}
-            onGrinderChange={setSelectedGrinderId}
-            onBrewMethodChange={setSelectedBrewMethod}
+            onRoasterChange={changeRoaster}
+            onGrinderChange={changeGrinder}
+            onBrewMethodChange={changeBrewMethod}
           />
         )}
 
@@ -180,18 +214,26 @@ export default function Coffee() {
           {isLoading ? (
             <p className={styles.statusText}>Loading brew entries...</p>
           ) : visibleLogs.length > 0 ? (
-            <div className={styles.roasterGroups}>
-              {groupEntriesByRoaster(visibleLogs).map((group) => (
-                <CoffeeRoasterSection
-                  key={group.key}
-                  group={group}
-                  temperatureUnit={temperatureUnit}
-                  canManage={canManage}
-                  deletingEntryId={deletingEntryId}
-                  onDelete={deleteEntry}
-                />
-              ))}
-            </div>
+            <>
+              <div className={styles.roasterGroups}>
+                {pageGroups.map((group) => (
+                  <CoffeeRoasterSection
+                    key={group.key}
+                    group={group}
+                    temperatureUnit={temperatureUnit}
+                    canManage={canManage}
+                    deletingEntryId={deletingEntryId}
+                    onDelete={deleteEntry}
+                  />
+                ))}
+              </div>
+              <CoffeePager
+                label="Roasters"
+                page={currentPage}
+                totalPages={totalPages}
+                onPageChange={setRoasterPage}
+              />
+            </>
           ) : (
             <div className={styles.emptyJournal}>
               <p>

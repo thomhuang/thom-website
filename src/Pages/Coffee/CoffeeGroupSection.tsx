@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 import { PAGES } from '../../Assets/constants';
 import type { CoffeeEntrySummary } from '../../api/Coffee/CoffeeRouter';
 import CoffeeEntryCard from './CoffeeEntryCard';
+import CoffeePager from './CoffeePager';
+import { getTotalPages, useCoffeePageSize } from './coffeePagination';
 import {
   formatCoffeeMetadata,
   formatCount,
@@ -33,6 +36,20 @@ export default function CoffeeGroupSection({
   const groupMeta = coffeeMetadata.join(' · ');
   const brewCount = formatCount(group.entries.length, 'brew', 'brews');
 
+  const [entryPage, setEntryPage] = useState(1);
+  const pageSize = useCoffeePageSize();
+  const totalPages = getTotalPages(group.entries.length, pageSize);
+  const currentPage = Math.min(entryPage, totalPages);
+  const pageEntries = group.entries.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // Keep the page in range when an entry is deleted.
+  if (entryPage > totalPages) {
+    setEntryPage(totalPages);
+  }
+
   return (
     <section className={styles.coffeeGroup}>
       <details className={styles.groupDetails}>
@@ -55,7 +72,7 @@ export default function CoffeeGroupSection({
         {groupMeta && <p className={styles.entryMeta}>{groupMeta}</p>}
 
         <div className={styles.entryGrid}>
-          {group.entries.map((entry) => (
+          {pageEntries.map((entry) => (
             <CoffeeEntryCard
               key={entry.id}
               entry={entry}
@@ -66,6 +83,13 @@ export default function CoffeeGroupSection({
             />
           ))}
         </div>
+
+        <CoffeePager
+          label="Brews"
+          page={currentPage}
+          totalPages={totalPages}
+          onPageChange={setEntryPage}
+        />
       </details>
     </section>
   );

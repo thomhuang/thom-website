@@ -411,6 +411,40 @@
   color: var(--muted);
 }
 
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.pagerButton {
+  min-width: 2.25rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.pagerButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pagerCurrent {
+  border-color: var(--fg);
+  font-weight: 600;
+}
+
+.pagerEllipsis {
+  color: var(--muted);
+}
+
 .form {
   display: flex;
   flex-direction: column;

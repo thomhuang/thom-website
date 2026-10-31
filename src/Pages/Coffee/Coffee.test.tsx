@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
   GetCoffeeEntriesAsync,
@@ -73,6 +74,10 @@ beforeEach(() => {
   mockedGetRoasters.mockResolvedValue([]);
   mockedGetGrinders.mockResolvedValue([]);
   mockedGetProfiles.mockResolvedValue([]);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe('Coffee journal', () => {
@@ -214,5 +219,114 @@ describe('Coffee journal', () => {
 
     const link = await screen.findByRole('link', { name: 'V60' });
     expect(link).toHaveAttribute('href', '/coffee/7');
+  });
+
+  test('paginates roasters, five per page', async () => {
+    const user = userEvent.setup();
+    mockedGetEntries.mockResolvedValue(
+      Array.from({ length: 6 }, (_, index) =>
+        makeEntry({
+          id: String(index + 1),
+          coffeeName: `Coffee ${index + 1}`,
+          roaster: `Roaster ${index + 1}`,
+        })
+      )
+    );
+
+    renderCoffee();
+
+    expect(await screen.findAllByRole('heading', { level: 3 })).toHaveLength(5);
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(1);
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Roaster 6' })
+    ).toBeInTheDocument();
+  });
+
+  test('paginates coffees within a roaster, five per page', async () => {
+    const user = userEvent.setup();
+    mockedGetEntries.mockResolvedValue(
+      Array.from({ length: 6 }, (_, index) =>
+        makeEntry({
+          id: String(index + 1),
+          coffeeName: `Coffee ${index + 1}`,
+          roaster: 'Onyx',
+        })
+      )
+    );
+
+    renderCoffee();
+
+    await screen.findByRole('heading', { level: 3, name: 'Onyx' });
+
+    expect(screen.getAllByRole('heading', { level: 4 })).toHaveLength(5);
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(screen.getAllByRole('heading', { level: 4 })).toHaveLength(1);
+    expect(
+      screen.getByRole('heading', { level: 4, name: 'Coffee 6' })
+    ).toBeInTheDocument();
+  });
+
+  test('paginates brews within a coffee, five per page', async () => {
+    const user = userEvent.setup();
+    mockedGetEntries.mockResolvedValue(
+      Array.from({ length: 6 }, (_, index) =>
+        makeEntry({
+          id: String(index + 1),
+          coffeeName: 'Ethiopia Guji',
+          roaster: 'Onyx',
+        })
+      )
+    );
+
+    renderCoffee();
+
+    await screen.findByRole('heading', { level: 3, name: 'Onyx' });
+
+    expect(screen.getAllByRole('article')).toHaveLength(5);
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(screen.getAllByRole('article')).toHaveLength(1);
+  });
+
+  test('paginates roasters, three per page on mobile', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'matchMedia').mockImplementation((query: string) => ({
+      matches:
+        query === '(max-width: 640px)' || query === '(max-width: 1024px)',
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }) as unknown as MediaQueryList);
+
+    mockedGetEntries.mockResolvedValue(
+      Array.from({ length: 4 }, (_, index) =>
+        makeEntry({
+          id: String(index + 1),
+          coffeeName: `Coffee ${index + 1}`,
+          roaster: `Roaster ${index + 1}`,
+        })
+      )
+    );
+
+    renderCoffee();
+
+    expect(await screen.findAllByRole('heading', { level: 3 })).toHaveLength(3);
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(1);
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Roaster 4' })
+    ).toBeInTheDocument();
   });
 });

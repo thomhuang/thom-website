@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { PAGES } from '../../Assets/constants';
 import type { CoffeeEntrySummary } from '../../api/Coffee/CoffeeRouter';
 import CoffeeEntryCard from './CoffeeEntryCard';
-import CoffeePager from './CoffeePager';
+import CoffeeBrewPager from './CoffeeBrewPager';
 import { getTotalPages, useBrewPageSize } from './coffeePagination';
 import {
   formatCoffeeMetadata,
@@ -84,8 +84,7 @@ export default function CoffeeGroupSection({
           ))}
         </div>
 
-        <CoffeePager
-          label="Brews"
+        <CoffeeBrewPager
           page={currentPage}
           totalPages={totalPages}
           onPageChange={setEntryPage}

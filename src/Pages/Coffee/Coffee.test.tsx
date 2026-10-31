@@ -288,10 +288,12 @@ describe('Coffee journal', () => {
     await screen.findByRole('heading', { level: 3, name: 'Onyx' });
 
     expect(screen.getAllByRole('article')).toHaveLength(3);
+    expect(screen.getByText('1 / 2')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Next' }));
+    await user.click(screen.getByRole('button', { name: 'Next brews' }));
 
     expect(screen.getAllByRole('article')).toHaveLength(1);
+    expect(screen.getByText('2 / 2')).toBeInTheDocument();
   });
 
   test('paginates roasters, three per page on mobile', async () => {

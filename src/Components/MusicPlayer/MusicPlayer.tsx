@@ -101,13 +101,13 @@ export default function MusicPlayer() {
     const [duration, setDuration] = useState(0);
     const [hover, setHover] = useState<{ time: number; x: number } | null>(null);
     const seekingRef = useRef(false);
-    const [position, setPosition] = useState<{ left: number; bottom: number } | null>(
+    const [position, setPosition] = useState<{ right: number; bottom: number } | null>(
         null
     );
     const dragRef = useRef<{
         startX: number;
         startY: number;
-        startLeft: number;
+        startRight: number;
         startBottom: number;
     } | null>(null);
     const rootRef = useRef<HTMLDivElement>(null);
@@ -185,16 +185,16 @@ export default function MusicPlayer() {
             return;
         }
         const rect = rootRef.current.getBoundingClientRect();
-        const left = Math.min(
-            Math.max(position.left, 0),
+        const right = Math.min(
+            Math.max(position.right, 0),
             Math.max(0, window.innerWidth - rect.width)
         );
         const bottom = Math.min(
             Math.max(position.bottom, 0),
             Math.max(0, window.innerHeight - rect.height)
         );
-        if (left !== position.left || bottom !== position.bottom) {
-            setPosition({ left, bottom });
+        if (right !== position.right || bottom !== position.bottom) {
+            setPosition({ right, bottom });
         }
     }, [view, position]);
 
@@ -277,7 +277,7 @@ export default function MusicPlayer() {
         dragRef.current = {
             startX: event.clientX,
             startY: event.clientY,
-            startLeft: rect.left,
+            startRight: window.innerWidth - rect.right,
             startBottom: window.innerHeight - rect.bottom,
         };
         event.currentTarget.setPointerCapture(event.pointerId);
@@ -289,15 +289,15 @@ export default function MusicPlayer() {
             return;
         }
         const rect = event.currentTarget.getBoundingClientRect();
-        const left = Math.min(
-            Math.max(drag.startLeft + event.clientX - drag.startX, 0),
+        const right = Math.min(
+            Math.max(drag.startRight - (event.clientX - drag.startX), 0),
             window.innerWidth - rect.width
         );
         const bottom = Math.min(
             Math.max(drag.startBottom - (event.clientY - drag.startY), 0),
             window.innerHeight - rect.height
         );
-        setPosition({ left, bottom });
+        setPosition({ right, bottom });
     };
 
     const handlePointerUp = () => {
@@ -410,7 +410,7 @@ export default function MusicPlayer() {
     );
 
     const positionStyle: CSSProperties | undefined = position
-        ? { left: position.left, bottom: position.bottom, right: 'auto', top: 'auto' }
+        ? { right: position.right, bottom: position.bottom, left: 'auto', top: 'auto' }
         : undefined;
 
     const dragProps = {

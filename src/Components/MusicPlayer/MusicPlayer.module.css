@@ -216,7 +216,8 @@
 
 @media (max-width: 640px) {
     .player {
-        position: relative;
+        position: sticky;
+        bottom: 0;
         max-width: none;
         margin-bottom: 1rem;
         border-radius: 0.75rem;

@@ -343,7 +343,7 @@ export default function MusicPlayer() {
             aria-label={playing ? 'Pause' : 'Play'}
             disabled={!ready}
         >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
                 {playing ? (
                     <path d="M6 5h4v14H6zm8 0h4v14h-4z" />
                 ) : (
@@ -361,7 +361,7 @@ export default function MusicPlayer() {
             aria-label={muted ? 'Unmute' : 'Mute'}
             disabled={!ready}
         >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
                 <path d="M3 9v6h4l5 5V4L7 9H3z" />
                 {muted ? (
                     <path

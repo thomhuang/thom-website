@@ -409,6 +409,17 @@ export default function MusicPlayer() {
         </div>
     );
 
+    const resetButton = position !== null ? (
+        <button
+            type="button"
+            className={styles.control}
+            onClick={() => setPosition(null)}
+            aria-label="Reset position"
+        >
+            ◎
+        </button>
+    ) : null;
+
     const positionStyle: CSSProperties | undefined = position
         ? { right: position.right, bottom: position.bottom, left: 'auto', top: 'auto' }
         : undefined;
@@ -469,6 +480,7 @@ export default function MusicPlayer() {
                 <div className={styles.videoControls}>
                     {playPause}
                     {volumeControl}
+                    {resetButton}
                 </div>
             </div>
         );
@@ -507,6 +519,7 @@ export default function MusicPlayer() {
             >
                 ×
             </button>
+            {resetButton}
         </div>
     );
 }

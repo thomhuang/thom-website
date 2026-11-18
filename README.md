@@ -139,4 +139,4 @@ are gitignored. Read the `.example` files for the shape of the config instead.
   token is the credential — unlike the session-keyed `PublicShopOrder`
   confirmation lookup. Treat the token as a secret: do not log or forward the URL.
 
-See `CLOUDFLARE.md` for deploy specifics and `checklist.md` for open work.
+See `CLOUDFLARE.md` for deploy specifics.

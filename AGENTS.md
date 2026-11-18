@@ -1,12 +1,5 @@
 # Repository Guidelines
 
-## Session board
-
-If a shared session board (a `BOARD.md` next to the repositories you work on)
-exists, read it before starting work, and when you stop, append an entry above
-its END sentinel using `edit` (never `write`, which replaces the whole file).
-It is a shared live log, not a lock, and the repos remain the source of truth.
-
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
@@ -67,41 +60,34 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
 
-## Coding Style
+## Project Structure & Commands
 
-Use TypeScript with functional React components where the stack is React. Avoid
-`any`; type component props, API responses, and environment boundaries
-explicitly. Keep page-specific loading, form, and error state local; shared
-state belongs in dedicated auth/context modules. Use the project's existing
-styling approach (e.g., CSS Modules and design tokens) instead of inventing new
-conventions. Match the surrounding files' casing, quotes, and structure.
+Single Vite + React + TypeScript app backed by `thom-server`. Entry wiring is in `src/index.tsx` and routes in `src/App.tsx` (route constants in `src/Assets/constants.tsx`); pages live in `src/Pages/<Domain>/`, reusable UI in `src/Components/`, auth state in `src/Auth/AuthContext.tsx`, typed axios clients and DTOs in `src/api/<Domain>/` (`src/api/config.ts` defaults to `http://localhost:4000` in dev and `/api` in prod), shared hooks in `src/hooks.tsx` and `src/useAsync.ts`, and design tokens/base styles in `src/index.css` with component-local `*.module.css`. Static assets and Cloudflare headers (`public/_headers`) live in `public/`, fronted by `worker/index.js`.
 
-Keep comments to a minimum: write them only when they clarify something
-ambiguous or that is not clear from the code itself, not to restate it.
+- `npm start`: Vite dev server on `http://localhost:3000`.
+- `npm run typecheck && npm run lint && npx vitest run`: non-interactive verification check (`npm test` runs Vitest watch mode).
+- `npm run build`: production bundle into `dist/`.
+- `npx wrangler deploy` (production `thom-website`) / `npx wrangler deploy -c wrangler.test.jsonc` (test `thom-website-test`).
 
-## Testing
+## Coding Style & Data-Fetching Conventions
 
-Write tests near the code they cover. Prioritize route smoke tests, API-client
-behavior, loading states, empty states, errors, and responsive rendering for
-user-facing changes. Run the project's checks (typecheck, lint, tests) before
-declaring work done.
+Use TypeScript with functional React components. Avoid `any`; type component props, API responses, and environment boundaries explicitly. Keep page-specific loading, form, and error state local; shared state belongs in dedicated context modules (`AuthContext`, `CartContext`). Style with CSS Modules and existing tokens from `src/index.css`. Match surrounding casing, quotes, and structure, and keep comments to clarifying non-obvious behavior.
 
-## Committing
+- **Read-only data loads:** use `useAsync` (`src/useAsync.ts`) rather than ad-hoc `useEffect` fetch chains. Exceptions are effects that seed editable local form drafts (`BlogPostForm`, `ShopItemForm`, `useCoffeeEntryLoader`) or merge fetched lookups into local state (`useCoffeeLookup`).
+- **Derived & pagination state:** do not sync derived state in `useEffect` — reset pages inside filter/sort change handlers and clamp page bounds during render.
 
-Keep commits short, descriptive, and focused: avoid mixing broad refactors with
-feature work. Pull requests should include a concise summary, the verification
-commands run, linked issues when relevant, and screenshots or recordings for
-visual changes.
+## Edge Proxy, Caching & Security
 
-## Security
+- **Same-origin `/api/*` proxy (`worker/index.js`):** forwards `/api/*` to `thom-server` over a Cloudflare service binding so `__Host-` auth cookies stay first-party. Anonymous `GET`s on allowlisted public paths use the Worker Cache API, while any request carrying a `Cookie` header bypasses the cache so admin edits appear immediately.
+- **CSP (`public/_headers`):** `img-src` (`https://img.thomhuang.com`, `https://*.r2.dev`) and `connect-src` (`https://*.r2.cloudflarestorage.com`) must match R2 buckets/domains or browser image loads and presigned PUT uploads break.
+- **Secrets & env:** never commit secrets or put them in `VITE_*` variables (embedded in the client bundle). Keep network calls inside `src/api/`; hidden UI (`useAuth().isAdmin`) is not security. Treat real `.env*` and `.dev.vars*` files as off-limits for reading or printing; read `.env.example` for shape.
 
-Never commit secrets or keys. Keep network and service-access logic in a
-dedicated API layer; hidden UI is not security. Build-time environment
-variables are public by design, so never put secrets in them. Consult the
-committed `.example` env files for config shape; treat real `.env*` and
-`.dev.vars*` files as off-limits for reading or printing.
+## Testing, Committing & Cross-Repo Contract
 
-## Remaining Work
+Write colocated `*.test.tsx` / `*.test.ts` tests (Vitest + React Testing Library). Prioritize route smoke tests, API-client behavior, loading/empty/error states, and responsive breakpoints. Run `npm run typecheck && npm run lint && npx vitest run` before declaring work done. Keep commits short, lowercase, and focused (e.g., `fix(coffee): center brew pager chevrons with inline SVG`).
 
-Track open items in `checklist.md` when one exists; tick items off as they land
-and add new ones as they come up.
+- **Paired backend (`thom-server`):** DTOs in `src/api/<Domain>/` mirror `thom-server/internal/server/<domain>` manually (no codegen). Deploy additive server schema/routes before website callers. Production deploys via Workers Builds from `release` (`git push origin main:release`); check unpromoted commits in both repos with `git log --oneline origin/release..origin/main`.
+
+## Domain Reference Skills
+
+Detailed UI and domain conventions for Blog, Shop, and Coffee live in `.agents/skills/website-domains/SKILL.md` (loaded on demand when working in `src/Pages/` or `src/api/`).

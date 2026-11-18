@@ -35,4 +35,12 @@ describe('checkoutErrorMessage', () => {
 
     expect(message).toBe('This item is sold out.');
   });
+
+  test('reports remaining inventory when partial stock is available', () => {
+    const message = checkoutErrorMessage(
+      axiosError(409, { title: 'Test mug', available: 2 })
+    );
+
+    expect(message).toBe('Only 2 of Test mug left in stock.');
+  });
 });

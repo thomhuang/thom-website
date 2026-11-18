@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { PAGES } from '../../Assets/constants';
@@ -36,13 +36,20 @@ export default function ShopItem() {
     error: itemError,
   } = useAsync<ShopItemResponse | null>(
     (signal) => GetShopItemByIdAsync(itemId ?? '', signal),
-    [itemId],
+    [itemId, isAdmin],
     {
       enabled: Boolean(itemId),
       initialData: null,
       errorMessage: 'Listing could not be found.',
     }
   );
+
+  useEffect(() => {
+    setSelectedImageUrl('');
+    setFailedImageUrl('');
+    setCheckoutError('');
+    setAddedToCart(false);
+  }, [itemId]);
 
   useDocumentTitle(item ? item.title : 'Shop');
 
@@ -159,7 +166,7 @@ export default function ShopItem() {
             type="button"
             className={styles.buyButton}
             onClick={startCheckout}
-            disabled={isSoldOut || isCheckingOut}
+            disabled={isSoldOut || isCheckingOut || !item.isPublished}
           >
             {isSoldOut
               ? 'Sold out'
@@ -171,7 +178,7 @@ export default function ShopItem() {
             type="button"
             className={styles.addButton}
             onClick={addItemToCart}
-            disabled={isSoldOut}
+            disabled={isSoldOut || !item.isPublished}
           >
             {addedToCart ? 'Added to cart' : 'Add to cart'}
           </button>

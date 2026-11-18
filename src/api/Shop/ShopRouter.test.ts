@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { apiRequest } from '../client';
 import {
+  GetShopOrderAsync,
   GetShopOrderByTokenAsync,
   GetShopOrdersAsync,
   UpdateShopItemsPublicationAsync,
@@ -40,6 +41,20 @@ describe('GetShopOrdersAsync', () => {
         url: '/shop/orders?cursor=abc&limit=5',
       })
     );
+  });
+});
+
+describe('GetShopOrderAsync', () => {
+  test('URL-encodes sessionId and omits credentials', async () => {
+    mockedApiRequest.mockResolvedValue({});
+
+    await GetShopOrderAsync('../orders');
+
+    expect(mockedApiRequest).toHaveBeenCalledWith({
+      method: 'GET',
+      signal: undefined,
+      url: '/shop/orders/..%2Forders',
+    });
   });
 });
 

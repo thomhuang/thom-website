@@ -74,7 +74,7 @@ export default function Shop() {
 
       return { items: loadedItems, brands: loadedBrands };
     },
-    [],
+    [isAdmin],
     {
       initialData: {
         items: [] as ShopItemSummary[],
@@ -300,7 +300,7 @@ export default function Shop() {
       ) : visibleItems.length > 0 ? (
         <>
           <p className={styles.statusText}>
-            {items.length} item{items.length === 1 ? '' : 's'}
+            {visibleItems.length} item{visibleItems.length === 1 ? '' : 's'}
           </p>
           <section
             ref={gridRef}

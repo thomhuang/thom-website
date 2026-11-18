@@ -84,6 +84,7 @@ export default function Cart() {
               </Link>
               <p className={styles.cardMeta}>
                 {formatPrice(line.priceCents, line.currency)} each
+                {line.quantity > 1 ? ` × ${line.quantity}` : ''}
               </p>
             </div>
             <p className={styles.cartLineTotal}>

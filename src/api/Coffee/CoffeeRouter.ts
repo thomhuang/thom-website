@@ -31,17 +31,17 @@ export interface CoffeeEntrySummary {
 }
 
 export interface CoffeeEntry extends CoffeeEntrySummary {
-  daysSinceRoast: number;
+  daysSinceRoast?: number;
   roasterId: string;
   grinderId: string;
   grinder: string;
-  grindSetting: number;
-  dose: number;
-  yieldAmount: number;
-  waterTemperature: number;
+  grindSetting?: number;
+  dose?: number;
+  yieldAmount?: number;
+  waterTemperature?: number;
   brewTime: string;
   bloomTime: string;
-  bloomWater: number;
+  bloomWater?: number;
   pourNotes: string;
   profileId?: string;
   sessionNotes?: string;

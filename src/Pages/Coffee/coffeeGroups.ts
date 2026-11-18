@@ -37,7 +37,7 @@ export const formatCoffeeMetadata = (entry: CoffeeEntrySummary) =>
     .join(' / ');
 
 export const formatDaysSinceRoast = (daysSinceRoast?: number) => {
-  if (daysSinceRoast == null) {
+  if (daysSinceRoast == null || daysSinceRoast <= 0) {
     return '';
   }
 
@@ -45,7 +45,7 @@ export const formatDaysSinceRoast = (daysSinceRoast?: number) => {
 };
 
 export const formatGrams = (value?: number) =>
-  value != null ? `${value} g` : '';
+  value != null && value > 0 ? `${value} g` : '';
 
 export const formatBloom = (entry: CoffeeEntrySummary) =>
   [entry.bloomTime, formatGrams(entry.bloomWater)].filter(Boolean).join(' / ');
@@ -76,7 +76,10 @@ export const getEntryStatGroups = (
         { label: 'Grinder', value: entry.grinder || '' },
         {
           label: 'Grind',
-          value: entry.grindSetting != null ? String(entry.grindSetting) : '',
+          value:
+            entry.grindSetting != null && entry.grindSetting > 0
+              ? String(entry.grindSetting)
+              : '',
         },
       ],
     },

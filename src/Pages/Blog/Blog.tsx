@@ -31,8 +31,11 @@ export default function Blog() {
     error: blogError,
   } = useAsync<BlogPost[]>(
     (signal) => GetBlogPostsAsync(selectedCategoryId || undefined, signal),
-    [selectedCategoryId],
-    { initialData: [], errorMessage: 'Blog posts could not be loaded.' }
+    [selectedCategoryId, isAdmin],
+    {
+      initialData: [],
+      errorMessage: 'Blog posts could not be loaded.',
+    }
   );
 
   const changeCategory = (categoryId: string) => {

@@ -84,6 +84,7 @@ export default function BlogPostForm() {
   const [bodyView, setBodyView] = useState<BodyView>('write');
   const [restoredDraft, setRestoredDraft] = useState(false);
   const hasEditedRef = useRef(false);
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: categories } = useAsync<BlogCategory[]>(
     (signal) => GetBlogCategoriesAsync(signal),
@@ -96,6 +97,8 @@ export default function BlogPostForm() {
 
   useEffect(() => {
     if (!isEditing || !postId) {
+      hasEditedRef.current = false;
+      setRestoredDraft(false);
       setDraft(createEmptyDraft());
       setFormError('');
       setPostLoadFailed(false);
@@ -190,11 +193,12 @@ export default function BlogPostForm() {
 
   // Autosave the draft, debounced, once the admin has made an edit.
   useEffect(() => {
-    if (isEditing || !hasEditedRef.current) {
+    if (isEditing || isSubmitting || !hasEditedRef.current) {
       return;
     }
 
     const timer = setTimeout(() => {
+      autosaveTimerRef.current = null;
       PutBlogDraftAsync({
         title: draft.title,
         body: draft.body,
@@ -202,9 +206,15 @@ export default function BlogPostForm() {
         published: draft.published,
       }).catch(() => {});
     }, 1000);
+    autosaveTimerRef.current = timer;
 
-    return () => clearTimeout(timer);
-  }, [draft, isEditing]);
+    return () => {
+      clearTimeout(timer);
+      if (autosaveTimerRef.current === timer) {
+        autosaveTimerRef.current = null;
+      }
+    };
+  }, [draft, isEditing, isSubmitting]);
 
   const canShowForm =
     !isAuthLoading && isAdmin && !isPostLoading && !postLoadFailed;
@@ -229,17 +239,32 @@ export default function BlogPostForm() {
   const insertImageMarkdown = (
     textarea: HTMLTextAreaElement,
     markdown: string,
-    start: number,
-    end: number
+    fallbackStart: number,
+    fallbackEnd: number
   ) => {
     hasEditedRef.current = true;
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      body: currentDraft.body.slice(0, start) + markdown + currentDraft.body.slice(end),
-    }));
+    const isConnected = document.body.contains(textarea);
+    let caret = fallbackStart + markdown.length;
 
-    const caret = start + markdown.length;
-    if (typeof window.requestAnimationFrame === 'function') {
+    setDraft((currentDraft) => {
+      const start = isConnected
+        ? textarea.selectionStart ?? currentDraft.body.length
+        : Math.min(fallbackStart, currentDraft.body.length);
+      const end = isConnected
+        ? textarea.selectionEnd ?? currentDraft.body.length
+        : Math.min(fallbackEnd, currentDraft.body.length);
+      caret = start + markdown.length;
+
+      return {
+        ...currentDraft,
+        body:
+          currentDraft.body.slice(0, start) +
+          markdown +
+          currentDraft.body.slice(end),
+      };
+    });
+
+    if (isConnected && typeof window.requestAnimationFrame === 'function') {
       window.requestAnimationFrame(() => {
         textarea.setSelectionRange(caret, caret);
       });
@@ -312,6 +337,10 @@ export default function BlogPostForm() {
     }
 
     setFormError('');
+    if (autosaveTimerRef.current !== null) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
     setIsSubmitting(true);
 
     try {
@@ -327,6 +356,7 @@ export default function BlogPostForm() {
         : await CreateBlogPostAsync(request);
 
       if (!isEditing) {
+        hasEditedRef.current = false;
         DeleteBlogDraftAsync().catch(() => {});
       }
 

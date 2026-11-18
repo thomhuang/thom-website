@@ -35,6 +35,7 @@ export async function GetBlogPostsAsync(
     signal,
     url: '/blog',
     params: categoryId ? { category: categoryId } : undefined,
+    withCredentials: true,
   });
 }
 
@@ -55,7 +56,8 @@ export async function GetBlogPostByIdAsync(
   return apiRequest<BlogPost>({
     method: 'GET',
     signal,
-    url: `/blog/${id}`,
+    url: `/blog/${encodeURIComponent(id)}`,
+    withCredentials: true,
   });
 }
 

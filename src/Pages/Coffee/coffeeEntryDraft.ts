@@ -144,12 +144,12 @@ export const createDraftFromEntry = (
   brewMethod: entry.brewMethod,
   ratio: getRatioValue(entry.ratio),
   grinderId,
-  grindSetting: String(entry.grindSetting),
-  dose: String(entry.dose),
-  waterTemperature: String(entry.waterTemperature),
+  grindSetting: entry.grindSetting ? String(entry.grindSetting) : '',
+  dose: entry.dose ? String(entry.dose) : '',
+  waterTemperature: entry.waterTemperature ? String(entry.waterTemperature) : '',
   brewTime: entry.brewTime,
   bloomTime: entry.bloomTime,
-  bloomWater: String(entry.bloomWater),
+  bloomWater: entry.bloomWater ? String(entry.bloomWater) : '',
   pourNotes: entry.pourNotes,
   profileId: entry.profileId ?? '',
   sessionNotes: entry.sessionNotes ?? '',
@@ -211,7 +211,14 @@ export const getDaysSinceRoast = (date: string, roastDate: string): string => {
 };
 
 // Reconstructs the roast date an entry with a known days-since-roast implies.
-export const getRoastDate = (date: string, daysSinceRoast: number): string => {
+export const getRoastDate = (
+  date: string,
+  daysSinceRoast?: number
+): string => {
+  if (daysSinceRoast == null || daysSinceRoast <= 0) {
+    return '';
+  }
+
   const brewDate = parseDateValue(date);
 
   if (!brewDate) {
@@ -287,14 +294,14 @@ export const createRequestFromDraft = (
     roaster: roaster.label,
     grinder: grinder.label,
     ratio: `${RATIO_PREFIX}${draft.ratio.trim()}`,
-    grindSetting: draft.grindSetting ? Number(draft.grindSetting) : undefined,
-    daysSinceRoast: daysSinceRoast !== '' ? Number(daysSinceRoast) : undefined,
-    dose: draft.dose ? Number(draft.dose) : undefined,
-    yieldAmount: yieldAmount ? Number(yieldAmount) : undefined,
+    grindSetting: draft.grindSetting ? Number(draft.grindSetting) : 0,
+    daysSinceRoast: daysSinceRoast !== '' ? Number(daysSinceRoast) : 0,
+    dose: draft.dose ? Number(draft.dose) : 0,
+    yieldAmount: yieldAmount ? Number(yieldAmount) : 0,
     waterTemperature: draft.waterTemperature
       ? Math.round(toCelsius(Number(draft.waterTemperature), temperatureUnit))
-      : undefined,
-    bloomWater: draft.bloomWater ? Number(draft.bloomWater) : undefined,
+      : 0,
+    bloomWater: draft.bloomWater ? Number(draft.bloomWater) : 0,
   };
 };
 

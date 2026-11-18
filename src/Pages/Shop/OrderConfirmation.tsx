@@ -5,6 +5,7 @@ import { PAGES } from '../../Assets/constants';
 import { GetShopOrderAsync, PublicShopOrder } from '../../api/Shop/ShopRouter';
 import { useDocumentTitle } from '../../hooks';
 import { useAsync } from '../../useAsync';
+import { useCart } from './CartContext';
 import { formatPrice } from './format';
 import { getOrderStatusCopy } from './orderStatus';
 import styles from './Shop.module.css';
@@ -18,6 +19,7 @@ const MAX_POLLS = 40;
 export default function OrderConfirmation() {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id') ?? '';
+  const { clear: clearCart } = useCart();
 
   const {
     data: order,
@@ -36,6 +38,12 @@ export default function OrderConfirmation() {
   const orderError = sessionId ? error : 'No order was specified.';
 
   useDocumentTitle('Order confirmation');
+
+  useEffect(() => {
+    if (order?.status === 'paid') {
+      clearCart();
+    }
+  }, [order?.status, clearCart]);
 
   // The webhook can land after the Stripe redirect, so a pending order is polled
   // until it settles. A failed poll keeps the last known order rather than

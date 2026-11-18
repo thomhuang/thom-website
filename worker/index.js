@@ -20,6 +20,7 @@ const authVaryingPaths = new Set([
   "/coffee",
   "/coffee/roasters",
   "/coffee/grinders",
+  "/coffee/profiles",
   "/shop/items",
   "/shop/brands",
   "/blog",

@@ -281,8 +281,7 @@ export async function GetShopOrderAsync(
   return apiRequest<PublicShopOrder>({
     method: 'GET',
     signal,
-    url: `/shop/orders/${sessionId}`,
-    withCredentials: true,
+    url: `/shop/orders/${encodeURIComponent(sessionId)}`,
   });
 }
 

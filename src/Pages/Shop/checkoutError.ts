@@ -17,5 +17,9 @@ export function checkoutErrorMessage(error: unknown): string {
       ? conflict.title
       : 'This item';
 
+  if (typeof conflict?.available === 'number' && conflict.available > 0) {
+    return `Only ${conflict.available} of ${title} left in stock.`;
+  }
+
   return `${title} is sold out.`;
 }

@@ -26,7 +26,7 @@ export default function BlogPost() {
     error,
   } = useAsync<BlogPostType | null>(
     (signal) => GetBlogPostByIdAsync(postId ?? '', signal),
-    [postId],
+    [postId, isAdmin],
     {
       enabled: Boolean(postId),
       initialData: null,

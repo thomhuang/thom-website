@@ -149,8 +149,8 @@ describe('createRequestFromDraft', () => {
     expect(request.waterTemperature).toBe(93);
     expect(request.roaster).toBe('Onyx');
     expect(request.grinder).toBe('DF64');
-    expect(request.grindSetting).toBeUndefined();
-    expect(request.bloomWater).toBeUndefined();
+    expect(request.grindSetting).toBe(0);
+    expect(request.bloomWater).toBe(0);
   });
 });
 
@@ -169,6 +169,28 @@ describe('createDraftFromEntry', () => {
       bloomWater: '50',
       notes: 'Sweet',
       rating: 4,
+    });
+  });
+
+  test('leaves unset or zero optional numeric fields blank', () => {
+    expect(
+      createDraftFromEntry(
+        makeEntry({
+          daysSinceRoast: undefined,
+          grindSetting: 0,
+          dose: undefined,
+          waterTemperature: 0,
+          bloomWater: undefined,
+        }),
+        'onyx',
+        'df64'
+      )
+    ).toMatchObject({
+      roastDate: '',
+      grindSetting: '',
+      dose: '',
+      waterTemperature: '',
+      bloomWater: '',
     });
   });
 });

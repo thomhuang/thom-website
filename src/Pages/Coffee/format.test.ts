@@ -29,6 +29,8 @@ describe('temperature conversions', () => {
 describe('formatTemperature', () => {
   test('returns empty for missing values', () => {
     expect(formatTemperature(undefined, 'C')).toBe('');
+    expect(formatTemperature(0, 'C')).toBe('');
+    expect(formatTemperature(0, 'F')).toBe('');
   });
 
   test('formats Celsius directly', () => {

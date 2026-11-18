@@ -14,7 +14,7 @@ export const formatTemperature = (
   value: number | undefined,
   unit: TemperatureUnit
 ) => {
-  if (value == null) {
+  if (value == null || value <= 0) {
     return '';
   }
 
